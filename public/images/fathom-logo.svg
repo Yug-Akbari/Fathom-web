@@ -1,15 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 170">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 180">
   <defs>
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@900&amp;display=swap');
     </style>
   </defs>
   <!-- FATHOM text -->
-  <text x="300" y="110" text-anchor="middle" font-family="'Playfair Display', 'Georgia', serif" font-weight="900" font-size="130" fill="#000000" letter-spacing="8">FATHOM</text>
+  <text x="400" y="120" text-anchor="middle" font-family="'Playfair Display', 'Georgia', serif" font-weight="900" font-size="140" fill="#000000" letter-spacing="12">FATHOM</text>
   <!-- Wave accent in the A -->
-  <path d="M120 70 C130 60, 145 55, 155 65 C165 75, 175 70, 185 62" stroke="#000000" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M200 80 C210 70, 225 65, 235 75 C245 85, 255 80, 265 72" stroke="#000000" stroke-width="4" fill="none" stroke-linecap="round"/>
   <!-- Main swoosh wave below -->
-  <path d="M5 135 C60 135, 100 128, 180 130 C260 132, 320 148, 420 135 C480 126, 540 112, 600 100" stroke="#000000" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <path d="M50 155 C130 155, 190 145, 270 147 C350 149, 430 167, 550 152 C620 142, 700 125, 770 110" stroke="#000000" stroke-width="8" fill="none" stroke-linecap="round"/>
   <!-- Secondary thinner wave -->
-  <path d="M220 148 C300 155, 380 158, 460 145 C510 138, 555 125, 600 115" stroke="#000000" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <path d="M290 170 C390 178, 490 180, 590 165 C660 155, 725 140, 770 125" stroke="#000000" stroke-width="4" fill="none" stroke-linecap="round"/>
 </svg>
