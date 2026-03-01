@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Search, ShoppingBag, User, X, LogOut, Shield } from "lucide-react";
+import { Search, ShoppingBag, User, X, LogOut, Shield, Menu } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -23,6 +23,7 @@ export default function Navbar() {
   const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { items, removeItem, clearCart, isCartOpen, setIsCartOpen } = useCart();
   const { user, isAdmin, loginWithGoogle, logout } = useAuth();
 
@@ -41,6 +42,21 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [isMobileMenuOpen]);
 
   const sendWhatsAppInquiry = () => {
     const productList = items.map((item, i) => `${i+1}. ${item.name} - ₹${item.price.toLocaleString('en-IN')}`).join('\n');
@@ -65,11 +81,15 @@ export default function Navbar() {
       >
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-5 h-5 bg-accent rounded-sm transform rotate-45"></div>
-            <span className="font-poppins font-bold text-xl tracking-widest text-primary uppercase">
-              Fathom
-            </span>
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/images/fathom-logo.svg"
+              alt="Fathom"
+              width={160}
+              height={45}
+              className="h-10 w-auto"
+              priority
+            />
           </Link>
 
           {/* Desktop Links */}
@@ -94,7 +114,7 @@ export default function Navbar() {
           </div>
 
           {/* Icons Area */}
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4 md:gap-6">
             <div className="hidden lg:flex items-center relative mr-2">
               <input type="text" placeholder="Search products..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onKeyDown={handleSearch} className="w-48 bg-transparent text-sm border-b border-gray-300 focus:border-primary outline-none py-1 placeholder-gray-400 transition-colors" />
               <Search className="w-4 h-4 text-gray-500 absolute right-0 cursor-pointer" onClick={() => { if (searchQuery.trim()) { router.push(`/shop?search=${encodeURIComponent(searchQuery.trim())}`); setSearchQuery(""); }}} />
@@ -112,15 +132,146 @@ export default function Navbar() {
             )}
 
             {/* Cart Button */}
-            <Link href="/cart" className="relative text-primary hover:text-accent transition-colors magnet-button mr-4">
+            <Link href="/cart" className="relative text-primary hover:text-accent transition-colors magnet-button">
               <ShoppingBag className="w-5 h-5" />
               {items.length > 0 && (
                 <span className="absolute -top-[6px] -right-[8px] w-4 h-4 bg-accent rounded-full text-[9px] text-white flex items-center justify-center font-bold">{items.length}</span>
               )}
             </Link>
+
+            {/* Mobile Hamburger Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden text-primary hover:text-accent transition-colors p-1"
+              aria-label="Toggle menu"
+            >
+              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
           </div>
         </div>
       </motion.nav>
+
+      {/* Mobile Menu Drawer */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-black/40 z-[55] md:hidden"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+            {/* Drawer */}
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="fixed right-0 top-0 bottom-0 w-[280px] bg-white shadow-2xl z-[56] md:hidden flex flex-col"
+            >
+              {/* Drawer Header */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-100">
+                <span className="font-poppins font-bold text-lg tracking-widest text-primary uppercase">Menu</span>
+                <button onClick={() => setIsMobileMenuOpen(false)} className="text-gray-400 hover:text-black transition-colors">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              {/* Mobile Search */}
+              <div className="px-6 py-4 border-b border-gray-50">
+                <div className="flex items-center relative">
+                  <input
+                    type="text"
+                    placeholder="Search products..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      handleSearch(e);
+                      if (e.key === "Enter") setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full bg-gray-50 text-sm border border-gray-200 rounded-lg outline-none py-3 px-4 pr-10 placeholder-gray-400 focus:border-primary transition-colors"
+                  />
+                  <Search className="w-4 h-4 text-gray-400 absolute right-3 cursor-pointer" onClick={() => { if (searchQuery.trim()) { router.push(`/shop?search=${encodeURIComponent(searchQuery.trim())}`); setSearchQuery(""); setIsMobileMenuOpen(false); }}} />
+                </div>
+              </div>
+
+              {/* Nav Links */}
+              <div className="flex-1 overflow-y-auto py-4">
+                {navLinks.map((link, index) => {
+                  const isActive = pathname === link.href;
+                  return (
+                    <motion.div
+                      key={link.href}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <Link
+                        href={link.href}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={`flex items-center px-6 py-4 text-sm font-semibold tracking-[0.2em] uppercase transition-colors ${
+                          isActive
+                            ? "text-accent bg-accent/5 border-r-2 border-accent"
+                            : "text-primary/80 hover:text-primary hover:bg-gray-50"
+                        }`}
+                      >
+                        {link.text}
+                      </Link>
+                    </motion.div>
+                  );
+                })}
+
+                {/* Admin link for mobile — only for admin users */}
+                {isAdmin && (
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: navLinks.length * 0.05 }}
+                  >
+                    <Link
+                      href="/admin"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`flex items-center gap-2 px-6 py-4 text-sm font-semibold tracking-[0.2em] uppercase transition-colors ${
+                        pathname?.startsWith('/admin')
+                          ? "text-accent bg-accent/5 border-r-2 border-accent"
+                          : "text-accent hover:text-primary hover:bg-gray-50"
+                      }`}
+                    >
+                      <Shield className="w-4 h-4" />
+                      Admin
+                    </Link>
+                  </motion.div>
+                )}
+              </div>
+
+              {/* Drawer Footer */}
+              <div className="p-6 border-t border-gray-100">
+                {user ? (
+                  <button
+                    onClick={() => { logout(); setIsMobileMenuOpen(false); }}
+                    className="w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-primary font-bold text-xs uppercase tracking-widest py-3 rounded-lg transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Sign Out
+                  </button>
+                ) : (
+                  <Link
+                    href="/login"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-black text-white font-bold text-xs uppercase tracking-widest py-3 rounded-lg transition-colors"
+                  >
+                    <User className="w-4 h-4" />
+                    Sign In
+                  </Link>
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Cart Drawer */}
       <AnimatePresence>

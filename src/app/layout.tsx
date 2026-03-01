@@ -17,6 +17,11 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "FATHOM Elite",
   description: "Ultra-Premium Kitchen Appliances.",
+  icons: {
+    icon: "/images/favicon.svg",
+    shortcut: "/images/favicon.svg",
+    apple: "/images/favicon.svg",
+  },
 };
 
 export default function RootLayout({

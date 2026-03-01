@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 170">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@900&amp;display=swap');
+    </style>
+  </defs>
+  <!-- FATHOM text -->
+  <text x="300" y="110" text-anchor="middle" font-family="'Playfair Display', 'Georgia', serif" font-weight="900" font-size="130" fill="#000000" letter-spacing="8">FATHOM</text>
+  <!-- Wave accent in the A -->
+  <path d="M120 70 C130 60, 145 55, 155 65 C165 75, 175 70, 185 62" stroke="#000000" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <!-- Main swoosh wave below -->
+  <path d="M5 135 C60 135, 100 128, 180 130 C260 132, 320 148, 420 135 C480 126, 540 112, 600 100" stroke="#000000" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <!-- Secondary thinner wave -->
+  <path d="M220 148 C300 155, 380 158, 460 145 C510 138, 555 125, 600 115" stroke="#000000" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+</svg>

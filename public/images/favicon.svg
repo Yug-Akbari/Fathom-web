@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Background -->
+  <rect width="64" height="64" rx="8" fill="#000000"/>
+  <!-- F letter -->
+  <text x="32" y="46" text-anchor="middle" font-family="'Georgia', serif" font-weight="900" font-size="42" fill="#ffffff">F</text>
+  <!-- Small wave -->
+  <path d="M12 52 C22 52, 30 56, 40 52 C48 49, 54 46, 58 44" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+</svg>
