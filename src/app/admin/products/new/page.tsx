@@ -438,7 +438,7 @@ export default function ProductEditor() {
              </div>
 
              <p className="text-[10px] text-gray-400 mt-6 leading-relaxed">
-               Recommended: 2048x2048px JPG or PNG. Max 5MB per file.
+               Recommended: 2048x2048px JPG or PNG.
              </p>
           </div>
 

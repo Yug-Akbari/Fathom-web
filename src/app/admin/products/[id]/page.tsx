@@ -120,25 +120,22 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
     try {
       let imageUrls: string[] = [];
 
-      // 1. Upload Images to GitHub
+      // 1. Upload Images to GitHub (sequentially to avoid SHA conflicts)
       if (imagesBase64.length > 0 && imageFiles.length > 0) {
-        // Upload concurrently
-        const uploadPromises = imagesBase64.map(async (base64, idx) => {
+        for (let idx = 0; idx < imagesBase64.length; idx++) {
           const file = imageFiles[idx];
           const res = await fetch('/api/upload', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              imageBase64: base64,
+              imageBase64: imagesBase64[idx],
               filename: file.name
             })
           });
           const data = await res.json();
           if (!res.ok) throw new Error(data.error || "Image upload failed");
-          return data.url;
-        });
-
-        imageUrls = await Promise.all(uploadPromises);
+          imageUrls.push(data.url);
+        }
       }
 
       // Capture existing image URLs that haven't been deleted
@@ -451,7 +448,7 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
              </div>
 
              <p className="text-[10px] text-gray-400 mt-6 leading-relaxed">
-               Recommended: 2048x2048px JPG or PNG. Max 5MB per file.
+               Recommended: 2048x2048px JPG or PNG.
              </p>
           </div>
 

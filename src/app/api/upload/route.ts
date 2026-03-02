@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server';
 
+// Remove the default body size limit so large images can be uploaded
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: Request) {
     try {
         const { imageBase64, filename } = await req.json();
@@ -16,9 +20,11 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Server misconfiguration: GitHub credentials missing' }, { status: 500 });
         }
 
-        // Prepare GitHub API request — use random ID to prevent conflicts
-        const randomId = Math.random().toString(36).substring(2, 10);
-        const path = `public/uploads/${Date.now()}_${randomId}_${filename.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+        // Use crypto.randomUUID for guaranteed unique filenames — prevents conflicts
+        // even when uploading the same file multiple times in quick succession
+        const uniqueId = crypto.randomUUID();
+        const sanitizedName = filename.replace(/[^a-zA-Z0-9.-]/g, '_');
+        const path = `public/uploads/${uniqueId}_${sanitizedName}`;
         const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
 
         // Remove the data URL prefix if present (e.g., "data:image/png;base64,")

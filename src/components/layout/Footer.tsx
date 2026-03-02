@@ -7,7 +7,7 @@ export default function Footer() {
         {/* Logo */}
         <div className="flex items-center">
           <Image
-            src="/images/fathom-logo.svg"
+            src="/images/fathom-logo.jpeg"
             alt="Fathom"
             width={140}
             height={40}
