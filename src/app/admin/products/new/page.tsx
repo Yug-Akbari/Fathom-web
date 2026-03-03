@@ -9,6 +9,7 @@ import { collection, addDoc, onSnapshot } from "firebase/firestore";
 export default function ProductEditor() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState("");
   
   // Form State
   const [name, setName] = useState("");
@@ -59,24 +60,79 @@ export default function ProductEditor() {
     setSpecs(updated);
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Compress image using canvas — ensures output is under MAX_BASE64_SIZE (3MB)
+  const MAX_BASE64_SIZE = 3 * 1024 * 1024;
+
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new window.Image();
+      img.onload = () => {
+        const maxDim = 1024;
+        let { width, height } = img;
+
+        if (width > maxDim || height > maxDim) {
+          const ratio = Math.min(maxDim / width, maxDim / height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return reject(new Error('Failed to get canvas context'));
+
+        ctx.drawImage(img, 0, 0, width, height);
+
+        let quality = 0.7;
+        let compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+
+        while (compressedBase64.length > MAX_BASE64_SIZE && quality > 0.1) {
+          quality -= 0.1;
+          compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+        }
+
+        if (compressedBase64.length > MAX_BASE64_SIZE) {
+          const smallCanvas = document.createElement('canvas');
+          smallCanvas.width = Math.round(width * 0.5);
+          smallCanvas.height = Math.round(height * 0.5);
+          const smallCtx = smallCanvas.getContext('2d');
+          if (smallCtx) {
+            smallCtx.drawImage(canvas, 0, 0, smallCanvas.width, smallCanvas.height);
+            compressedBase64 = smallCanvas.toDataURL('image/jpeg', 0.6);
+          }
+        }
+
+        console.log(`Compressed ${file.name}: ${(compressedBase64.length / 1024).toFixed(0)}KB (quality: ${quality.toFixed(1)})`);
+        resolve(compressedBase64);
+      };
+      img.onerror = () => reject(new Error('Failed to load image for compression'));
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
     setImageFiles(prev => [...prev, ...files]);
     
-    // Create preivews
     const newPreviews = files.map(file => URL.createObjectURL(file));
     setImagePreviews(prev => [...prev, ...newPreviews]);
 
-    // Read Base64
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagesBase64(prev => [...prev, reader.result as string]);
-      };
-      reader.readAsDataURL(file);
-    });
+    for (const file of files) {
+      try {
+        const compressedBase64 = await compressImage(file);
+        setImagesBase64(prev => [...prev, compressedBase64]);
+      } catch (err) {
+        console.error('Failed to compress image:', file.name, err);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImagesBase64(prev => [...prev, reader.result as string]);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
   };
 
   const removeImage = (index: number) => {
@@ -88,27 +144,53 @@ export default function ProductEditor() {
   const handleSave = async () => {
     if (!name || !price || !sku) return alert("Please fill required fields (Name, Price, SKU)");
     setIsSaving(true);
+    setUploadProgress("");
     
     try {
       let imageUrls: string[] = [];
+      const failedUploads: string[] = [];
 
       // 1. Upload Images to GitHub (sequentially to avoid SHA conflicts)
       if (imagesBase64.length > 0 && imageFiles.length > 0) {
         for (let idx = 0; idx < imagesBase64.length; idx++) {
           const file = imageFiles[idx];
-          const res = await fetch('/api/upload', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              imageBase64: imagesBase64[idx],
-              filename: file.name
-            })
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error || "Image upload failed");
-          imageUrls.push(data.url);
+          setUploadProgress(`Uploading image ${idx + 1} of ${imagesBase64.length}...`);
+          
+          try {
+            const res = await fetch('/api/upload', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                imageBase64: imagesBase64[idx],
+                filename: file.name
+              })
+            });
+
+            if (!res.ok) {
+              const errorText = await res.text();
+              let errorMsg: string;
+              try {
+                const errorData = JSON.parse(errorText);
+                errorMsg = errorData.error || 'Upload failed';
+              } catch {
+                errorMsg = errorText || `HTTP ${res.status}`;
+              }
+              console.error(`Failed to upload ${file.name}:`, errorMsg);
+              failedUploads.push(file.name);
+              continue;
+            }
+
+            const data = await res.json();
+            imageUrls.push(data.url);
+          } catch (uploadErr) {
+            console.error(`Network error uploading ${file.name}:`, uploadErr);
+            failedUploads.push(file.name);
+            continue;
+          }
         }
       }
+
+      setUploadProgress("Saving product...");
 
       // 2. Save Product to Firebase
       await addDoc(collection(db, "products"), {
@@ -128,6 +210,10 @@ export default function ProductEditor() {
         createdAt: new Date().toISOString()
       });
 
+      if (failedUploads.length > 0) {
+        alert(`Product saved, but ${failedUploads.length} image(s) failed to upload: ${failedUploads.join(', ')}. The successfully uploaded images were saved.`);
+      }
+
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
       
@@ -145,6 +231,7 @@ export default function ProductEditor() {
       alert("Failed to save product. Check console.");
     } finally {
       setIsSaving(false);
+      setUploadProgress("");
     }
   };
 

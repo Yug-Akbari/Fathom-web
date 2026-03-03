@@ -49,17 +49,20 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
     setSpecs(updated);
   };
 
-  // Compress image using canvas — resizes to max 1600px and outputs JPEG at 80% quality
-  // This typically reduces a 5MB photo to ~200-400KB, well under Vercel's body size limit
-  const compressImage = (file: File, maxWidth = 1600, maxHeight = 1600, quality = 0.8): Promise<string> => {
+  // Compress image using canvas — ensures output is under MAX_BASE64_SIZE (3MB)
+  // Uses progressive quality reduction: starts at 70%, drops by 10% each pass
+  const MAX_BASE64_SIZE = 3 * 1024 * 1024; // 3MB - safe margin under Vercel's 4.5MB limit
+
+  const compressImage = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const img = new window.Image();
       img.onload = () => {
+        const maxDim = 1024; // Max dimension for product images
         let { width, height } = img;
 
         // Scale down if needed, maintaining aspect ratio
-        if (width > maxWidth || height > maxHeight) {
-          const ratio = Math.min(maxWidth / width, maxHeight / height);
+        if (width > maxDim || height > maxDim) {
+          const ratio = Math.min(maxDim / width, maxDim / height);
           width = Math.round(width * ratio);
           height = Math.round(height * ratio);
         }
@@ -71,7 +74,29 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
         if (!ctx) return reject(new Error('Failed to get canvas context'));
 
         ctx.drawImage(img, 0, 0, width, height);
-        const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+
+        // Progressive compression: reduce quality until size is acceptable
+        let quality = 0.7;
+        let compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+
+        while (compressedBase64.length > MAX_BASE64_SIZE && quality > 0.1) {
+          quality -= 0.1;
+          compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+        }
+
+        // If still too large even at minimum quality, reduce dimensions further
+        if (compressedBase64.length > MAX_BASE64_SIZE) {
+          const smallCanvas = document.createElement('canvas');
+          smallCanvas.width = Math.round(width * 0.5);
+          smallCanvas.height = Math.round(height * 0.5);
+          const smallCtx = smallCanvas.getContext('2d');
+          if (smallCtx) {
+            smallCtx.drawImage(canvas, 0, 0, smallCanvas.width, smallCanvas.height);
+            compressedBase64 = smallCanvas.toDataURL('image/jpeg', 0.6);
+          }
+        }
+
+        console.log(`Compressed ${file.name}: ${(compressedBase64.length / 1024).toFixed(0)}KB (quality: ${quality.toFixed(1)})`);
         resolve(compressedBase64);
       };
       img.onerror = () => reject(new Error('Failed to load image for compression'));
