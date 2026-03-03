@@ -64,7 +64,7 @@ export default function ProductHero({ product }: { product: Product }) {
             initial={{ scale: 1.05, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-            className="w-full aspect-[4/5] bg-surface rounded-[32px] overflow-hidden relative flex items-center justify-center p-10 shadow-sm"
+            className="w-full aspect-square bg-surface rounded-[32px] overflow-hidden relative flex items-center justify-center p-6 shadow-sm"
           >
             {/* Image Transition Wrapper */}
             <motion.div
