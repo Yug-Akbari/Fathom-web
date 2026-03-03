@@ -15,7 +15,7 @@ export default function ShopClient() {
   const urlCategory = searchParams.get("category") || "";
 
   const [category, setCategory] = useState(urlCategory ? urlCategory.toLowerCase() : "all");
-  const [maxPrice, setMaxPrice] = useState(10000);
+  const [maxPrice, setMaxPrice] = useState(500000);
   const [finish, setFinish] = useState<string | null>(null);
   const [inStockOnly, setInStockOnly] = useState(false);
   const [searchText, setSearchText] = useState(urlSearch);
