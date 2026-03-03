@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 // Remove the default body size limit so large images can be uploaded
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60; // Allow longer execution for large uploads
 
 export async function POST(req: Request) {
     try {

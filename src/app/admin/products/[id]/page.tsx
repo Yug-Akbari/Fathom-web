@@ -10,6 +10,7 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
   const [isInitializing, setIsInitializing] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState("");
   
   // Form State
   const [name, setName] = useState("");
@@ -46,6 +47,36 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
     const updated = [...specs];
     updated[index][field] = newValue;
     setSpecs(updated);
+  };
+
+  // Compress image using canvas — resizes to max 1600px and outputs JPEG at 80% quality
+  // This typically reduces a 5MB photo to ~200-400KB, well under Vercel's body size limit
+  const compressImage = (file: File, maxWidth = 1600, maxHeight = 1600, quality = 0.8): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new window.Image();
+      img.onload = () => {
+        let { width, height } = img;
+
+        // Scale down if needed, maintaining aspect ratio
+        if (width > maxWidth || height > maxHeight) {
+          const ratio = Math.min(maxWidth / width, maxHeight / height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return reject(new Error('Failed to get canvas context'));
+
+        ctx.drawImage(img, 0, 0, width, height);
+        const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+        resolve(compressedBase64);
+      };
+      img.onerror = () => reject(new Error('Failed to load image for compression'));
+      img.src = URL.createObjectURL(file);
+    });
   };
 
   useEffect(() => {
@@ -87,24 +118,31 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
     fetchProduct();
   }, [params.id]);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
     setImageFiles(prev => [...prev, ...files]);
     
-    // Create preivews
+    // Create previews
     const newPreviews = files.map(file => URL.createObjectURL(file));
     setImagePreviews(prev => [...prev, ...newPreviews]);
 
-    // Read Base64
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagesBase64(prev => [...prev, reader.result as string]);
-      };
-      reader.readAsDataURL(file);
-    });
+    // Compress and read Base64 for each file
+    for (const file of files) {
+      try {
+        const compressedBase64 = await compressImage(file);
+        setImagesBase64(prev => [...prev, compressedBase64]);
+      } catch (err) {
+        console.error('Failed to compress image:', file.name, err);
+        // Fallback to uncompressed if compression fails
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImagesBase64(prev => [...prev, reader.result as string]);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
   };
 
   const removeImage = (index: number) => {
@@ -116,27 +154,53 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
   const handleSave = async () => {
     if (!name || !price || !sku) return alert("Please fill required fields (Name, Price, SKU)");
     setIsSaving(true);
+    setUploadProgress("");
     
     try {
       let imageUrls: string[] = [];
+      const failedUploads: string[] = [];
 
       // 1. Upload Images to GitHub (sequentially to avoid SHA conflicts)
       if (imagesBase64.length > 0 && imageFiles.length > 0) {
         for (let idx = 0; idx < imagesBase64.length; idx++) {
           const file = imageFiles[idx];
-          const res = await fetch('/api/upload', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              imageBase64: imagesBase64[idx],
-              filename: file.name
-            })
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error || "Image upload failed");
-          imageUrls.push(data.url);
+          setUploadProgress(`Uploading image ${idx + 1} of ${imagesBase64.length}...`);
+          
+          try {
+            const res = await fetch('/api/upload', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                imageBase64: imagesBase64[idx],
+                filename: file.name
+              })
+            });
+
+            if (!res.ok) {
+              const errorText = await res.text();
+              let errorMsg: string;
+              try {
+                const errorData = JSON.parse(errorText);
+                errorMsg = errorData.error || 'Upload failed';
+              } catch {
+                errorMsg = errorText || `HTTP ${res.status}`;
+              }
+              console.error(`Failed to upload ${file.name}:`, errorMsg);
+              failedUploads.push(file.name);
+              continue; // Skip this image but continue with others
+            }
+
+            const data = await res.json();
+            imageUrls.push(data.url);
+          } catch (uploadErr) {
+            console.error(`Network error uploading ${file.name}:`, uploadErr);
+            failedUploads.push(file.name);
+            continue;
+          }
         }
       }
+
+      setUploadProgress("Saving product...");
 
       // Capture existing image URLs that haven't been deleted
       const existingUrls = imagePreviews.filter(p => p.startsWith('http'));
@@ -156,6 +220,10 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
         images: [...existingUrls, ...imageUrls], // Array of all appended images
       });
 
+      if (failedUploads.length > 0) {
+        alert(`Product saved, but ${failedUploads.length} image(s) failed to upload: ${failedUploads.join(', ')}. The successfully uploaded images were saved.`);
+      }
+
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
       
@@ -168,6 +236,7 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
       alert("Failed to save product. Check console.");
     } finally {
       setIsSaving(false);
+      setUploadProgress("");
     }
   };
 
@@ -190,6 +259,9 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
         </div>
         
         <div className="flex items-center gap-4">
+          {uploadProgress && (
+            <span className="text-xs text-gray-500 animate-pulse">{uploadProgress}</span>
+          )}
           <button className="px-6 py-3.5 bg-white border border-gray-200 text-primary font-bold text-xs uppercase tracking-[0.1em] rounded-lg hover:border-gray-800 transition-colors shadow-sm">
             Preview
           </button>
