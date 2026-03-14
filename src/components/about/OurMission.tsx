@@ -47,10 +47,10 @@ export default function OurMission() {
           className="relative w-full aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl bg-gray-100 flex items-center justify-center p-8"
         >
           <Image 
-            src="/images/espresso.png" 
-            alt="Team collaboration" 
+            src="https://images.unsplash.com/photo-1556910103-1c02745a872e?w=800&q=80" 
+            alt="Modern Kitchen Collaboration" 
             fill
-            className="object-contain p-10 drop-shadow-2xl mix-blend-multiply"
+            className="object-cover drop-shadow-2xl"
           />
           <div className="absolute bottom-6 left-6 z-10 text-primary font-bold tracking-[0.2em] uppercase text-sm bg-white/80 backdrop-blur px-4 py-2 rounded">
             MISSION STATEMENT

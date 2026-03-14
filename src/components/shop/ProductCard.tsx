@@ -104,7 +104,6 @@ export default function ProductCard({ product }: { product: Product }) {
               {formatPrice(displayPrice)}
             </span>
           </div>
-          <p className="text-xs text-gray-500 font-inter mb-6">{product.subtitle}</p>
           
           <div className="mt-auto flex justify-between items-center border-t border-gray-100 pt-4 group-hover:border-accent/20 transition-colors duration-300">
             <span className="text-xs font-bold uppercase tracking-widest text-primary group-hover:text-accent transition-colors">

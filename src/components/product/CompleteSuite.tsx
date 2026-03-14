@@ -65,7 +65,6 @@ export default function CompleteSuite() {
               </div>
               
               <h3 className="text-lg font-poppins font-bold text-primary mb-1">{product.name}</h3>
-              <p className="text-[10px] font-bold tracking-widest uppercase text-gray-400 mb-3">{product.desc}</p>
               <p className="font-inter text-slate font-medium">{product.price}</p>
             </motion.div>
           </Link>

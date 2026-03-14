@@ -105,11 +105,7 @@ export default function ProductHero({ product }: { product: Product }) {
           className="w-full lg:w-1/2 flex flex-col justify-center py-10"
           initial="initial" animate="animate" variants={staggerContainer}
         >
-          {/* Metadata */}
-          <motion.div variants={pageTransition} className="flex items-center gap-4 mb-4">
-            <span className="text-xs font-bold tracking-[0.2em] text-gray-400 uppercase">FTHM-{product.id}</span>
-            <div className="flex text-accent text-sm">★★★★★</div>
-          </motion.div>
+
 
           {/* Title - Reduced size to fit better */}
           <motion.h1 variants={pageTransition} className="text-3xl md:text-5xl lg:text-5xl font-poppins font-bold text-primary leading-tight tracking-tight mb-6">
