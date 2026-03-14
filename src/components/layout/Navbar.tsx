@@ -83,7 +83,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <Image
-              src="/images/fathom-logo.svg"
+              src="/images/fathom-logo-transparent.png"
               alt="Fathom"
               width={160}
               height={45}

@@ -7,11 +7,11 @@ export default function Footer() {
         {/* Logo */}
         <div className="flex items-center">
           <Image
-            src="/images/fathom-logo.jpeg"
+            src="/images/fathom-logo-transparent.png"
             alt="Fathom"
             width={140}
             height={40}
-            className="h-8 w-auto mix-blend-multiply opacity-80"
+            className="h-8 w-auto"
           />
         </div>
 
