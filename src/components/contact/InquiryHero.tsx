@@ -17,14 +17,6 @@ export default function InquiryHero() {
           </motion.span>
         </h1>
         
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 0.3 }}
-          className="text-gray-500 font-inter text-lg md:text-xl leading-relaxed"
-        >
-          Whether you are an architect designing a masterpiece or a homeowner curating your sanctuary, we are here to assist.
-        </motion.p>
       </div>
     </div>
   );
