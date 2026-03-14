@@ -1,3 +1,6 @@
+// Force dynamic rendering — disable caching so admin product updates always show live
+export const dynamic = 'force-dynamic';
+
 import Link from "next/link";
 import ProductHero from "@/components/product/ProductHero";
 import CompleteSuite from "@/components/product/CompleteSuite";

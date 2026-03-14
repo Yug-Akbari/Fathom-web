@@ -18,7 +18,7 @@ export default function ArchitecturalMap() {
         className="absolute inset-0 w-full h-full grayscale opacity-60 mix-blend-multiply"
       >
         <iframe 
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3720.0!2d72.8650!3d21.2250!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be04f3c6c0e0001%3A0x0!2s126%2C%20Green%20Plaza%20Shopping%2C%20Mota%20Varachha%2C%20Surat%2C%20Gujarat%20394105!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin" 
+          src="https://maps.google.com/maps?q=126,%20Green%20Plaza%20Shopping,%20Mota%20Varachha,%20Surat,%20Gujarat%20394105&t=m&z=15&output=embed&iwloc=near" 
           width="100%" 
           height="100%" 
           style={{ border: 0 }} 
@@ -27,28 +27,6 @@ export default function ArchitecturalMap() {
           referrerPolicy="no-referrer-when-downgrade"
           className="w-full h-full"
         ></iframe>
-      </motion.div>
-
-      {/* Dropping Gold Pin */}
-      <motion.div
-        initial={{ y: -100, opacity: 0 }}
-        animate={isInView ? { y: 0, opacity: 1 } : { y: -100, opacity: 0 }}
-        transition={{ 
-          type: "spring", 
-          stiffness: 200, 
-          damping: 12, 
-          delay: 0.5 
-        }}
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[100%] z-10 hidden md:flex flex-col items-center"
-      >
-        <div className="w-10 h-10 bg-accent rounded-full flex items-center justify-center text-white shadow-xl relative z-10">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <circle cx="12" cy="10" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </div>
-        {/* Pin Shadow */}
-        <div className="w-4 h-1 bg-black/30 rounded-full blur-sm mt-1 mx-auto" />
       </motion.div>
 
       {/* FATHOM Map Overlay Box for Context */}

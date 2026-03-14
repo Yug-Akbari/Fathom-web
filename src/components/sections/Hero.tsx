@@ -46,9 +46,9 @@ export default function Hero() {
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "products"), (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
-      const featured = data.filter(p => p.isFeatured || p.badge === 'Featured' || p.badge === 'Bestseller');
-      if (featured.length > 0) {
-        const mappedSlides = featured.slice(0, 3).map((p, idx) => {
+      const mainPanelProducts = data.filter(p => p.isMainPanel === true);
+      if (mainPanelProducts.length > 0) {
+        const mappedSlides = mainPanelProducts.slice(0, 5).map((p, idx) => {
           const { title1, title2 } = parseProductName(p.name);
           return {
             id: p.id || idx,
@@ -127,10 +127,20 @@ export default function Hero() {
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.2 }}
-                  className="flex items-center gap-2 bg-accent/10 px-4 py-2 rounded-full mb-6 border border-accent/20"
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full mb-6 border ${
+                    currentSlide.isBestSeller 
+                    ? 'bg-black/90 border-black text-[#D4AF37]' 
+                    : 'bg-accent/10 border-accent/20 text-accent'
+                  }`}
                 >
-                  <span className="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
-                  <span className="text-accent text-xs font-bold uppercase tracking-widest">Featured</span>
+                  <span className={`w-2 h-2 rounded-full animate-pulse ${
+                    currentSlide.isBestSeller ? 'bg-[#D4AF37]' : 'bg-accent'
+                  }`}></span>
+                  <span className={`text-xs font-bold uppercase tracking-widest ${
+                    currentSlide.isBestSeller ? 'text-[#D4AF37]' : 'text-accent'
+                  }`}>
+                    {currentSlide.isBestSeller ? 'Bestseller' : currentSlide.isFeatured ? 'Featured' : 'Signature Series'}
+                  </span>
                 </motion.div>
 
                 <motion.h1 

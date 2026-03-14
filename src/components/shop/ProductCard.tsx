@@ -14,6 +14,8 @@ interface Product {
   subtitle: string;
   price: number;
   image: string;
+  isFeatured?: boolean;
+  isBestSeller?: boolean;
 }
 
 const formatPrice = (price: number) => {
@@ -60,10 +62,19 @@ export default function ProductCard({ product }: { product: Product }) {
   return (
     <Link href={`/product/${product.id}`} passHref>
       <div className="group cursor-pointer bg-surface rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 hover:bg-white flex flex-col pt-6 pb-8 px-8 relative h-full">
-        {/* Badge */}
-        {product.badge && (
-          <div className="absolute top-4 left-4 z-10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full bg-primary text-white">
-            {product.badge}
+        {/* Dynamic Badge */}
+        {(product.isBestSeller || product.isFeatured || product.badge) && (
+          <div className={`absolute top-4 left-4 z-10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-full flex items-center gap-2 shadow-sm ${
+            product.isBestSeller 
+              ? 'bg-black/90 text-white backdrop-blur-md' 
+              : product.isFeatured 
+                ? 'bg-[#FDF8E4] text-[#D4AF37] border border-[#D4AF37]/20' 
+                : 'bg-primary text-white'
+          }`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${
+              product.isBestSeller ? 'bg-[#D4AF37]' : product.isFeatured ? 'bg-[#D4AF37]' : 'bg-white'
+            }`}></span>
+            {product.isBestSeller ? 'Bestseller' : product.isFeatured ? 'Featured' : product.badge}
           </div>
         )}
 

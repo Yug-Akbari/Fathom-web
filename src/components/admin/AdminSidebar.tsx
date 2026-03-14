@@ -12,7 +12,8 @@ import {
   HelpCircle,
   LogOut,
   Calculator,
-  Grid
+  Grid,
+  ExternalLink
 } from "lucide-react";
 
 const mainNavItems = [
@@ -102,7 +103,15 @@ export default function AdminSidebar({ className = "" }: { className?: string })
               className="flex items-center gap-4 px-8 py-3 text-gray-400 hover:text-white transition-colors"
             >
               <HelpCircle className="w-5 h-5 shrink-0" />
-              <span className="font-semibold text-sm tracking-wide">Help Center</span>
+            </Link>
+          </li>
+          <li className="w-full">
+            <Link 
+              href="/"
+              className="flex items-center gap-4 px-8 py-3 text-gray-400 hover:text-white transition-colors"
+            >
+              <ExternalLink className="w-5 h-5 shrink-0" />
+              <span className="font-semibold text-sm tracking-wide">Back to Site</span>
             </Link>
           </li>
         </ul>

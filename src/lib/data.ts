@@ -11,6 +11,9 @@ export interface Product {
     inStock: boolean;
     desc: string;
     specs?: { key: string; value: string }[];
+    isFeatured?: boolean;
+    isBestSeller?: boolean;
+    isMainPanel?: boolean;
 }
 
 

@@ -16,8 +16,9 @@ export default function ShopClient() {
 
   const [category, setCategory] = useState(urlCategory ? urlCategory.toLowerCase() : "all");
   const [maxPrice, setMaxPrice] = useState(500000);
-  const [finish, setFinish] = useState<string | null>(null);
   const [inStockOnly, setInStockOnly] = useState(false);
+  const [featuredOnly, setFeaturedOnly] = useState(false);
+  const [bestSellerOnly, setBestSellerOnly] = useState(false);
   const [searchText, setSearchText] = useState(urlSearch);
   const [liveProducts, setLiveProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
@@ -45,6 +46,9 @@ export default function ShopClient() {
           inStock: d.stockStatus !== "Out of Stock",
           finish: d.specs?.find((s:any) => s.key === "FINISH")?.value || "Stainless Steel",
           isNew: false, // Could calculate based on createdAt
+          isFeatured: d.isFeatured,
+          isBestSeller: d.isBestSeller,
+          isMainPanel: d.isMainPanel,
           image: d.image || "/images/fridge-obsidian.png",
           hoverImage: "/images/fridge-obsidian-open.png", // Fallback hover
           subtitle: d.sku,
@@ -68,7 +72,7 @@ export default function ShopClient() {
 
   // Filter products based on all active states
   const filteredProducts = useMemo(() => {
-    return liveProducts.filter((product) => {
+    let result = liveProducts.filter((product: any) => {
       // Search Filter
       if (searchText && !product.name?.toLowerCase().includes(searchText.toLowerCase())) return false;
 
@@ -79,14 +83,42 @@ export default function ShopClient() {
       if (product.price > maxPrice) return false;
 
       // Finish Filter
-      if (finish && product.finish !== finish) return false;
+      // (Removed finish filter functionality as requested)
 
       // Stock Filter
       if (inStockOnly && !product.inStock) return false;
 
+      // Visibility Filters (Featured & Best Seller as OR/AND logic)
+      const isProductFeatured = product.isFeatured || product.badge === 'Featured';
+      const isProductBestSeller = product.isBestSeller || product.badge === 'Bestseller' || product.badge === 'Best Seller';
+
+      if (featuredOnly && bestSellerOnly) {
+        // If both checked, product must be EITHER featured OR bestseller
+        if (!isProductFeatured && !isProductBestSeller) return false;
+      } else if (featuredOnly) {
+        if (!isProductFeatured) return false;
+      } else if (bestSellerOnly) {
+        if (!isProductBestSeller) return false;
+      }
+
       return true;
     });
-  }, [category, maxPrice, finish, inStockOnly, liveProducts, searchText]);
+
+    // Default prioritized sorting based on visibility tags:
+    // Main Panel > Best Seller > Featured > Others
+    result.sort((a: any, b: any) => {
+      const getScore = (p: any) => {
+        if (p.isMainPanel) return 4;
+        if (p.isBestSeller || p.badge === 'Bestseller' || p.badge === 'Best Seller') return 3;
+        if (p.isFeatured || p.badge === 'Featured') return 2;
+        return 1;
+      };
+      
+      return getScore(b) - getScore(a);
+    });
+
+    return result;
+  }, [category, maxPrice, inStockOnly, featuredOnly, bestSellerOnly, liveProducts, searchText]);
 
   return (
     <div className="flex flex-col lg:flex-row gap-12 w-full mt-10">
@@ -94,8 +126,9 @@ export default function ShopClient() {
       <div className="w-full lg:w-64 flex-shrink-0">
         <FilterSidebar 
           maxPrice={maxPrice} setMaxPrice={setMaxPrice}
-          finish={finish} setFinish={setFinish}
           inStockOnly={inStockOnly} setInStockOnly={setInStockOnly}
+          featuredOnly={featuredOnly} setFeaturedOnly={setFeaturedOnly}
+          bestSellerOnly={bestSellerOnly} setBestSellerOnly={setBestSellerOnly}
         />
       </div>
 

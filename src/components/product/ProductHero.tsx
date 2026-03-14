@@ -111,8 +111,8 @@ export default function ProductHero({ product }: { product: Product }) {
             <div className="flex text-accent text-sm">★★★★★</div>
           </motion.div>
 
-          {/* Title */}
-          <motion.h1 variants={pageTransition} className="text-5xl md:text-7xl font-poppins font-bold text-primary leading-[1.1] tracking-tight mb-6">
+          {/* Title - Reduced size to fit better */}
+          <motion.h1 variants={pageTransition} className="text-3xl md:text-5xl lg:text-5xl font-poppins font-bold text-primary leading-tight tracking-tight mb-6">
             {product.name}
           </motion.h1>
 
@@ -123,10 +123,19 @@ export default function ProductHero({ product }: { product: Product }) {
             </span>
           </motion.div>
 
-          {/* Description */}
-          <motion.p variants={pageTransition} className="text-lg text-slate font-inter font-light leading-relaxed mb-10 max-w-xl">
-            {product.desc}
-          </motion.p>
+          {/* Description Rendered as Bullet Points or Paragraphs */}
+          <motion.div variants={pageTransition} className="text-base md:text-lg text-slate font-inter font-light leading-relaxed mb-10 max-w-xl max-h-48 overflow-y-auto pr-1">
+            {product.desc && product.desc.split('\n').map((line, idx) => {
+              if (line.trim().startsWith('- ')) {
+                return (
+                  <ul key={idx} className="list-disc pl-5 mb-2">
+                    <li>{line.trim().substring(2)}</li>
+                  </ul>
+                );
+              }
+              return <p key={idx} className="mb-2">{line}</p>;
+            })}
+          </motion.div>
 
           {/* CTAs */}
           <motion.div variants={pageTransition} className="flex flex-col sm:flex-row gap-4 mb-16">

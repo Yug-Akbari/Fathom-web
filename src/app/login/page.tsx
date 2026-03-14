@@ -77,7 +77,7 @@ export default function LoginPage() {
         />
         <div className="relative z-20 flex flex-col justify-end p-16 text-white">
           <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-accent bg-black/50 backdrop-blur-sm px-4 py-2 rounded-full w-fit mb-6">
-            Fathom Elite
+            Fathom
           </span>
           <h2 className="text-4xl md:text-5xl font-poppins font-bold leading-tight mb-4">
             &ldquo;Silence is the<br/>ultimate luxury.&rdquo;

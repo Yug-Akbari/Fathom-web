@@ -5,17 +5,21 @@ import { motion } from "framer-motion";
 export default function FilterSidebar({
   maxPrice,
   setMaxPrice,
-  finish,
-  setFinish,
   inStockOnly,
-  setInStockOnly
+  setInStockOnly,
+  featuredOnly,
+  setFeaturedOnly,
+  bestSellerOnly,
+  setBestSellerOnly
 }: {
   maxPrice: number;
   setMaxPrice: (val: number) => void;
-  finish: string | null;
-  setFinish: (val: string | null) => void;
   inStockOnly: boolean;
   setInStockOnly: (val: boolean) => void;
+  featuredOnly: boolean;
+  setFeaturedOnly: (val: boolean) => void;
+  bestSellerOnly: boolean;
+  setBestSellerOnly: (val: boolean) => void;
 }) {
   return (
     <aside className="w-full lg:w-64 flex flex-col gap-10 pr-8 mt-4 lg:sticky lg:top-32 lg:h-max">
@@ -37,28 +41,6 @@ export default function FilterSidebar({
         </div>
       </div>
 
-      {/* Filter by Finish */}
-      <div>
-        <h3 className="text-xs font-bold text-gray-500 tracking-[0.2em] uppercase mb-4">Filter by Finish</h3>
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={() => setFinish(finish === 'cream' ? null : 'cream')}
-            className={`w-6 h-6 rounded-full bg-[#E8E8E8] border transition-all ${finish === 'cream' ? 'ring-2 ring-accent ring-offset-2 border-transparent' : 'border-gray-300'}`}
-            title="Cream"
-          ></button>
-          <button 
-            onClick={() => setFinish(finish === 'obsidian' ? null : 'obsidian')}
-            className={`w-6 h-6 rounded-full bg-[#111111] border transition-all ${finish === 'obsidian' ? 'ring-2 ring-accent ring-offset-2 border-transparent' : 'border-gray-900'}`}
-            title="Obsidian"
-          ></button>
-          <button 
-            onClick={() => setFinish(finish === 'slate' ? null : 'slate')}
-            className={`w-6 h-6 rounded-full bg-[#6B6B6B] border transition-all ${finish === 'slate' ? 'ring-2 ring-accent ring-offset-2 border-transparent' : 'border-gray-600'}`}
-            title="Slate"
-          ></button>
-        </div>
-      </div>
-
       {/* Availability */}
       <div>
         <h3 className="text-xs font-bold text-gray-500 tracking-[0.2em] uppercase mb-4">Availability</h3>
@@ -68,12 +50,38 @@ export default function FilterSidebar({
               type="checkbox" 
               className="hidden" 
               checked={inStockOnly} 
-              onChange={() => setInStockOnly(!inStockOnly)} 
+              onChange={(e) => setInStockOnly(e.target.checked)} 
             />
             <div className={`w-5 h-5 rounded flex items-center justify-center transition-colors ${inStockOnly ? 'border-accent bg-accent text-white' : 'border border-gray-300 bg-white group-hover:border-primary'}`}>
               {inStockOnly && <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
             </div>
             <span className={`text-sm font-medium transition-colors ${inStockOnly ? 'text-primary' : 'text-gray-600 group-hover:text-primary'}`}>In Stock Only</span>
+          </label>
+
+          <label className="flex items-center gap-3 cursor-pointer group">
+            <input 
+              type="checkbox" 
+              className="hidden" 
+              checked={featuredOnly} 
+              onChange={(e) => setFeaturedOnly(e.target.checked)} 
+            />
+            <div className={`w-5 h-5 rounded flex items-center justify-center transition-colors ${featuredOnly ? 'border-accent bg-accent text-white' : 'border border-gray-300 bg-white group-hover:border-primary'}`}>
+              {featuredOnly && <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+            </div>
+            <span className={`text-sm font-medium transition-colors ${featuredOnly ? 'text-primary' : 'text-gray-600 group-hover:text-primary'}`}>Featured Products</span>
+          </label>
+
+          <label className="flex items-center gap-3 cursor-pointer group">
+            <input 
+              type="checkbox" 
+              className="hidden" 
+              checked={bestSellerOnly} 
+              onChange={(e) => setBestSellerOnly(e.target.checked)} 
+            />
+            <div className={`w-5 h-5 rounded flex items-center justify-center transition-colors ${bestSellerOnly ? 'border-accent bg-accent text-white' : 'border border-gray-300 bg-white group-hover:border-primary'}`}>
+              {bestSellerOnly && <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+            </div>
+            <span className={`text-sm font-medium transition-colors ${bestSellerOnly ? 'text-primary' : 'text-gray-600 group-hover:text-primary'}`}>Best Sellers</span>
           </label>
         </div>
       </div>

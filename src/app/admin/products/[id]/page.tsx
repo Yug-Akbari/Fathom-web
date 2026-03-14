@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, collection, onSnapshot } from "firebase/firestore";
 
 export default function ProductEditor({ params }: { params: { id: string } }) {
   const [isInitializing, setIsInitializing] = useState(true);
@@ -17,7 +17,16 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [sku, setSku] = useState("");
-  const [category, setCategory] = useState("Refrigeration");
+  const [category, setCategory] = useState("");
+  const [categories, setCategories] = useState<string[]>([]);
+
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "categories"), (snapshot) => {
+      const data = snapshot.docs.map(doc => doc.data().name);
+      setCategories(data);
+    });
+    return () => unsub();
+  }, []);
   // Image State (Multiple)
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -25,6 +34,7 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [visibility, setVisibility] = useState({
+    mainPanel: false,
     bestSeller: false,
     featured: true,
     active: true
@@ -117,6 +127,7 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
           setSku(d.sku || "");
           setCategory(d.category || "Refrigeration");
           setVisibility({
+             mainPanel: !!d.isMainPanel,
              bestSeller: !!d.isBestSeller,
              featured: !!d.isFeatured,
              active: !!d.isActive
@@ -241,6 +252,7 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
         isFeatured: visibility.featured,
         isActive: visibility.active,
         isBestSeller: visibility.bestSeller,
+        isMainPanel: visibility.mainPanel,
         image: [...existingUrls, ...imageUrls].length > 0 ? [...existingUrls, ...imageUrls][0] : "", // Cover image
         images: [...existingUrls, ...imageUrls], // Array of all appended images
       });
@@ -355,18 +367,36 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
               </div>
 
               <div className="flex flex-col gap-2 relative group focus-within:text-primary">
-                <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 group-focus-within:text-accent transition-colors">Short Description</label>
+                <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 group-focus-within:text-accent transition-colors">
+                  Short Description
+                </label>
                 <textarea 
-                  rows={3}
+                  rows={4}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="A masterpiece of cooling technology..."
+                  placeholder="A masterpiece of cooling technology...&#10;- Bullet point 1&#10;- Bullet point 2 (use new lines)"
                   className="w-full bg-[#FAF9F6] border border-gray-100 rounded-lg p-4 text-sm font-inter text-gray-600 focus:bg-white focus:border-primary outline-none transition-colors resize-none"
                 />
-                <span className="absolute -bottom-6 right-0 text-[10px] text-gray-400">104/160 characters</span>
+                <span className="absolute -bottom-6 right-0 text-[10px] text-gray-400">Use new lines for bullet points</span>
               </div>
 
-              <div className="grid grid-cols-2 gap-6 mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+                 <div className="flex flex-col gap-2 relative group focus-within:text-primary">
+                    <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 group-focus-within:text-accent transition-colors">Category</label>
+                    <div className="relative">
+                      <select 
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        className="w-full bg-transparent border border-gray-200 rounded-lg p-4 text-sm font-inter text-primary focus:border-primary outline-none transition-colors appearance-none cursor-pointer"
+                      >
+                        <option value="" disabled>Select Category</option>
+                        {categories.map((cat, i) => (
+                          <option key={i} value={cat}>{cat}</option>
+                        ))}
+                      </select>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400"><path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    </div>
+                 </div>
                  <div className="flex flex-col gap-2 relative group focus-within:text-primary">
                     <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 group-focus-within:text-accent transition-colors">Price (USD)</label>
                     <div className="relative">
@@ -501,6 +531,28 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
                   className="w-4 h-4 rounded-full bg-white absolute top-1 shadow-sm flex items-center justify-center shrink-0"
                 >
                   {visibility.active && (
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" className="text-accent"><polyline points="20 6 9 17 4 12" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  )}
+                </motion.div>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col">
+                <span className="font-bold text-sm text-primary">Main Panel Product</span>
+                <span className="text-xs text-gray-500">Show in home page main slider</span>
+              </div>
+              <div 
+                onClick={() => setVisibility({...visibility, mainPanel: !visibility.mainPanel})}
+                className={`w-12 h-6 rounded-full relative cursor-pointer flex items-center shadow-inner transition-colors ${visibility.mainPanel ? 'bg-accent' : 'bg-gray-200'}`}
+              >
+                <motion.div 
+                  layout
+                  initial={false}
+                  animate={{ left: visibility.mainPanel ? 24 : 4 }}
+                  className="w-4 h-4 rounded-full bg-white absolute top-1 shadow-sm flex items-center justify-center shrink-0"
+                >
+                  {visibility.mainPanel && (
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" className="text-accent"><polyline points="20 6 9 17 4 12" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
                   )}
                 </motion.div>

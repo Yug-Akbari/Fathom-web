@@ -165,7 +165,7 @@ export default function InventoryControl() {
 
         {/* The Animated Table */}
         <div className="flex-1 overflow-auto bg-[#FDFDFC]">
-          <table className="w-full text-left border-collapse min-w-[800px]">
+          <table className="w-full text-left border-collapse min-w-[700px]">
             <thead className="sticky top-0 bg-[#FDFDFC] z-10 shadow-[0_1px_0_rgba(243,244,246,1)]">
               <tr>
                 <th className="py-4 px-6 w-14">
@@ -219,23 +219,18 @@ export default function InventoryControl() {
                           )}
                         </div>
                       </td>
-                      <td className="py-2.5 px-6 flex items-center gap-4">
-                        <div className="w-10 h-10 bg-gray-100 rounded overflow-hidden shrink-0 relative">
+                      <td className="py-2.5 px-4 flex items-center gap-3">
+                        <div className="w-9 h-9 bg-gray-100 rounded overflow-hidden shrink-0 relative">
                           <Image 
-                            src={
-                              product.category === 'Cooking' ? '/images/blender.png' :
-                              product.category === 'Cleaning' ? '/images/fridge-obsidian.png' :
-                              product.category === 'Beverage' ? '/images/espresso.png' :
-                              '/images/cream-fridge.png'
-                            } 
+                            src={product.image || '/images/cream-fridge.png'}
                             alt={product.name} 
                             fill 
                             className="object-cover" 
                           />
                         </div>
-                        <div className="flex flex-col min-w-0">
-                          <span className="font-semibold text-primary truncate">{product.name}</span>
-                          <span className="text-xs text-gray-500 font-mono mt-0.5">SKU: {product.sku}</span>
+                        <div className="flex flex-col max-w-[150px]">
+                          <span className="font-semibold text-primary truncate text-sm" title={product.name}>{product.name}</span>
+                          <span className="text-xs text-gray-500 font-mono mt-0.5 truncate">SKU: {product.sku}</span>
                         </div>
                       </td>
                       <td className="py-2.5 px-6">

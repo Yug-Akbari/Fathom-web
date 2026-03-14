@@ -15,16 +15,36 @@ export default function TrendingNow() {
     const unsub = onSnapshot(collection(db, "products"), (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
       
-      const bestSellers = data.filter(p => p.badge === 'Bestseller' || p.badge === 'Best Seller');
-      const featured = data.filter(p => (p.isFeatured || p.badge === 'Featured') && !bestSellers.find(b => b.id === p.id));
+      const bestSellers = data.filter(p => p.isBestSeller === true || p.badge === 'Bestseller' || p.badge === 'Best Seller');
+      const featured = data.filter(p => (p.isFeatured === true || p.badge === 'Featured') && !bestSellers.find(b => b.id === p.id));
       const normals = data.filter(p => !bestSellers.find(b => b.id === p.id) && !featured.find(f => f.id === p.id));
 
-      const selected = [];
-      if (bestSellers.length > 0) selected.push(bestSellers[0]);
-      if (featured.length > 0) selected.push(featured[0]);
-      
-      const needed = 4 - selected.length;
-      selected.push(...normals.slice(0, needed));
+      const selected: any[] = [];
+      const usedCategories = new Set<string>();
+
+      // 1. Pick 1 Best Seller
+      if (bestSellers.length > 0) {
+        selected.push(bestSellers[0]);
+        if (bestSellers[0].category) usedCategories.add(bestSellers[0].category.toLowerCase());
+      }
+
+      // 2. Pick up to 3 Featured from different categories
+      for (const p of featured) {
+        if (selected.length >= 4) break;
+        const cat = p.category ? p.category.toLowerCase() : "";
+        if (!usedCategories.has(cat)) {
+          selected.push(p);
+          if (cat) usedCategories.add(cat);
+        }
+      }
+
+      // 3. Fill remaining with normals if needed
+      if (selected.length < 4) {
+        for (const p of normals) {
+          if (selected.length >= 4) break;
+          selected.push(p);
+        }
+      }
 
       setProducts(selected);
     });
@@ -54,9 +74,19 @@ export default function TrendingNow() {
               className="group"
             >
               <div className="relative aspect-[4/5] bg-surface rounded-xl overflow-hidden mb-4 transition-shadow duration-300 group-hover:shadow-2xl group-hover:shadow-black/10">
-                {product.badge && (
-                  <div className={`absolute top-4 left-4 z-10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded ${product.badge === 'Bestseller' || product.badge === 'Best Seller' ? 'bg-black text-white' : 'bg-accent text-white'}`}>
-                    {product.badge}
+                {/* Dynamic Badge */}
+                {(product.isBestSeller || product.isFeatured || product.badge) && (
+                  <div className={`absolute top-4 left-4 z-10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-full flex items-center gap-2 shadow-sm ${
+                    product.isBestSeller 
+                      ? 'bg-black/90 text-white backdrop-blur-md' 
+                      : product.isFeatured 
+                        ? 'bg-[#FDF8E4] text-[#D4AF37] border border-[#D4AF37]/20' 
+                        : 'bg-primary text-white'
+                  }`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${
+                      product.isBestSeller ? 'bg-[#D4AF37]' : product.isFeatured ? 'bg-[#D4AF37]' : 'bg-white'
+                    }`}></span>
+                    {product.isBestSeller ? 'Bestseller' : product.isFeatured ? 'Featured' : product.badge}
                   </div>
                 )}
                 
