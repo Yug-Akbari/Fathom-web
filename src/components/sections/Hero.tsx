@@ -175,22 +175,7 @@ export default function Hero() {
                     priority
                   />
                 </motion.div>
-                
-                {/* Floating feature pill */}
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5, duration: 0.5 }}
-                  className="absolute bottom-4 lg:bottom-10 left-1/2 -translate-x-1/2 lg:translate-x-0 lg:left-10 bg-white/90 backdrop-blur px-6 py-3 shadow-2xl rounded-2xl flex items-center gap-3 border border-gray-100 min-w-max"
-                >
-                  <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white">
-                    <span className="text-xs">{currentSlide.pillUnit}</span>
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">{currentSlide.pillTitle}</p>
-                    <p className="text-primary font-bold">{currentSlide.pillValue}</p>
-                  </div>
-                </motion.div>
+
               </div>
             </div>
           </motion.div>
