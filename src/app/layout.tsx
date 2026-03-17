@@ -16,7 +16,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "FATHOM Elite",
+  title: "FATHOM",
   description: "Ultra-Premium Kitchen Appliances.",
   icons: {
     icon: "/images/favicon.svg",

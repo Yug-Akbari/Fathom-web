@@ -4,7 +4,7 @@ import SpecialistConnect from "@/components/contact/SpecialistConnect";
 import ArchitecturalMap from "@/components/contact/ArchitecturalMap";
 
 export const metadata = {
-  title: "Contact Us | FATHOM Elite",
+  title: "Contact Us | FATHOM",
   description: "Connect with our specialist team for your high-end architectural needs.",
 };
 

@@ -3,7 +3,7 @@ import NotificationBell from "@/components/admin/NotificationBell";
 import AdminGuard from "@/components/admin/AdminGuard";
 
 export const metadata = {
-  title: "Admin Portal | FATHOM Elite",
+  title: "Admin Portal | FATHOM",
   description: "Executive Management Dashboard.",
 };
 

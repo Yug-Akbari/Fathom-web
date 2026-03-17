@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import ShopClient from "@/components/shop/ShopClient";
 
 export const metadata = {
-  title: "Shop | FATHOM Elite",
+  title: "Shop | FATHOM",
   description: "Explore our ultra-premium collection of kitchen appliances.",
 };
 

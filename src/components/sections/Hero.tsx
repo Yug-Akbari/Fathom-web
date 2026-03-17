@@ -123,25 +123,7 @@ export default function Hero() {
             <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center mx-auto max-w-7xl">
               {/* Text Content */}
               <div className="flex flex-col items-start mt-4 lg:mt-0">
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.2 }}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full mb-6 border ${
-                    currentSlide.isBestSeller 
-                    ? 'bg-black/90 border-black text-[#D4AF37]' 
-                    : 'bg-accent/10 border-accent/20 text-accent'
-                  }`}
-                >
-                  <span className={`w-2 h-2 rounded-full animate-pulse ${
-                    currentSlide.isBestSeller ? 'bg-[#D4AF37]' : 'bg-accent'
-                  }`}></span>
-                  <span className={`text-xs font-bold uppercase tracking-widest ${
-                    currentSlide.isBestSeller ? 'text-[#D4AF37]' : 'text-accent'
-                  }`}>
-                    {currentSlide.isBestSeller ? 'Bestseller' : currentSlide.isFeatured ? 'Featured' : 'Signature Series'}
-                  </span>
-                </motion.div>
+
 
                 <motion.h1 
                   custom={1} initial="hidden" animate="visible" variants={textVariants}

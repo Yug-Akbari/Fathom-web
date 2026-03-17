@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
   const product = await fetchProductData(params.id);
   if (!product) return { title: "Not Found | FATHOM" };
   return {
-    title: `${product.name} | FATHOM Elite`,
+    title: `${product.name} | FATHOM`,
     description: product.desc,
   };
 }
