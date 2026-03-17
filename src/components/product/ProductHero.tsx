@@ -2,13 +2,16 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { MessageCircle } from "lucide-react";
 import { Product } from "@/lib/data";
 
 export default function ProductHero({ product }: { product: Product }) {
   const [activeImage, setActiveImage] = useState(product.image);
   const [isChangingImage, setIsChangingImage] = useState(false);
+  const [descExpanded, setDescExpanded] = useState(false);
+  const [isOverflowing, setIsOverflowing] = useState(false);
+  const descRef = useRef<HTMLDivElement>(null);
   const [displayPrice, setDisplayPrice] = useState(0);
 
   // Use uploaded images array, or fallback to the single main image
@@ -43,6 +46,14 @@ export default function ProductHero({ product }: { product: Product }) {
     }, 16);
     return () => clearInterval(timer);
   }, [product.price]);
+
+  // Detect if description overflows 3 lines
+  useEffect(() => {
+    if (descRef.current) {
+      const el = descRef.current;
+      setIsOverflowing(el.scrollHeight > el.clientHeight);
+    }
+  }, [product.desc]);
 
   const pageTransition = {
     initial: { opacity: 0, y: 20 },
@@ -119,18 +130,34 @@ export default function ProductHero({ product }: { product: Product }) {
             </span>
           </motion.div>
 
-          {/* Description Rendered as Bullet Points or Paragraphs */}
-          <motion.div variants={pageTransition} className="text-base md:text-lg text-slate font-inter font-light leading-relaxed mb-10 max-w-xl max-h-48 overflow-y-auto pr-1">
-            {product.desc && product.desc.split('\n').map((line, idx) => {
-              if (line.trim().startsWith('- ')) {
-                return (
-                  <ul key={idx} className="list-disc pl-5 mb-2">
-                    <li>{line.trim().substring(2)}</li>
+          {/* Description with View More / View Less */}
+          <motion.div variants={pageTransition} className="mb-10 max-w-xl">
+            {(() => {
+              const lines = product.desc ? product.desc.split('\n').filter((l) => l.trim() !== '') : [];
+              const visibleLines = descExpanded ? lines : lines.slice(0, 3);
+              const hasMore = lines.length > 3;
+
+              return (
+                <>
+                  <ul className="list-disc pl-5 space-y-2">
+                    {visibleLines.map((line, idx) => {
+                      const text = line.trim().startsWith('- ') ? line.trim().substring(2) : line.trim();
+                      return (
+                        <li key={idx} className="font-inter font-semibold text-primary text-sm">{text}</li>
+                      );
+                    })}
                   </ul>
-                );
-              }
-              return <p key={idx} className="mb-2">{line}</p>;
-            })}
+                  {hasMore && (
+                    <button
+                      onClick={() => setDescExpanded(!descExpanded)}
+                      className="mt-3 text-sm font-semibold text-accent hover:underline focus:outline-none transition-colors"
+                    >
+                      {descExpanded ? 'View Less' : 'View More'}
+                    </button>
+                  )}
+                </>
+              );
+            })()}
           </motion.div>
 
           {/* CTAs */}
