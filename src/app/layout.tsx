@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
 import Script from "next/script";
+import { Analytics } from "@vercel/analytics/next";
 import ConditionalLayoutWrapper from "@/components/layout/ConditionalLayoutWrapper";
 import "./globals.css";
 
@@ -50,6 +51,7 @@ export default function RootLayout({
         <ConditionalLayoutWrapper>
           {children}
         </ConditionalLayoutWrapper>
+        <Analytics />
       </body>
     </html>
   );
