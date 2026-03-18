@@ -5,30 +5,42 @@ import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { db } from "@/lib/firebase";
-import { collection, onSnapshot, query, limit } from "firebase/firestore";
+import { collection, onSnapshot, query, limit, where } from "firebase/firestore";
 
 
 
 export default function CategoryGrid() {
-  const [categories, setCategories] = useState<any[]>([]);
+  const [dbCategories, setDbCategories] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
 
   useEffect(() => {
     const q = query(collection(db, "categories"), limit(6));
     const unsub = onSnapshot(q, (snapshot) => {
-      const dbCategories = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        title: doc.data().name,
-        count: `${doc.data().productCount || 0} Products`,
-        image: doc.data().image || "/images/dehydrator.png" // using placeholder if no image URL
-      }));
-      if (dbCategories.length > 0) {
-        setCategories(dbCategories);
-      }
+      setDbCategories(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
 
-    return () => unsub();
+    const productsQ = query(collection(db, "products"), where("isActive", "==", true));
+    const productsUnsub = onSnapshot(productsQ, (snapshot) => {
+      setProducts(snapshot.docs.map(doc => doc.data()));
+    });
+
+    return () => {
+      unsub();
+      productsUnsub();
+    };
   }, []);
+
+  const categories = dbCategories.map(cat => {
+    const title = cat.name || cat.title || "";
+    const activeCount = products.filter((p: any) => p.category?.toLowerCase() === title.toLowerCase()).length;
+    return {
+      id: cat.id,
+      ...cat,
+      title,
+      count: `${activeCount} Product${activeCount !== 1 ? 's' : ''}`,
+      image: cat.image || "/images/dehydrator.png"
+    };
+  });
 
   const containerRef = useRef(null);
   const { scrollYProgress } = useScroll({
