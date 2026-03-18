@@ -15,38 +15,8 @@ export default function TrendingNow() {
     const unsub = onSnapshot(collection(db, "products"), (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
       
-      const bestSellers = data.filter(p => p.isBestSeller === true || p.badge === 'Bestseller' || p.badge === 'Best Seller');
-      const featured = data.filter(p => (p.isFeatured === true || p.badge === 'Featured') && !bestSellers.find(b => b.id === p.id));
-      const normals = data.filter(p => !bestSellers.find(b => b.id === p.id) && !featured.find(f => f.id === p.id));
-
-      const selected: any[] = [];
-      const usedCategories = new Set<string>();
-
-      // 1. Pick 1 Best Seller
-      if (bestSellers.length > 0) {
-        selected.push(bestSellers[0]);
-        if (bestSellers[0].category) usedCategories.add(bestSellers[0].category.toLowerCase());
-      }
-
-      // 2. Pick up to 3 Featured from different categories
-      for (const p of featured) {
-        if (selected.length >= 4) break;
-        const cat = p.category ? p.category.toLowerCase() : "";
-        if (!usedCategories.has(cat)) {
-          selected.push(p);
-          if (cat) usedCategories.add(cat);
-        }
-      }
-
-      // 3. Fill remaining with normals if needed
-      if (selected.length < 4) {
-        for (const p of normals) {
-          if (selected.length >= 4) break;
-          selected.push(p);
-        }
-      }
-
-      setProducts(selected);
+      const featured = data.filter(p => p.isFeatured === true || p.badge === 'Featured');
+      setProducts(featured);
     });
     return () => unsub();
   }, []);

@@ -14,6 +14,7 @@ export default function ProductEditor() {
   // Form State
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [desc, setDesc] = useState("");
   const [price, setPrice] = useState("");
   const [sku, setSku] = useState("");
   const [category, setCategory] = useState("");
@@ -205,6 +206,7 @@ export default function ProductEditor() {
         isActive: visibility.active,
         isBestSeller: visibility.bestSeller,
         isMainPanel: visibility.mainPanel,
+        desc: visibility.mainPanel ? desc : "",
         image: imageUrls.length > 0 ? imageUrls[0] : "", // Cover image
         images: imageUrls, // Array of all uploaded images
         stockStatus: "In Stock",
@@ -222,6 +224,7 @@ export default function ProductEditor() {
       // Reset Form
       setName("");
       setDescription("");
+      setDesc("");
       setPrice("");
       setSku("");
       setImageFiles([]);
@@ -491,26 +494,41 @@ export default function ProductEditor() {
               </div>
             </div>
             
-            <div className="flex items-center justify-between">
-              <div className="flex flex-col">
-                <span className="font-bold text-sm text-primary">Main Panel Product</span>
-                <span className="text-xs text-gray-500">Show in home page main slider</span>
-              </div>
-              <div 
-                onClick={() => setVisibility({...visibility, mainPanel: !visibility.mainPanel})}
-                className={`w-12 h-6 rounded-full relative cursor-pointer flex items-center shadow-inner transition-colors ${visibility.mainPanel ? 'bg-accent' : 'bg-gray-200'}`}
-              >
-                <motion.div 
-                  layout
-                  initial={false}
-                  animate={{ left: visibility.mainPanel ? 24 : 4 }}
-                  className="w-4 h-4 rounded-full bg-white absolute top-1 shadow-sm flex items-center justify-center shrink-0"
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col">
+                  <span className="font-bold text-sm text-primary">Main Panel Product</span>
+                  <span className="text-xs text-gray-500">Show in home page main slider</span>
+                </div>
+                <div 
+                  onClick={() => setVisibility({...visibility, mainPanel: !visibility.mainPanel})}
+                  className={`w-12 h-6 rounded-full relative cursor-pointer flex items-center shadow-inner transition-colors ${visibility.mainPanel ? 'bg-accent' : 'bg-gray-200'}`}
                 >
-                  {visibility.mainPanel && (
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" className="text-accent"><polyline points="20 6 9 17 4 12" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  )}
-                </motion.div>
+                  <motion.div 
+                    layout
+                    initial={false}
+                    animate={{ left: visibility.mainPanel ? 24 : 4 }}
+                    className="w-4 h-4 rounded-full bg-white absolute top-1 shadow-sm flex items-center justify-center shrink-0"
+                  >
+                    {visibility.mainPanel && (
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" className="text-accent"><polyline points="20 6 9 17 4 12" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    )}
+                  </motion.div>
+                </div>
               </div>
+
+              {visibility.mainPanel && (
+                <div className="flex flex-col gap-2 relative group focus-within:text-primary">
+                  <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 group-focus-within:text-accent transition-colors">Hero Description</label>
+                  <textarea 
+                    rows={2}
+                    value={desc}
+                    onChange={(e) => setDesc(e.target.value)}
+                    placeholder="Brief description for the main slider..."
+                    className="w-full bg-[#FAF9F6] border border-gray-100 rounded-lg p-3 text-sm font-inter text-gray-600 focus:bg-white focus:border-primary outline-none transition-colors resize-none"
+                  />
+                </div>
+              )}
             </div>
           </div>
 
