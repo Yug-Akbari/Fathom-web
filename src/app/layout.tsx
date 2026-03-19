@@ -20,9 +20,9 @@ export const metadata: Metadata = {
   title: "FATHOM",
   description: "Ultra-Premium Kitchen Appliances.",
   icons: {
-    icon: "/images/favicon.svg",
-    shortcut: "/images/favicon.svg",
-    apple: "/images/favicon.svg",
+    icon: "/images/fathom-favicon.jpeg",
+    shortcut: "/images/fathom-favicon.jpeg",
+    apple: "/images/fathom-favicon.jpeg",
   },
 };
 
