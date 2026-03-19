@@ -13,7 +13,8 @@ import {
   LogOut,
   Calculator,
   Grid,
-  ExternalLink
+  ExternalLink,
+  Receipt
 } from "lucide-react";
 
 const mainNavItems = [
@@ -21,6 +22,7 @@ const mainNavItems = [
   { name: "Products", href: "/admin/inventory", icon: PackageSearch },
   { name: "Categories", href: "/admin/categories", icon: Grid },
   { name: "Leads", href: "/admin/leads", icon: Users },
+  { name: "Invoices", href: "/admin/invoices", icon: Receipt },
   { name: "Accounting", href: "/admin/accounting", icon: Calculator },
 ];
 
