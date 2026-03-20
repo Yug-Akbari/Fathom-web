@@ -234,10 +234,15 @@ export default function AccountingPage() {
   const returnRatio = totalOrders > 0 ? ((returns / totalOrders) * 100).toFixed(1) : "0.0";
   const rtoCount = filteredEntries.filter(entry => entry.returnType === "RTO").length;
   const customerCount = filteredEntries.filter(entry => entry.returnType === "Customer").length;
+  const replacementCount = filteredEntries.filter(entry => entry.returnType === "Replacement").length;
   
   const totalSales = filteredEntries.reduce((sum, entry) => {
-    // Only count completed/positive amounts, you can adjust logic if needed.
     const amt = parseFloat(entry.amount.replace(/[^0-9.-]+/g,"")) || 0;
+    return sum + amt;
+  }, 0);
+
+  const totalReimbursement = filteredEntries.reduce((sum, entry) => {
+    const amt = parseFloat((entry.reimbursement || "").replace(/[^0-9.-]+/g,"")) || 0;
     return sum + amt;
   }, 0);
 
@@ -373,6 +378,19 @@ export default function AccountingPage() {
           </div>
         </div>
 
+        {/* Replacement */}
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 flex flex-col relative overflow-hidden">
+          <div className="flex justify-between items-start mb-4 relative z-10">
+            <span className="text-xs font-bold text-gray-500 tracking-wider">REPLACEMENT</span>
+          </div>
+          <div className="flex items-baseline gap-3 relative z-10">
+            <span className="text-3xl font-extrabold font-poppins text-gray-900">{replacementCount}</span>
+            <span className="flex items-center text-xs font-semibold text-teal-700 bg-teal-100 px-2 py-0.5 rounded-full">
+              Replaced
+            </span>
+          </div>
+        </div>
+
         {/* Return Ratio */}
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 flex flex-col relative overflow-hidden">
           <div className="flex justify-between items-start mb-4 relative z-10">
@@ -392,6 +410,21 @@ export default function AccountingPage() {
           <div className="flex items-baseline gap-3 relative z-10">
             <span className="text-3xl font-extrabold font-poppins text-gray-900">{uniqueSkus.length}</span>
             <span className="text-xs font-semibold text-yellow-700 bg-yellow-100 px-2 py-0.5 rounded-full">
+              Total
+            </span>
+          </div>
+        </div>
+
+        {/* Total Reimbursement */}
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 flex flex-col relative overflow-hidden">
+          <div className="flex justify-between items-start mb-4 relative z-10">
+            <span className="text-xs font-bold text-gray-500 tracking-wider">REIMBURSEMENT</span>
+          </div>
+          <div className="flex items-baseline gap-3 relative z-10">
+            <span className="text-3xl font-extrabold font-poppins text-gray-900">
+              ₹{totalReimbursement.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
+            <span className="flex items-center text-xs font-semibold text-rose-700 bg-rose-100 px-2 py-0.5 rounded-full">
               Total
             </span>
           </div>
@@ -606,24 +639,25 @@ export default function AccountingPage() {
           </div>
         </div>
 
-        <div className="overflow-x-visible min-h-[400px]">
+        <div className="overflow-x-auto min-h-[400px]">
           <table className="w-full text-left text-sm whitespace-nowrap">
             <thead>
               <tr className="text-xs font-bold text-gray-500 tracking-wider border-b border-gray-100 bg-gray-50/50">
                 <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('refId')}>REF ID <SortIcon columnKey="refId" /></th>
-                <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('date')}>DATE <SortIcon columnKey="date" /></th>
                 <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('sku')}>SKU <SortIcon columnKey="sku" /></th>
                 <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('type')}>TYPE <SortIcon columnKey="type" /></th>
                 <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('amount')}>AMOUNT <SortIcon columnKey="amount" /></th>
                 <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('status')}>STATUS <SortIcon columnKey="status" /></th>
                 <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('paymentText')}>PAYMENT <SortIcon columnKey="paymentText" /></th>
+                <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('state')}>STATE <SortIcon columnKey="state" /></th>
+                <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('reimbursement')}>REIMBURSEMENT <SortIcon columnKey="reimbursement" /></th>
                 <th className="px-6 py-4 text-right">ACTIONS</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {sortedEntries.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={9} className="px-6 py-12 text-center text-gray-500">
                     <div>No entries match your search/filters.</div>
                   </td>
                 </tr>
@@ -631,7 +665,6 @@ export default function AccountingPage() {
                 sortedEntries.map((entry) => (
                   <tr key={entry.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4 font-bold text-gray-900">{entry.refId}</td>
-                    <td className="px-6 py-4 text-gray-500">{entry.date}</td>
                     <td className="px-6 py-4 font-medium text-gray-700">{entry.sku}</td>
                     <td className="px-6 py-4">
                       <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${
@@ -655,10 +688,14 @@ export default function AccountingPage() {
                         {entry.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 flex items-center gap-2 text-gray-500">
-                      {getIconComponent(entry.paymentIconName)}
-                      {entry.paymentText}
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2 text-gray-500">
+                        {getIconComponent(entry.paymentIconName)}
+                        {entry.paymentText}
+                      </div>
                     </td>
+                    <td className="px-6 py-4 text-gray-600 max-w-[200px] truncate" title={entry.state || ''}>{entry.state || <span className="text-gray-400">—</span>}</td>
+                    <td className="px-6 py-4 text-gray-600">{entry.reimbursement || <span className="text-gray-400">—</span>}</td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button 
