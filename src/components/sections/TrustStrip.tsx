@@ -6,13 +6,13 @@ import { Shield, Truck, Award } from "lucide-react";
 const features = [
   {
     icon: Award,
-    title: "Top Rated Brand",
-    description: "Trusted by Michelin-star chefs worldwide for consistency.",
+    title: "Trusted Quality",
+    description: "Built to last with strict quality standards.",
   },
   {
     icon: Truck,
-    title: "Free Global Shipping",
-    description: "Complimentary expedited delivery on all orders over ₹500.",
+    title: "Free Shipping",
+    description: "Complimentary delivery on all orders.",
   },
 ];
 
