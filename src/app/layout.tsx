@@ -19,6 +19,12 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "FATHOM",
   description: "Ultra-Premium Kitchen Appliances.",
+  icons: {
+    icon: [
+      { url: "https://fathomstore.in/favicon.png", sizes: "48x48", type: "image/png" }
+    ],
+    shortcut: "https://fathomstore.in/favicon.ico",
+  }
 };
 
 export default function RootLayout({

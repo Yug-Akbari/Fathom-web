@@ -104,8 +104,8 @@ export default function Hero() {
   }
 
   return (
-    <section className="relative min-h-[90vh] flex items-center bg-surface overflow-hidden pt-20">
-      <div className="max-w-7xl mx-auto px-6 w-full relative z-10 flex flex-col justify-center min-h-[850px] lg:min-h-[700px]">
+    <section className="relative min-h-[90vh] flex items-center bg-surface overflow-x-hidden pt-24 pb-24 lg:pt-20 lg:pb-0">
+      <div className="max-w-7xl mx-auto px-6 w-full relative z-10 flex flex-col justify-center min-h-[750px] lg:min-h-[700px]">
         <AnimatePresence initial={false} custom={direction} mode="wait">
           <motion.div
             key={page}
@@ -120,14 +120,14 @@ export default function Hero() {
             }}
             className="absolute inset-0 w-full h-full px-6 flex items-center"
           >
-            <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center mx-auto max-w-7xl">
+            <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center mx-auto max-w-7xl pb-16 lg:pb-0">
               {/* Text Content */}
               <div className="flex flex-col items-start mt-4 lg:mt-0">
 
 
                 <motion.h1 
                   custom={1} initial="hidden" animate="visible" variants={textVariants}
-                  className="text-4xl md:text-5xl lg:text-7xl font-poppins font-bold text-primary leading-tight mb-4 uppercase tracking-tighter text-center md:text-left w-full"
+                  className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-poppins font-bold text-primary leading-tight mb-4 uppercase tracking-tighter text-center md:text-left w-full"
                 >
                   {currentSlide.title1} <br className="hidden md:block" /> {currentSlide.title2}
                 </motion.h1>
@@ -150,7 +150,7 @@ export default function Hero() {
                   custom={4} initial="hidden" animate="visible" variants={textVariants}
                   className="flex flex-wrap items-center justify-center md:justify-start gap-4 lg:gap-6 w-full"
                 >
-                  <Link href="/shop" className="w-full sm:w-auto flex items-center justify-center gap-3 bg-primary text-white px-6 lg:px-8 py-4 font-bold tracking-widest uppercase hover:bg-black transition-colors rounded-none shadow-xl magnet-button">
+                  <Link href="/shop" className="w-fit inline-flex items-center justify-center gap-3 bg-primary text-white px-8 py-4 font-bold tracking-widest uppercase hover:bg-black transition-colors rounded-none shadow-xl magnet-button">
                     Shop Now
                     <ArrowRight className="w-5 h-5" />
                   </Link>
@@ -183,7 +183,7 @@ export default function Hero() {
       </div>
 
       {/* Slider Controls */}
-      <div className="absolute top-[85%] lg:top-auto lg:bottom-10 left-1/2 lg:left-auto lg:right-10 -translate-x-1/2 lg:translate-x-0 z-20 flex items-center gap-4">
+      <div className="absolute bottom-6 lg:bottom-10 left-1/2 lg:left-auto lg:right-10 -translate-x-1/2 lg:translate-x-0 z-20 flex items-center gap-4">
         <button 
           onClick={() => paginate(-1)}
           className="w-12 h-12 rounded-full bg-white/50 backdrop-blur border border-gray-200 flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-colors shadow-lg"
