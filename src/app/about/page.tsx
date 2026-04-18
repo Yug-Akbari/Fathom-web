@@ -7,16 +7,19 @@ import OurImpact from "@/components/about/OurImpact";
 export const metadata: Metadata = {
   title: "About Us | FATHOM — Our Story & Mission",
   description:
-    "Learn about FATHOM — India's trusted partner for ultra-premium Home & kitchen appliances. 5+ years of excellence, 5000+ happy customers, and an unwavering commitment to quality and innovation.",
+    "Learn about FATHOM — India's trusted brand for Food Dehydrators, Dehydrators, Food Dryers, Coffee Machines & Grinders. 5+ years of excellence, 5000+ happy customers.",
   keywords: [
-    "about FATHOM store",
-    "premium appliances brand India",
-    "FATHOM Home & kitchen appliances story",
+    "fathom",
+    "about fathom",
+    "fathom food dehydrator brand",
+    "fathom dehydrator",
+    "food dryer brand",
+    "premium appliances brand",
   ],
   openGraph: {
     title: "About Us | FATHOM — Our Story & Mission",
     description:
-      "5+ years of excellence, 5000+ happy customers. Discover the FATHOM story.",
+      "5+ years of excellence, 5000+ happy customers. Discover FATHOM — India's home for Food Dehydrators & premium appliances.",
     url: "https://www.fathomstore.in/about",
     siteName: "FATHOM",
     type: "website",

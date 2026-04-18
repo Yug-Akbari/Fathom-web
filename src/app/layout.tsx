@@ -17,14 +17,32 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "FATHOM",
-  description: "Ultra-Premium Kitchen Appliances.",
+  title: {
+    default: "FATHOM | Food Dehydrator",
+    template: "%s | FATHOM",
+  },
+  description:
+    "FATHOM — Shop premium Food Dehydrator, Food Dryer, Dehydrator, Coffee Machine & Coffee Grinder online. Free shipping across India.",
+  keywords: [
+    "fathom",
+    "fathom store",
+    "food dehydrator",
+    "dehydrator",
+    "food dryer",
+    "food dehydrator India",
+    "buy dehydrator online India",
+    "best food dehydrator India",
+    "food dryer India",
+    "coffee machine",
+    "coffee grinder",
+    "premium home appliances India",
+  ],
   icons: {
     icon: [
       { url: "https://fathomstore.in/favicon.png", sizes: "48x48", type: "image/png" }
     ],
     shortcut: "https://fathomstore.in/favicon.ico",
-  }
+  },
 };
 
 export default function RootLayout({
