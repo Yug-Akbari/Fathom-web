@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useCart } from "@/lib/CartContext";
 import { Trash2, ShoppingBag, MessageCircle, ArrowLeft } from "lucide-react";
 
-const WHATSAPP_NUMBER = "919173546159";
+const WHATSAPP_NUMBER = "918238543000";
 
 export default function CartPage() {
   const { items, removeItem, clearCart } = useCart();

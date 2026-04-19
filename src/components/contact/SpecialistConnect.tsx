@@ -16,7 +16,7 @@ export default function SpecialistConnect() {
       <div className="flex flex-col gap-10">
         
         {/* Contact Method 1 */}
-        <div className="flex items-start gap-6 group cursor-pointer" onClick={() => window.open('https://wa.me/919173546159', '_blank')}>
+        <div className="flex items-start gap-6 group cursor-pointer" onClick={() => window.open('https://wa.me/918238543000', '_blank')}>
           <div className="relative">
             <div className="absolute inset-0 bg-accent rounded-full hidden group-hover:block transition-all duration-300 group-hover:animate-pulse-ring"></div>
             <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center text-white relative z-10 transition-transform duration-300 group-hover:scale-110">
@@ -27,7 +27,7 @@ export default function SpecialistConnect() {
           </div>
           <div className="flex flex-col">
             <span className="font-poppins font-bold text-primary text-lg group-hover:text-accent transition-colors">WhatsApp Enquiry</span>
-            <span className="text-gray-500 font-inter text-sm">+91 91735 46159</span>
+            <span className="text-gray-500 font-inter text-sm">+91 82385 43000</span>
           </div>
         </div>
 
@@ -49,7 +49,7 @@ export default function SpecialistConnect() {
             Mota Varachha, Surat,<br />
             Gujarat 394105
           </span>
-          <span className="text-gray-500 font-inter text-sm mb-1">+91 91735 46159</span>
+          <span className="text-gray-500 font-inter text-sm mb-1">+91 82385 43000</span>
           <span className="text-gray-500 font-inter text-sm">fathom.support@gmail.com</span>
         </div>
       </div>

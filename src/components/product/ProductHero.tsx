@@ -163,7 +163,7 @@ export default function ProductHero({ product }: { product: Product }) {
           {/* CTAs */}
           <motion.div variants={pageTransition} className="flex flex-col sm:flex-row gap-4 mb-16">
             <motion.a 
-              href={`https://wa.me/919173546159?text=${encodeURIComponent(`Hi FATHOM, I'm interested in the ${product.name} (₹${product.price.toLocaleString('en-IN')}). Please share more details.`)}`}
+              href={`https://wa.me/918238543000?text=${encodeURIComponent(`Hi FATHOM, I'm interested in the ${product.name} (₹${product.price.toLocaleString('en-IN')}). Please share more details.`)}`}
               target="_blank"
               whileHover={{ scale: 1.02 }}
               className="group relative px-8 py-5 bg-gradient-to-b from-accent to-[#b8952b] text-white font-bold tracking-widest uppercase rounded-full shadow-lg overflow-hidden flex items-center justify-center gap-3 w-full sm:w-auto text-xs"
@@ -175,7 +175,7 @@ export default function ProductHero({ product }: { product: Product }) {
               <MessageCircle className="w-5 h-5 group-hover:animate-pulse" />
               WhatsApp Enquiry
             </motion.a>
-            <a href="tel:+919173546159" className="px-8 py-5 border border-gray-200 text-primary font-bold tracking-widest uppercase rounded-full hover:border-primary transition-colors text-xs w-full sm:w-auto text-center">
+            <a href="tel:+918238543000" className="px-8 py-5 border border-gray-200 text-primary font-bold tracking-widest uppercase rounded-full hover:border-primary transition-colors text-xs w-full sm:w-auto text-center">
               Call Showroom
             </a>
           </motion.div>

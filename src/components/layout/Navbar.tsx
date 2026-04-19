@@ -16,7 +16,7 @@ const navLinks = [
   { text: "Contact", href: "/contact" },
 ];
 
-const WHATSAPP_NUMBER = "919173546159";
+const WHATSAPP_NUMBER = "918238543000";
 
 export default function Navbar() {
   const pathname = usePathname();
