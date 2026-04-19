@@ -14,7 +14,8 @@ import {
   Calculator,
   Grid,
   ExternalLink,
-  Receipt
+  Receipt,
+  Star
 } from "lucide-react";
 
 const mainNavItems = [
@@ -24,6 +25,7 @@ const mainNavItems = [
   { name: "Leads", href: "/admin/leads", icon: Users },
   { name: "Invoices", href: "/admin/invoices", icon: Receipt },
   { name: "Accounting", href: "/admin/accounting", icon: Calculator },
+  { name: "Reviews", href: "/admin/reviews", icon: Star },
 ];
 
 export default function AdminSidebar({ className = "" }: { className?: string }) {
@@ -81,7 +83,6 @@ export default function AdminSidebar({ className = "" }: { className?: string })
                   </motion.div>
                 </Link>
                 
-                {/* Active State Background & Indicator (Shared Layout Transition) */}
                 {isActive && (
                   <motion.div
                     layoutId="active-sidebar-bg"
