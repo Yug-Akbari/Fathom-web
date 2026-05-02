@@ -11,8 +11,6 @@ import {
   FilePlus, 
   Search, 
   Filter,
-  CreditCard,
-  Building,
   MoreHorizontal,
   Edit,
   Trash2
@@ -37,8 +35,8 @@ interface AccountingEntry {
   type: string;
   amount: string;
   status: string;
-  paymentIconName: string; // Storing icon name string to save in Firebase
-  paymentText: string;
+  paymentIconName?: string; // Storing icon name string to save in Firebase
+  paymentText?: string;
   sku: string;
   notified: boolean;
   returnType: string;
@@ -53,7 +51,6 @@ export default function AccountingPage() {
   const [orderId, setOrderId] = useState("");
   const [type, setType] = useState("FBA");
   const [amount, setAmount] = useState("");
-  const [payment, setPayment] = useState("Prepaid");
   const [returnType, setReturnType] = useState("");
   const [state, setState] = useState("");
   const [reimbursement, setReimbursement] = useState("");
@@ -95,7 +92,6 @@ export default function AccountingPage() {
     setOrderId("");
     setType("FBA");
     setAmount("");
-    setPayment("Prepaid");
     setReturnType("");
     setState("");
     setReimbursement("");
@@ -113,8 +109,6 @@ export default function AccountingPage() {
       type: type,
       amount: amount.startsWith('₹') || amount.startsWith('-') ? amount : `₹${amount || '0.00'}`,
       status: "Completed",
-      paymentIconName: payment === "Prepaid" ? "CreditCard" : "Building",
-      paymentText: payment,
       sku: sku || "N/A",
       notified: notified,
       returnType: returnType,
@@ -147,7 +141,6 @@ export default function AccountingPage() {
     setOrderId(entry.refId.replace('#', ''));
     setType(entry.type);
     setAmount(entry.amount.replace('₹', ''));
-    setPayment(entry.paymentText);
     setReturnType(entry.returnType || "");
     setState(entry.state || "");
     setReimbursement(entry.reimbursement || "");
@@ -187,7 +180,6 @@ export default function AccountingPage() {
           (entry.type && entry.type.toLowerCase().includes(term)) ||
           (entry.amount && entry.amount.toLowerCase().includes(term)) ||
           (entry.status && entry.status.toLowerCase().includes(term)) ||
-          (entry.paymentText && entry.paymentText.toLowerCase().includes(term)) ||
           (entry.state && entry.state.toLowerCase().includes(term)) ||
           (entry.note && entry.note.toLowerCase().includes(term))
         );
@@ -241,6 +233,18 @@ export default function AccountingPage() {
     return sum + amt;
   }, 0);
 
+  const totalReturnAmount = filteredEntries.reduce((sum, entry) => {
+    if (entry.notified === true || entry.returnType === "Customer" || entry.returnType === "RTO" || entry.returnType === "Replacement") {
+      const amt = parseFloat(entry.amount.replace(/[^0-9.-]+/g,"")) || 0;
+      return sum + amt;
+    }
+    return sum;
+  }, 0);
+  
+  const netSales = totalSales - totalReturnAmount;
+  
+  const salesPercentage = totalSales > 0 ? ((netSales / totalSales) * 100).toFixed(1) : "0.0";
+
   const totalReimbursement = filteredEntries.reduce((sum, entry) => {
     const amt = parseFloat((entry.reimbursement || "").replace(/[^0-9.-]+/g,"")) || 0;
     return sum + amt;
@@ -248,11 +252,6 @@ export default function AccountingPage() {
 
   // Extract unique SKUs for datalist
   const uniqueSkus = Array.from(new Set(entries.map(e => e.sku).filter(Boolean)));
-
-  const getIconComponent = (iconName: string) => {
-    if (iconName === "Building") return <Building className="w-4 h-4" />;
-    return <CreditCard className="w-4 h-4" />;
-  };
 
   return (
     <div className="w-full max-w-7xl mx-auto space-y-8 font-inter">
@@ -280,9 +279,9 @@ export default function AccountingPage() {
           <div className="flex items-center gap-3">
             <button 
               onClick={() => {
-                const headers = ["Ref ID", "Date", "SKU", "Type", "Amount", "Status", "Payment", "Return Type", "State", "Reimbursement", "Notified", "Note"];
+                const headers = ["Ref ID", "Date", "SKU", "Type", "Amount", "Status", "Return Type", "State", "Reimbursement", "Notified", "Note"];
                 const rows = sortedEntries.map(e => [
-                  e.refId, e.date, e.sku, e.type, e.amount, e.status, e.paymentText, 
+                  e.refId, e.date, e.sku, e.type, e.amount, e.status, 
                   e.returnType || "", e.state || "", e.reimbursement || "", e.notified ? "Yes" : "No", e.note || ""
                 ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(","));
                 const csv = [headers.join(","), ...rows].join("\n");
@@ -335,6 +334,34 @@ export default function AccountingPage() {
             </span>
             <span className="flex items-center text-xs font-semibold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">
               Gross
+            </span>
+          </div>
+        </div>
+
+        {/* Net Sales */}
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 flex flex-col relative overflow-hidden">
+          <div className="flex justify-between items-start mb-4 relative z-10">
+            <span className="text-xs font-bold text-gray-500 tracking-wider">NET SALES</span>
+          </div>
+          <div className="flex items-baseline gap-3 relative z-10">
+            <span className="text-3xl font-extrabold font-poppins text-gray-900">
+              ₹{netSales.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
+            <span className="flex items-center text-xs font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
+              Net
+            </span>
+          </div>
+        </div>
+
+        {/* Sales Percentage */}
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 flex flex-col relative overflow-hidden">
+          <div className="flex justify-between items-start mb-4 relative z-10">
+            <span className="text-xs font-bold text-gray-500 tracking-wider">SALES PERCENTAGE</span>
+          </div>
+          <div className="flex items-baseline gap-3 relative z-10">
+            <span className="text-3xl font-extrabold font-poppins text-gray-900">{salesPercentage}%</span>
+            <span className="flex items-center text-xs font-semibold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-full">
+              of Gross
             </span>
           </div>
         </div>
@@ -502,7 +529,7 @@ export default function AccountingPage() {
               </div>
             </div>
           </div>
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-1.5 md:col-span-2">
             <label className="text-xs font-bold text-gray-500 tracking-wider">AMOUNT</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
@@ -517,23 +544,6 @@ export default function AccountingPage() {
               />
             </div>
           </div>
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold text-gray-500 tracking-wider">PAYMENT</label>
-            <div className="relative">
-              <select 
-                className="w-full px-3 py-2 bg-gray-50 rounded-lg border border-gray-200 text-sm appearance-none focus:outline-none focus:ring-1 focus:ring-[#D4AF37]"
-                value={payment}
-                onChange={(e) => setPayment(e.target.value)}
-              >
-                <option value="Prepaid">Prepaid</option>
-                <option value="COD">COD</option>
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-gray-500">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-              </div>
-            </div>
-          </div>
-
           {/* Row 2 */}
           <div className="flex flex-col gap-1.5 md:col-span-2">
             <label className="text-xs font-bold text-gray-500 tracking-wider">STATE / ADDRESS</label>
@@ -648,7 +658,6 @@ export default function AccountingPage() {
                 <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('type')}>TYPE <SortIcon columnKey="type" /></th>
                 <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('amount')}>AMOUNT <SortIcon columnKey="amount" /></th>
                 <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('status')}>STATUS <SortIcon columnKey="status" /></th>
-                <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('paymentText')}>PAYMENT <SortIcon columnKey="paymentText" /></th>
                 <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('state')}>STATE <SortIcon columnKey="state" /></th>
                 <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('reimbursement')}>REIMBURSEMENT <SortIcon columnKey="reimbursement" /></th>
                 <th className="px-6 py-4 text-right">ACTIONS</th>
@@ -657,7 +666,7 @@ export default function AccountingPage() {
             <tbody className="divide-y divide-gray-100">
               {sortedEntries.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
                     <div>No entries match your search/filters.</div>
                   </td>
                 </tr>
@@ -687,12 +696,6 @@ export default function AccountingPage() {
                         }`}></div>
                         {entry.status}
                       </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2 text-gray-500">
-                        {getIconComponent(entry.paymentIconName)}
-                        {entry.paymentText}
-                      </div>
                     </td>
                     <td className="px-6 py-4 text-gray-600 max-w-[200px] truncate" title={entry.state || ''}>{entry.state || <span className="text-gray-400">—</span>}</td>
                     <td className="px-6 py-4 text-gray-600">{entry.reimbursement || <span className="text-gray-400">—</span>}</td>
