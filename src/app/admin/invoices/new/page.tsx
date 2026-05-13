@@ -77,7 +77,7 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
     new Date().toISOString().split("T")[0]
   );
   const [companyName, setCompanyName] = useState("Shivam Enterprises");
-  const [companyAddress, setCompanyAddress] = useState("");
+  const [companyAddress, setCompanyAddress] = useState("126, Green Plaza, Near Golden Chowk, Mota Varachha, Surat, Gujarat - 394101");
   const [orderType, setOrderType] = useState("Retail");
   const [deliveryDate, setDeliveryDate] = useState("");
 

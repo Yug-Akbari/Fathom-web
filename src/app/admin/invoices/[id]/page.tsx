@@ -302,10 +302,10 @@ export default function InvoicePreviewPage() {
               <div className="text-sm leading-relaxed text-gray-600">
                 <p className="text-[10px] font-bold tracking-widest text-[#947A26] uppercase mb-4">FROM</p>
                 <p className="font-bold text-gray-900 text-lg mb-2 uppercase">{invoice.companyName || "Shivam Enterprises"}</p>
-                <p className="whitespace-pre-line text-sm">{invoice.companyAddress || "Plot No. 442, Industrial Area Phase II,\nPanchkula, Haryana 134113\nIndia"}</p>
+                <p className="whitespace-pre-line text-sm">{invoice.companyAddress || "126, Green Plaza, Near Golden Chowk,\nMota Varachha, Surat,\nGujarat - 394101"}</p>
                 <div className="mt-4 space-y-1">
                   <p><span className="font-semibold text-gray-800">GSTIN:</span> 24AFWFS8557F1Z8</p>
-                  <p><span className="font-semibold text-gray-800">Email:</span> accounts@shivamenterprises.com</p>
+                  <p><span className="font-semibold text-gray-800">Email:</span> fathom.support@gmail.com</p>
                 </div>
               </div>
               
@@ -367,23 +367,23 @@ export default function InvoicePreviewPage() {
                 <div className="text-[11px] text-gray-500 space-y-3">
                   <div className="flex justify-between">
                     <span>Bank Name:</span>
-                    <span className="font-bold text-gray-900">HDFC Bank Ltd.</span>
+                    <span className="font-bold text-gray-900">The Varachha Co-Op Bank Ltd.</span>
                   </div>
                   <div className="flex justify-between">
                     <span>A/C Name:</span>
-                    <span className="font-bold text-gray-900 uppercase">Shivam Enterprises</span>
+                    <span className="font-bold text-gray-900 uppercase">SHIVAM ENTERPRISES</span>
                   </div>
                   <div className="flex justify-between">
                     <span>A/C Number:</span>
-                    <span className="font-bold text-gray-900">50200048123491</span>
+                    <span className="font-bold text-gray-900">01330110315458</span>
                   </div>
                   <div className="flex justify-between">
                     <span>IFSC Code:</span>
-                    <span className="font-bold text-gray-900">HDFC0000412</span>
+                    <span className="font-bold text-gray-900">VARA0289013</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Branch:</span>
-                    <span className="font-bold text-gray-900">Sector 11, Panchkula</span>
+                    <span className="font-bold text-gray-900">MOTA VARACHHA BRANCH</span>
                   </div>
                 </div>
               </div>
