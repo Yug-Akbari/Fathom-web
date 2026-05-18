@@ -24,7 +24,8 @@ const mainNavItems = [
   { name: "Categories", href: "/admin/categories", icon: Grid },
   { name: "Leads", href: "/admin/leads", icon: Users },
   { name: "Invoices", href: "/admin/invoices", icon: Receipt },
-  { name: "Accounting", href: "/admin/accounting", icon: Calculator },
+  { name: "FBA Accounting", href: "/admin/accounting", icon: Calculator },
+  { name: "FBM Accounting", href: "/admin/fbm-accounting", icon: Calculator },
   { name: "Reviews", href: "/admin/reviews", icon: Star },
 ];
 

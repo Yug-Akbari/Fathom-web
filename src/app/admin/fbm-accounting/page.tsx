@@ -41,13 +41,15 @@ interface AccountingEntry {
   notified: boolean;
   returnType: string;
   state: string;
+  reimbursement: string;
+  note: string;
   createdAt: any;
 }
 
 export default function AccountingPage() {
   const [shipDate, setShipDate] = useState("");
   const [orderId, setOrderId] = useState("");
-  const type = "FBA";
+  const type = "FBM";
   const [amount, setAmount] = useState("");
   const [returnType, setReturnType] = useState("");
   const [state, setState] = useState("");
@@ -71,7 +73,7 @@ export default function AccountingPage() {
       const fetchedEntries: AccountingEntry[] = [];
       snapshot.forEach((doc) => {
         const data = doc.data() as AccountingEntry;
-        if (data.type === "FBA") {
+        if (data.type === "FBM") {
           fetchedEntries.push({ id: doc.id, ...data });
         }
       });
@@ -257,8 +259,8 @@ export default function AccountingPage() {
       {/* Header section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold font-poppins text-primary">FBA Accounting & Order Entry</h1>
-          <p className="text-gray-500 mt-1">Manage FBA financial records, reimbursements, and operational expenses.</p>
+          <h1 className="text-3xl font-extrabold font-poppins text-primary">FBM Accounting & Order Entry</h1>
+          <p className="text-gray-500 mt-1">Manage FBM financial records, reimbursements, and operational expenses.</p>
         </div>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
            {/* Global SKU Filter */}
