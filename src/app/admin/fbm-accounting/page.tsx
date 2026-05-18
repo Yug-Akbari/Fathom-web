@@ -55,7 +55,7 @@ export default function AccountingPage() {
   const [state, setState] = useState("");
   const [reimbursement, setReimbursement] = useState("");
   const [sku, setSku] = useState("");
-  const [notified, setNotified] = useState(true);
+  const [notified, setNotified] = useState(false);
   const [note, setNote] = useState("");
   const [filterSku, setFilterSku] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -98,7 +98,7 @@ export default function AccountingPage() {
     setState("");
     setReimbursement("");
     setSku("");
-    setNotified(true);
+    setNotified(false);
     setNote("");
     setEditingId(null);
   };

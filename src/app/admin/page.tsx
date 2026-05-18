@@ -27,7 +27,7 @@ export default function AdminDashboard() {
     });
 
     const unsubLeads = onSnapshot(collection(db, "leads"), (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any)).filter((lead: any) => lead.status !== "Resolved");
       data.sort((a: any, b: any) => new Date(b.createdAt || b.date || 0).getTime() - new Date(a.createdAt || a.date || 0).getTime());
       setLeads(data);
     });
