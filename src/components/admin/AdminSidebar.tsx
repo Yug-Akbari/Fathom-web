@@ -15,13 +15,15 @@ import {
   Grid,
   ExternalLink,
   Receipt,
-  Star
+  Star,
+  BookUser
 } from "lucide-react";
 
 const mainNavItems = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Products", href: "/admin/inventory", icon: PackageSearch },
   { name: "Categories", href: "/admin/categories", icon: Grid },
+  { name: "Directory", href: "/admin/directory", icon: BookUser },
   { name: "Leads", href: "/admin/leads", icon: Users },
   { name: "Invoices", href: "/admin/invoices", icon: Receipt },
   { name: "FBA Accounting", href: "/admin/accounting", icon: Calculator },
