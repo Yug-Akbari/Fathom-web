@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Star, Check, X, Clock } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Star, Check, X, Clock, Eye, Edit } from "lucide-react";
 import { db } from "@/lib/firebase";
 import {
   collection,
@@ -46,6 +46,8 @@ export default function AdminReviewsPage() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [tab, setTab] = useState<Tab>("pending");
   const [loading, setLoading] = useState(true);
+  const [viewingReview, setViewingReview] = useState<Review | null>(null);
+  const [editingReview, setEditingReview] = useState<Review | null>(null);
 
   useEffect(() => {
     const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"));
@@ -68,6 +70,21 @@ export default function AdminReviewsPage() {
     if (confirm("Permanently delete this review?")) {
       await deleteDoc(doc(db, "reviews", id));
     }
+  };
+
+  const handleUpdateReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingReview) return;
+    await updateDoc(doc(db, "reviews", editingReview.id), {
+      productName: editingReview.productName,
+      customerName: editingReview.customerName,
+      platform: editingReview.platform,
+      orderNumber: editingReview.orderNumber,
+      rating: editingReview.rating,
+      title: editingReview.title,
+      description: editingReview.description,
+    });
+    setEditingReview(null);
   };
 
   const filtered = reviews.filter((r) => r.status === tab);
@@ -194,7 +211,7 @@ export default function AdminReviewsPage() {
                       <p className="text-xs font-inter text-gray-500 line-clamp-2 leading-relaxed">{review.description}</p>
                     </td>
                     <td className="py-4 px-5">
-                      <div className="flex gap-2 items-center">
+                      <div className="flex gap-2 items-center flex-wrap">
                         {tab === "pending" && (
                           <>
                             <button
@@ -239,6 +256,23 @@ export default function AdminReviewsPage() {
                             </button>
                           </>
                         )}
+
+                        <div className="w-px h-6 bg-gray-200 mx-1"></div>
+
+                        <button
+                          onClick={() => setViewingReview(review)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 text-blue-700 text-[10px] font-bold tracking-wide uppercase hover:bg-blue-100 transition-colors"
+                        >
+                          <Eye className="w-3 h-3" />
+                          View
+                        </button>
+                        <button
+                          onClick={() => setEditingReview(review)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-bold tracking-wide uppercase hover:bg-amber-100 transition-colors"
+                        >
+                          <Edit className="w-3 h-3" />
+                          Edit
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -248,6 +282,154 @@ export default function AdminReviewsPage() {
           </div>
         )}
       </div>
+
+      {/* Modals */}
+      <AnimatePresence>
+        {viewingReview && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8"
+            >
+              <div className="flex justify-between items-start mb-6">
+                <h2 className="text-2xl font-bold font-poppins text-primary">Review Details</h2>
+                <button onClick={() => setViewingReview(null)} className="text-gray-400 hover:text-gray-600 p-1 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="flex flex-col gap-6">
+                <div className="grid grid-cols-2 gap-6 bg-gray-50/50 p-6 rounded-xl border border-gray-100">
+                  <div>
+                    <p className="text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1">Product</p>
+                    <p className="font-semibold text-primary">{viewingReview.productName}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1">Customer</p>
+                    <p className="font-semibold text-primary">{viewingReview.customerName}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1">Rating</p>
+                    <div className="mt-1"><StarDisplay rating={viewingReview.rating} /></div>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1">Platform & Order</p>
+                    <p className="font-semibold text-primary">{viewingReview.platform} - {viewingReview.orderNumber}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1">Status</p>
+                    <p className="font-semibold uppercase text-sm text-primary">{viewingReview.status}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1">Date</p>
+                    <p className="font-semibold text-primary">{formatDate(viewingReview.createdAt)}</p>
+                  </div>
+                </div>
+                <div className="p-6 bg-gray-50 rounded-xl border border-gray-100">
+                  {viewingReview.title && (
+                    <p className="font-bold text-lg mb-3 text-primary">{viewingReview.title}</p>
+                  )}
+                  <p className="text-gray-600 whitespace-pre-wrap leading-relaxed font-inter">{viewingReview.description}</p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {editingReview && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8"
+            >
+              <div className="flex justify-between items-start mb-6">
+                <h2 className="text-2xl font-bold font-poppins text-primary">Edit Review</h2>
+                <button onClick={() => setEditingReview(null)} className="text-gray-400 hover:text-gray-600 p-1 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <form onSubmit={handleUpdateReview} className="flex flex-col gap-5">
+                <div className="grid grid-cols-2 gap-5">
+                  <div>
+                    <label className="text-[10px] font-bold tracking-widest text-gray-500 uppercase block mb-1.5">Product Name</label>
+                    <input 
+                      value={editingReview.productName} 
+                      onChange={e => setEditingReview({...editingReview, productName: e.target.value})}
+                      className="w-full border border-gray-200 rounded-lg p-2.5 text-sm font-inter focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" 
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold tracking-widest text-gray-500 uppercase block mb-1.5">Customer Name</label>
+                    <input 
+                      value={editingReview.customerName} 
+                      onChange={e => setEditingReview({...editingReview, customerName: e.target.value})}
+                      className="w-full border border-gray-200 rounded-lg p-2.5 text-sm font-inter focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" 
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold tracking-widest text-gray-500 uppercase block mb-1.5">Platform</label>
+                    <input 
+                      value={editingReview.platform} 
+                      onChange={e => setEditingReview({...editingReview, platform: e.target.value})}
+                      className="w-full border border-gray-200 rounded-lg p-2.5 text-sm font-inter focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" 
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold tracking-widest text-gray-500 uppercase block mb-1.5">Order Number</label>
+                    <input 
+                      value={editingReview.orderNumber} 
+                      onChange={e => setEditingReview({...editingReview, orderNumber: e.target.value})}
+                      className="w-full border border-gray-200 rounded-lg p-2.5 text-sm font-inter focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" 
+                      required
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="text-[10px] font-bold tracking-widest text-gray-500 uppercase block mb-1.5">Rating (1-5)</label>
+                    <input 
+                      type="number" min="1" max="5"
+                      value={editingReview.rating} 
+                      onChange={e => setEditingReview({...editingReview, rating: Number(e.target.value)})}
+                      className="w-full border border-gray-200 rounded-lg p-2.5 text-sm font-inter focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" 
+                      required
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold tracking-widest text-gray-500 uppercase block mb-1.5">Title</label>
+                  <input 
+                    value={editingReview.title} 
+                    onChange={e => setEditingReview({...editingReview, title: e.target.value})}
+                    className="w-full border border-gray-200 rounded-lg p-2.5 text-sm font-inter focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" 
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold tracking-widest text-gray-500 uppercase block mb-1.5">Description</label>
+                  <textarea 
+                    value={editingReview.description} 
+                    onChange={e => setEditingReview({...editingReview, description: e.target.value})}
+                    className="w-full border border-gray-200 rounded-lg p-2.5 text-sm font-inter focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary h-32 resize-y" 
+                    required
+                  />
+                </div>
+                <div className="flex justify-end gap-3 mt-2">
+                  <button type="button" onClick={() => setEditingReview(null)} className="px-5 py-2.5 bg-gray-50 hover:bg-gray-100 text-gray-600 font-bold text-xs tracking-wider uppercase rounded-lg transition-colors">
+                    Cancel
+                  </button>
+                  <button type="submit" className="px-5 py-2.5 bg-primary hover:bg-primary/90 text-white font-bold text-xs tracking-wider uppercase rounded-lg transition-colors shadow-sm">
+                    Save Changes
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
