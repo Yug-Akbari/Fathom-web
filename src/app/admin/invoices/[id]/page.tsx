@@ -302,8 +302,8 @@ export default function InvoicePreviewPage() {
             <div className="grid grid-cols-2 gap-12 mb-10 mt-6">
               <div className="text-sm leading-relaxed text-gray-600">
                 <p className="text-[10px] font-bold tracking-widest text-[#947A26] uppercase mb-4">FROM</p>
-                <p className="font-bold text-gray-900 text-lg mb-2 uppercase">{invoice.companyName || "Shivam Enterprises"}</p>
-                <p className="whitespace-pre-line text-sm">{invoice.companyAddress || "126, Green Plaza, Near Golden Chowk,\nMota Varachha, Surat,\nGujarat - 394101"}</p>
+                {invoice.companyName && <p className="font-bold text-gray-900 text-lg mb-2 uppercase">{invoice.companyName}</p>}
+                {invoice.companyAddress && <p className="whitespace-pre-line text-sm">{invoice.companyAddress}</p>}
                 <div className="mt-4 space-y-1">
                   <p><span className="font-semibold text-gray-800">GSTIN:</span> 24AFWFS8557F1Z8</p>
                   <p><span className="font-semibold text-gray-800">Email:</span> fathom.support@gmail.com</p>
@@ -312,8 +312,8 @@ export default function InvoicePreviewPage() {
               
               <div className="text-sm leading-relaxed text-gray-600">
                 <p className="text-[10px] font-bold tracking-widest text-[#947A26] uppercase mb-4">BILL TO</p>
-                <p className="font-bold text-gray-900 text-lg mb-2">{invoice.customerName || "The Grand Regency Hotels"}</p>
-                <p className="whitespace-pre-line text-sm">{invoice.billingAddress || "12/A, Skyline Towers, Sector 45\nGurugram, Haryana 122003\nIndia"}</p>
+                {invoice.customerName && <p className="font-bold text-gray-900 text-lg mb-2">{invoice.customerName}</p>}
+                {invoice.billingAddress && <p className="whitespace-pre-line text-sm">{invoice.billingAddress}</p>}
                 <div className="mt-4 space-y-1">
                   {invoice.customerEmail && <p><span className="font-semibold text-gray-800">Email:</span> {invoice.customerEmail}</p>}
                   {invoice.customerPhone && <p><span className="font-semibold text-gray-800">Contact:</span> {invoice.customerPhone}</p>}
