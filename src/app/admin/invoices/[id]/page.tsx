@@ -41,6 +41,7 @@ interface Invoice {
   transportCharges: number;
   unloadingCharges: number;
   specialNotes: string;
+  showBankDetails?: boolean;
   subtotal: number;
   totalDiscount: number;
   totalGst: number;
@@ -361,32 +362,34 @@ export default function InvoicePreviewPage() {
             {/* Bottom Details Section */}
             <div className="grid grid-cols-[1fr_1.1fr] gap-8 mb-12">
               
-              {/* Left Side: Bank Details */}
-              <div className="bg-white/60 print:bg-transparent p-6 rounded-lg self-start border border-gray-100/50 shadow-sm mt-3 relative z-10">
-                <p className="text-[9px] font-bold tracking-widest uppercase text-gray-800 mb-5">BANK DETAILS</p>
-                <div className="text-[11px] text-gray-500 space-y-3">
-                  <div className="flex justify-between">
-                    <span>Bank Name:</span>
-                    <span className="font-bold text-gray-900">The Varachha Co-Op Bank Ltd.</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>A/C Name:</span>
-                    <span className="font-bold text-gray-900 uppercase">SHIVAM ENTERPRISES</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>A/C Number:</span>
-                    <span className="font-bold text-gray-900">01330110315458</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>IFSC Code:</span>
-                    <span className="font-bold text-gray-900">VARA0289013</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Branch:</span>
-                    <span className="font-bold text-gray-900">MOTA VARACHHA BRANCH</span>
+              {/* Left Side: Bank Details (conditional) */}
+              {(invoice.showBankDetails !== false) && (
+                <div className="bg-white/60 print:bg-transparent p-6 rounded-lg self-start border border-gray-100/50 shadow-sm mt-3 relative z-10">
+                  <p className="text-[9px] font-bold tracking-widest uppercase text-gray-800 mb-5">BANK DETAILS</p>
+                  <div className="text-[11px] text-gray-500 space-y-3">
+                    <div className="flex justify-between">
+                      <span>Bank Name:</span>
+                      <span className="font-bold text-gray-900">The Varachha Co-Op Bank Ltd.</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>A/C Name:</span>
+                      <span className="font-bold text-gray-900 uppercase">SHIVAM ENTERPRISES</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>A/C Number:</span>
+                      <span className="font-bold text-gray-900">01330110315458</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>IFSC Code:</span>
+                      <span className="font-bold text-gray-900">VARA0289013</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Branch:</span>
+                      <span className="font-bold text-gray-900">MOTA VARACHHA BRANCH</span>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* Right Side: Totals */}
               <div className="text-xs flex flex-col justify-between pt-2 relative z-10">
