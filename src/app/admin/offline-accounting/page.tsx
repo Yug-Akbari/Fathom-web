@@ -706,18 +706,8 @@ export default function AccountingPage() {
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
           {/* Row 1 */}
-          <div className="flex flex-col gap-1.5 md:col-span-2">
-            <label className="text-xs font-bold text-gray-500 tracking-wider">PRODUCT NAME</label>
-            <input 
-              type="text" 
-              placeholder="e.g. Wireless Earbuds"
-              className="w-full px-3 py-2 bg-gray-50 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]"
-              value={productName}
-              onChange={(e) => setProductName(e.target.value)}
-            />
-          </div>
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-bold text-gray-500 tracking-wider">SHIP DATE</label>
             <input 
@@ -753,16 +743,7 @@ export default function AccountingPage() {
               ))}
             </datalist>
           </div>
-          <div className="flex flex-col gap-1.5 md:col-span-1">
-            <label className="text-xs font-bold text-gray-500 tracking-wider">QTY</label>
-            <input 
-              type="number" 
-              min="1"
-              className="w-full px-3 py-2 bg-gray-50 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]"
-              value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
-            />
-          </div>
+
           <div className="flex flex-col gap-1.5 md:col-span-1">
             <label className="text-xs font-bold text-gray-500 tracking-wider">AMOUNT</label>
             <div className="relative">

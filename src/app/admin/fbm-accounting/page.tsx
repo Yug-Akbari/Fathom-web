@@ -667,17 +667,7 @@ export default function AccountingPage() {
         </div>
 
         {/* Row 1 */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-          <div className="flex flex-col gap-1.5 md:col-span-2">
-            <label className="text-xs font-bold text-gray-500 tracking-wider">PRODUCT NAME</label>
-            <input 
-              type="text" 
-              placeholder="E.g. Fathom Refrigerator"
-              className="w-full px-3 py-2 bg-gray-50 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]"
-              value={productName}
-              onChange={(e) => setProductName(e.target.value)}
-            />
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-6">
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-bold text-gray-500 tracking-wider">SHIP DATE</label>
             <input 
@@ -697,10 +687,6 @@ export default function AccountingPage() {
               onChange={(e) => setOrderId(e.target.value)}
             />
           </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-6 mb-6">
-          {/* Row 2 */}
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-bold text-gray-500 tracking-wider">SKU</label>
             <input 
@@ -716,16 +702,6 @@ export default function AccountingPage() {
                 <option key={i} value={s} />
               ))}
             </datalist>
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold text-gray-500 tracking-wider">QTY</label>
-            <input 
-              type="number" 
-              placeholder="1"
-              className="w-full px-3 py-2 bg-gray-50 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]"
-              value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
-            />
           </div>
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-bold text-gray-500 tracking-wider">TYPE</label>
