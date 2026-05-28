@@ -16,7 +16,8 @@ import {
   ExternalLink,
   Receipt,
   Star,
-  BookUser
+  BookUser,
+  Warehouse
 } from "lucide-react";
 
 const mainNavItems = [
@@ -28,6 +29,8 @@ const mainNavItems = [
   { name: "Invoices", href: "/admin/invoices", icon: Receipt },
   { name: "FBA Accounting", href: "/admin/accounting", icon: Calculator },
   { name: "FBM Accounting", href: "/admin/fbm-accounting", icon: Calculator },
+  { name: "Offline Accounting", href: "/admin/offline-accounting", icon: Calculator },
+  { name: "Stock Management", href: "/admin/stock-management", icon: Warehouse },
   { name: "Reviews", href: "/admin/reviews", icon: Star },
 ];
 

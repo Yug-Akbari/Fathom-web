@@ -26,9 +26,11 @@ import {
   serverTimestamp, 
   query, 
   orderBy,
+  setDoc,
+  getDoc,
   getDocs,
   where,
-  setDoc
+  increment 
 } from "firebase/firestore";
 
 interface AccountingEntry {
@@ -44,15 +46,17 @@ interface AccountingEntry {
   notified: boolean;
   returnType: string;
   state: string;
-  reimbursement: string;
-  note: string;
   createdAt: any;
+  quantity?: number;
+  condition?: string;
+  productName?: string;
 }
 
 export default function AccountingPage() {
+  const [productName, setProductName] = useState("");
   const [shipDate, setShipDate] = useState("");
   const [orderId, setOrderId] = useState("");
-  const type = "FBM";
+  const type = "Offline";
   const [amount, setAmount] = useState("");
   const [returnType, setReturnType] = useState("");
   const [state, setState] = useState("");
@@ -60,7 +64,6 @@ export default function AccountingPage() {
   const [sku, setSku] = useState("");
   const [notified, setNotified] = useState(false);
   const [note, setNote] = useState("");
-  const [productName, setProductName] = useState("");
   const [quantity, setQuantity] = useState("1");
   const [condition, setCondition] = useState("Sellable");
   const [filterSku, setFilterSku] = useState("");
@@ -79,7 +82,7 @@ export default function AccountingPage() {
       const fetchedEntries: AccountingEntry[] = [];
       snapshot.forEach((doc) => {
         const data = doc.data() as AccountingEntry;
-        if (data.type === "FBM") {
+        if (data.type === "Offline") {
           fetchedEntries.push({ id: doc.id, ...data });
         }
       });
@@ -97,6 +100,7 @@ export default function AccountingPage() {
   }, []);
 
   const clearForm = () => {
+    setProductName("");
     setShipDate("");
     setOrderId("");
     setAmount("");
@@ -106,23 +110,14 @@ export default function AccountingPage() {
     setSku("");
     setNotified(false);
     setNote("");
-    setProductName("");
     setQuantity("1");
     setCondition("Sellable");
     setEditingId(null);
   };
 
-  const CUTOFF_DATE = new Date("2026-05-28T06:22:22Z").getTime();
-  const getTimestamp = (val: any) => {
-    if (!val) return 0;
-    if (val.toDate) return val.toDate().getTime();
-    if (val.seconds) return val.seconds * 1000;
-    if (typeof val === "number") return val;
-    return new Date(val).getTime();
-  };
-
+  // Helper: sync stock entry & damage log for a given doc ID
   const syncStockAndLogs = async (docId: string, skuVal: string, qtyVal: number, costVal: number, conditionVal: string, isReturn: boolean, productNameVal: string, shipDateVal: string, returnTypeVal: string, noteVal: string, isUpdateSync: boolean = false) => {
-    const entryName = productNameVal || `FBM Return — ${skuVal}`;
+    const entryName = productNameVal || `FBA Return — ${skuVal}`;
     const dateVal = shipDateVal ? new Date(shipDateVal).toISOString() : new Date().toISOString();
 
     if (isUpdateSync) {
@@ -140,6 +135,7 @@ export default function AccountingPage() {
     }
 
     if (isReturn) {
+      // Find the actual cost price for this SKU from stock_entries
       let actualCostPrice = 0;
       try {
         const qCost = query(collection(db, "stock_entries"), where("sku_id", "==", skuVal));
@@ -155,7 +151,9 @@ export default function AccountingPage() {
             }
           }
         });
-      } catch (e) {}
+      } catch (e) {
+        console.error(e);
+      }
 
       if (conditionVal === "Sellable") {
         const newStockEntryDoc = await addDoc(collection(db, "stock_entries"), {
@@ -169,9 +167,10 @@ export default function AccountingPage() {
           source_ref: docId,
           condition: "Sellable",
           status: "Active",
-          source_type: "fbm_return",
+          source_type: "fba_return",
           createdAt: serverTimestamp(),
         });
+
         await addDoc(collection(db, "audit_logs"), {
           timestamp: serverTimestamp(),
           action: isUpdateSync ? "UPDATE" : "CREATE",
@@ -179,8 +178,8 @@ export default function AccountingPage() {
           sku_id: skuVal || "N/A",
           product_name: entryName,
           performed_by: "System",
-          changes: `FBM Return Sync: ${qtyVal} units`,
-          source: "FBM Sync",
+          changes: `FBA Return Sync: ${qtyVal} units`,
+          source: "FBA Sync",
           ref_id: newStockEntryDoc.id
         });
       } else if (conditionVal === "Damaged") {
@@ -195,9 +194,10 @@ export default function AccountingPage() {
           source_ref: docId,
           condition: "Damaged",
           status: "Excluded",
-          source_type: "fbm_damaged_return",
+          source_type: "fba_damaged_return",
           createdAt: serverTimestamp(),
         });
+
         await addDoc(collection(db, "audit_logs"), {
           timestamp: serverTimestamp(),
           action: isUpdateSync ? "UPDATE" : "CREATE",
@@ -205,10 +205,12 @@ export default function AccountingPage() {
           sku_id: skuVal || "N/A",
           product_name: entryName,
           performed_by: "System",
-          changes: `FBM Return Sync: ${qtyVal} units (Damaged)`,
-          source: "FBM Sync",
+          changes: `FBA Return Sync: ${qtyVal} units (Damaged)`,
+          source: "FBA Sync",
           ref_id: newStockEntryDoc.id
         });
+
+        // Also write to damaged_return_logs
         await addDoc(collection(db, "damaged_return_logs"), {
           log_date: dateVal,
           product_name: entryName,
@@ -216,7 +218,7 @@ export default function AccountingPage() {
           returned_qty: qtyVal,
           reason: returnTypeVal || "Unknown",
           fba_reference: docId,
-          logged_by: "FBM Auto-Sync",
+          logged_by: "FBA Auto-Sync",
           notes: noteVal || "",
           createdAt: serverTimestamp(),
         });
@@ -224,10 +226,24 @@ export default function AccountingPage() {
     }
   };
 
+  // Helper: update sku_stock_summary
+  const CUTOFF_DATE = new Date("2026-05-28T06:22:22Z").getTime();
+  const getTimestamp = (val: any) => {
+    if (!val) return 0;
+    if (val.toDate) return val.toDate().getTime();
+    if (val.seconds) return val.seconds * 1000;
+    if (typeof val === "number") return val;
+    return new Date(val).getTime();
+  };
+
   const updateSkuStockSummary = async (skuVal: string) => {
     if (!skuVal || skuVal === "N/A") return;
     const summaryRef = doc(db, "sku_stock_summary", skuVal);
-    const stockQ = query(collection(db, "stock_entries"), where("sku_id", "==", skuVal));
+
+    const stockQ = query(
+      collection(db, "stock_entries"),
+      where("sku_id", "==", skuVal)
+    );
     const stockSnap = await getDocs(stockQ);
     let inboundAndReturnTotal = 0;
     stockSnap.forEach((doc) => {
@@ -238,7 +254,10 @@ export default function AccountingPage() {
       }
     });
 
-    const fbaQ = query(collection(db, "accounting_entries"), where("sku", "==", skuVal));
+    const fbaQ = query(
+      collection(db, "accounting_entries"),
+      where("sku", "==", skuVal)
+    );
     const fbaSnap = await getDocs(fbaQ);
     let fbaSalesTotal = 0;
     fbaSnap.forEach((doc) => {
@@ -250,23 +269,33 @@ export default function AccountingPage() {
     });
 
     const netStock = inboundAndReturnTotal - fbaSalesTotal;
-    await setDoc(summaryRef, {
+
+    const updates: Record<string, any> = {
       net_stock: netStock,
       low_stock: netStock <= 5,
       sku_id: skuVal,
-      product_name: productName || `FBM — ${skuVal}`,
+      product_name: productName || `Offline — ${skuVal}`,
       last_updated: serverTimestamp(),
-    }, { merge: true });
+    };
+
+    await setDoc(summaryRef, updates, { merge: true });
   };
 
+  // Helper: clear existing stock_entries and damaged_return_logs for a given doc ID
   const clearSyncedDocs = async (docId: string) => {
+    // Delete stock_entries where source_ref == docId
     const stockQ = query(collection(db, "stock_entries"), where("source_ref", "==", docId));
     const stockSnap = await getDocs(stockQ);
-    for (const d of stockSnap.docs) { await deleteDoc(doc(db, "stock_entries", d.id)); }
+    for (const d of stockSnap.docs) {
+      await deleteDoc(doc(db, "stock_entries", d.id));
+    }
 
+    // Delete damaged_return_logs where fba_reference == docId
     const damageQ = query(collection(db, "damaged_return_logs"), where("fba_reference", "==", docId));
     const damageSnap = await getDocs(damageQ);
-    for (const d of damageSnap.docs) { await deleteDoc(doc(db, "damaged_return_logs", d.id)); }
+    for (const d of damageSnap.docs) {
+      await deleteDoc(doc(db, "damaged_return_logs", d.id));
+    }
   };
 
   const handleCreateOrUpdateEntry = async () => {
@@ -294,20 +323,31 @@ export default function AccountingPage() {
     
     try {
       if (editingId) {
+        // Update existing
         await updateDoc(doc(db, "accounting_entries", editingId), entryData);
+
+        // Re-sync: clear old synced docs and re-create
         await clearSyncedDocs(editingId);
+
         if (isReturn) {
           await syncStockAndLogs(editingId, sku || "N/A", qtyVal, costVal, condition, isReturn, productName, shipDate, returnType, note, true);
         }
+
+        // Recalculate sku_stock_summary
         await updateSkuStockSummary(sku || "N/A");
       } else {
+        // Create new
         const newDocRef = await addDoc(collection(db, "accounting_entries"), {
           ...entryData,
           createdAt: serverTimestamp()
         });
+
+        // Sync to stock_entries if it's a return
         if (isReturn) {
           await syncStockAndLogs(newDocRef.id, sku || "N/A", qtyVal, costVal, condition, isReturn, productName, shipDate, returnType, note, false);
         }
+
+        // Update sku_stock_summary for ALL entries
         await updateSkuStockSummary(sku || "N/A");
       }
       clearForm();
@@ -320,6 +360,7 @@ export default function AccountingPage() {
   };
 
   const handleEditClick = (entry: AccountingEntry) => {
+    setProductName(entry.productName || "");
     setOrderId(entry.refId.replace('#', ''));
     setAmount(entry.amount.replace('₹', ''));
     setReturnType(entry.returnType || "");
@@ -328,9 +369,8 @@ export default function AccountingPage() {
     setSku(entry.sku === "N/A" ? "" : entry.sku);
     setNotified(entry.notified);
     setNote(entry.note || "");
-    setProductName((entry as any).productName || "");
-    setQuantity((entry as any).quantity?.toString() || "1");
-    setCondition((entry as any).condition || "Sellable");
+    setQuantity(entry.quantity?.toString() || "1");
+    setCondition(entry.condition || "Sellable");
     setEditingId(entry.id);
     
     // Scroll to top
@@ -448,8 +488,8 @@ export default function AccountingPage() {
       {/* Header section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold font-poppins text-primary">FBM Accounting & Order Entry</h1>
-          <p className="text-gray-500 mt-1">Manage FBM financial records, reimbursements, and operational expenses.</p>
+          <h1 className="text-3xl font-extrabold font-poppins text-primary">Offline Accounting & Order Entry</h1>
+          <p className="text-gray-500 mt-1">Manage Offline financial records, reimbursements, and operational expenses.</p>
         </div>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
            {/* Global SKU Filter */}
@@ -666,13 +706,13 @@ export default function AccountingPage() {
           )}
         </div>
 
-        {/* Row 1 */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-6 mb-6">
+          {/* Row 1 */}
           <div className="flex flex-col gap-1.5 md:col-span-2">
             <label className="text-xs font-bold text-gray-500 tracking-wider">PRODUCT NAME</label>
             <input 
               type="text" 
-              placeholder="E.g. Fathom Refrigerator"
+              placeholder="e.g. Wireless Earbuds"
               className="w-full px-3 py-2 bg-gray-50 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]"
               value={productName}
               onChange={(e) => setProductName(e.target.value)}
@@ -697,10 +737,6 @@ export default function AccountingPage() {
               onChange={(e) => setOrderId(e.target.value)}
             />
           </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-6 mb-6">
-          {/* Row 2 */}
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-bold text-gray-500 tracking-wider">SKU</label>
             <input 
@@ -717,26 +753,17 @@ export default function AccountingPage() {
               ))}
             </datalist>
           </div>
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-1.5 md:col-span-1">
             <label className="text-xs font-bold text-gray-500 tracking-wider">QTY</label>
             <input 
               type="number" 
-              placeholder="1"
+              min="1"
               className="w-full px-3 py-2 bg-gray-50 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
             />
           </div>
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold text-gray-500 tracking-wider">TYPE</label>
-            <input 
-              type="text" 
-              value={type}
-              disabled
-              className="w-full px-3 py-2 bg-gray-100 text-gray-500 rounded-lg border border-gray-200 text-sm cursor-not-allowed"
-            />
-          </div>
-          <div className="flex flex-col gap-1.5 md:col-span-2">
+          <div className="flex flex-col gap-1.5 md:col-span-1">
             <label className="text-xs font-bold text-gray-500 tracking-wider">AMOUNT</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
@@ -791,11 +818,11 @@ export default function AccountingPage() {
             />
           </div>
           {(notified || (returnType && returnType !== "None")) && (
-            <div className="flex flex-col gap-1.5 md:col-span-1">
+            <div className="flex flex-col gap-1.5">
               <label className="text-xs font-bold text-gray-500 tracking-wider">CONDITION</label>
               <div className="relative">
                 <select 
-                  className="w-full px-3 py-2 bg-gray-50 rounded-lg border border-gray-200 text-sm appearance-none focus:outline-none focus:ring-1 focus:ring-[#D4AF37]"
+                  className="w-full px-3 py-2 bg-gray-50 rounded-lg border border-gray-200 text-sm appearance-none focus:outline-none focus:ring-1 focus:ring-[#D4AF37] text-gray-900"
                   value={condition}
                   onChange={(e) => setCondition(e.target.value)}
                 >
@@ -808,7 +835,7 @@ export default function AccountingPage() {
               </div>
             </div>
           )}
-          <div className="flex flex-col gap-1.5 justify-end">
+          <div className="flex flex-col gap-1.5 justify-center md:justify-end">
              <label className="text-xs font-bold text-gray-500 tracking-wider">NOTIFIED (RETURN)</label>
              <div className="flex items-center gap-3 h-[38px]">
                <button 
