@@ -17,7 +17,8 @@ import {
   Receipt,
   Star,
   BookUser,
-  Warehouse
+  Warehouse,
+  FileSignature
 } from "lucide-react";
 
 const mainNavItems = [
@@ -27,6 +28,7 @@ const mainNavItems = [
   { name: "Directory", href: "/admin/directory", icon: BookUser },
   { name: "Leads", href: "/admin/leads", icon: Users },
   { name: "Invoices", href: "/admin/invoices", icon: Receipt },
+  { name: "Quotations", href: "/admin/quotations", icon: FileSignature },
   { name: "FBA Accounting", href: "/admin/accounting", icon: Calculator },
   { name: "FBM Accounting", href: "/admin/fbm-accounting", icon: Calculator },
   { name: "Offline Accounting", href: "/admin/offline-accounting", icon: Calculator },

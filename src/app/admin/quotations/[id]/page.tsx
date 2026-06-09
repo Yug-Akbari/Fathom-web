@@ -8,21 +8,19 @@ import Image from "next/image";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, deleteDoc, updateDoc } from "firebase/firestore";
 
-interface InvoiceItem {
+interface quotationItem {
   productName: string;
-  hsnCode?: string;
   category: string;
   qty: number;
   rate: number;
-  gstPercent: number;
   discountPercent: number;
   total: number;
 }
 
-interface Invoice {
+interface quotation {
   id: string;
-  invoiceNumber: string;
-  invoiceDate: string;
+  quotationNumber: string;
+  quotationDate: string;
   deliveryDate: string;
   companyName: string;
   companyAddress: string;
@@ -37,12 +35,11 @@ interface Invoice {
   paymentMode: string;
   dueDate: string;
   amountPaid: number;
-  items: InvoiceItem[];
+  items: quotationItem[];
   transportCharges: number;
   unloadingCharges: number;
   specialNotes: string;
-  showBankDetails?: boolean;
-  invoiceType?: "Tax Invoice" | "Invoice";
+  termsAndConditions?: string;
   subtotal: number;
   totalDiscount: number;
   totalGst: number;
@@ -72,29 +69,29 @@ const numberToWords = (num: number): string => {
   return str.trim();
 };
 
-export default function InvoicePreviewPage() {
+export default function quotationPreviewPage() {
   const params = useParams();
   const router = useRouter();
-  const invoiceId = params.id as string;
+  const quotationId = params.id as string;
 
-  const [invoice, setInvoice] = useState<Invoice | null>(null);
+  const [quotation, setquotation] = useState<quotation | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const loadInvoice = async () => {
+    const loadquotation = async () => {
       try {
-        const snap = await getDoc(doc(db, "invoices", invoiceId));
+        const snap = await getDoc(doc(db, "quotations", quotationId));
         if (snap.exists()) {
-          setInvoice({ id: snap.id, ...snap.data() } as Invoice);
+          setquotation({ id: snap.id, ...snap.data() } as quotation);
         }
       } catch (error) {
-        console.error("Error loading invoice:", error);
+        console.error("Error loading quotation:", error);
       } finally {
         setIsLoading(false);
       }
     };
-    loadInvoice();
-  }, [invoiceId]);
+    loadquotation();
+  }, [quotationId]);
 
   const handlePrint = () => {
     window.print();
@@ -106,24 +103,24 @@ export default function InvoicePreviewPage() {
   };
 
   const handleDelete = async () => {
-    if (window.confirm("Are you sure you want to delete this invoice?")) {
+    if (window.confirm("Are you sure you want to delete this quotation?")) {
       try {
-        await deleteDoc(doc(db, "invoices", invoiceId));
-        router.push("/admin/invoices");
+        await deleteDoc(doc(db, "quotations", quotationId));
+        router.push("/admin/quotations");
       } catch (error) {
-        console.error("Error deleting invoice:", error);
+        console.error("Error deleting quotation:", error);
       }
     }
   };
 
   const handleMarkPaid = async () => {
     try {
-      await updateDoc(doc(db, "invoices", invoiceId), {
+      await updateDoc(doc(db, "quotations", quotationId), {
         status: "Paid",
-        amountPaid: invoice?.grandTotal || 0,
+        amountPaid: quotation?.grandTotal || 0,
         pendingAmount: 0,
       });
-      setInvoice((prev) => prev ? { ...prev, status: "Paid", amountPaid: prev.grandTotal, pendingAmount: 0 } : prev);
+      setquotation((prev) => prev ? { ...prev, status: "Paid", amountPaid: prev.grandTotal, pendingAmount: 0 } : prev);
     } catch (error) {
       console.error("Error updating status:", error);
     }
@@ -131,12 +128,12 @@ export default function InvoicePreviewPage() {
 
   const handleMarkNotPaid = async () => {
     try {
-      await updateDoc(doc(db, "invoices", invoiceId), {
+      await updateDoc(doc(db, "quotations", quotationId), {
         status: "Pending",
         amountPaid: 0,
-        pendingAmount: invoice?.grandTotal || 0,
+        pendingAmount: quotation?.grandTotal || 0,
       });
-      setInvoice((prev) => prev ? { ...prev, status: "Pending", amountPaid: 0, pendingAmount: prev.grandTotal } : prev);
+      setquotation((prev) => prev ? { ...prev, status: "Pending", amountPaid: 0, pendingAmount: prev.grandTotal } : prev);
     } catch (error) {
       console.error("Error updating status:", error);
     }
@@ -170,28 +167,26 @@ export default function InvoicePreviewPage() {
       <div className="flex items-center justify-center h-96">
         <div className="flex flex-col items-center gap-3 text-gray-400">
           <div className="w-8 h-8 border-2 border-[#947A26] border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm font-semibold">Loading invoice...</span>
+          <span className="text-sm font-semibold">Loading quotation...</span>
         </div>
       </div>
     );
   }
 
-  if (!invoice) {
+  if (!quotation) {
     return (
       <div className="flex flex-col items-center justify-center h-96 gap-4 text-gray-400">
-        <span className="text-lg font-semibold">Invoice not found</span>
+        <span className="text-lg font-semibold">quotation not found</span>
         <Link
-          href="/admin/invoices"
+          href="/admin/quotations"
           className="text-[#947A26] hover:text-[#7a641f] font-bold text-sm"
         >
-          ← Back to Invoices
+          ← Back to quotations
         </Link>
       </div>
     );
   }
 
-  const cgst = (invoice.totalGst || 0) / 2;
-  const sgst = (invoice.totalGst || 0) / 2;
 
   return (
     <>
@@ -224,14 +219,14 @@ export default function InvoicePreviewPage() {
       {/* Action Bar - Hidden in print */}
       <div className="no-print max-w-[850px] mx-auto mb-6 flex items-center justify-between p-4 bg-white rounded-lg shadow-sm border border-gray-100 font-inter">
         <button
-          onClick={() => router.push("/admin/invoices")}
+          onClick={() => router.push("/admin/quotations")}
           className="flex items-center gap-2 text-gray-500 hover:text-gray-900 text-sm font-semibold transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Invoices
+          Back to quotations
         </button>
         <div className="flex items-center gap-3">
-          {invoice.status !== "Paid" ? (
+          {quotation.status !== "Paid" ? (
             <button
               onClick={handleMarkPaid}
               className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-bold hover:bg-green-700 transition-colors"
@@ -256,7 +251,7 @@ export default function InvoicePreviewPage() {
             Print/PDF
           </button>
           <button
-            onClick={() => router.push(`/admin/invoices/${invoiceId}/edit`)}
+            onClick={() => router.push(`/admin/quotations/${quotationId}/edit`)}
             className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-bold hover:bg-gray-50 transition-colors"
           >
             <Edit className="w-4 h-4" />
@@ -272,7 +267,7 @@ export default function InvoicePreviewPage() {
         </div>
       </div>
 
-      {/* Invoice Document */}
+      {/* quotation Document */}
       <div className="bg-[#f3f4f6] py-10 print:py-0 print:bg-white min-h-screen">
         <div className="print-area max-w-[850px] mx-auto bg-white min-h-[1122px] relative shadow-lg print:shadow-none overflow-hidden font-sans">
           
@@ -290,11 +285,10 @@ export default function InvoicePreviewPage() {
               </div>
               
               <div className="text-right">
-                <h2 className="text-2xl font-bold text-gray-900 mb-1 font-serif">{invoice.invoiceType === "Invoice" ? "Invoice" : "Tax Invoice"}</h2>
-                <p className="text-sm font-semibold text-gray-800 mb-4">#{invoice.invoiceNumber}</p>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4 font-serif">Quotation</h2>
                 <div className="text-xs text-gray-500 leading-relaxed uppercase tracking-wider">
-                  <p>Date: <span className="text-gray-900 font-medium">{formatDate(invoice.invoiceDate)}</span></p>
-                  <p>Due Date: <span className="text-gray-900 font-medium">{invoice.dueDate ? formatDate(invoice.dueDate) : "On Receipt"}</span></p>
+                  <p>Date: <span className="text-gray-900 font-medium">{formatDate(quotation.quotationDate)}</span></p>
+                  <p>Due Date: <span className="text-gray-900 font-medium">{quotation.dueDate ? formatDate(quotation.dueDate) : "On Receipt"}</span></p>
                 </div>
               </div>
             </div>
@@ -303,55 +297,46 @@ export default function InvoicePreviewPage() {
             <div className="grid grid-cols-2 gap-12 mb-10 mt-6">
               <div className="text-sm leading-relaxed text-gray-600">
                 <p className="text-[10px] font-bold tracking-widest text-[#947A26] uppercase mb-4">FROM</p>
-                {invoice.companyName && <p className="font-bold text-gray-900 text-lg mb-2 uppercase">{invoice.companyName}</p>}
-                {invoice.companyAddress && <p className="whitespace-pre-line text-sm">{invoice.companyAddress}</p>}
+                {quotation.companyName && <p className="font-bold text-gray-900 text-lg mb-2 uppercase">{quotation.companyName}</p>}
+                {quotation.companyAddress && <p className="whitespace-pre-line text-sm">{quotation.companyAddress}</p>}
                 <div className="mt-4 space-y-1">
-                  {invoice.invoiceType !== "Invoice" && <p><span className="font-semibold text-gray-800">GSTIN:</span> 24AFWFS8557F1Z8</p>}
                   <p><span className="font-semibold text-gray-800">Email:</span> fathom.support@gmail.com</p>
                 </div>
               </div>
               
               <div className="text-sm leading-relaxed text-gray-600">
                 <p className="text-[10px] font-bold tracking-widest text-[#947A26] uppercase mb-4">BILL TO</p>
-                {invoice.customerName && <p className="font-bold text-gray-900 text-lg mb-2">{invoice.customerName}</p>}
-                {invoice.billingAddress && <p className="whitespace-pre-line text-sm">{invoice.billingAddress}</p>}
+                {quotation.customerName && <p className="font-bold text-gray-900 text-lg mb-2">{quotation.customerName}</p>}
+                {quotation.billingAddress && <p className="whitespace-pre-line text-sm">{quotation.billingAddress}</p>}
                 <div className="mt-4 space-y-1">
-                  {invoice.customerEmail && <p><span className="font-semibold text-gray-800">Email:</span> {invoice.customerEmail}</p>}
-                  {invoice.customerPhone && <p><span className="font-semibold text-gray-800">Contact:</span> {invoice.customerPhone}</p>}
-                  {invoice.customerGst && <p><span className="font-semibold text-gray-800">GSTIN:</span> {invoice.customerGst}</p>}
+                  {quotation.customerEmail && <p><span className="font-semibold text-gray-800">Email:</span> {quotation.customerEmail}</p>}
+                  {quotation.customerPhone && <p><span className="font-semibold text-gray-800">Contact:</span> {quotation.customerPhone}</p>}
                 </div>
               </div>
             </div>
 
             {/* Products Table */}
             <div className="mb-10 rounded-lg overflow-hidden flex flex-col pt-4 relative z-10">
-              <div className={`bg-[#f9fafb]/90 print:bg-transparent px-5 py-3 grid gap-2 items-center text-[9px] font-bold tracking-wider uppercase text-gray-500 rounded-t-lg ${invoice.invoiceType === "Invoice" ? "grid-cols-[3fr_0.5fr_1fr_1fr]" : "grid-cols-[2.5fr_0.6fr_0.5fr_1fr_1fr_0.8fr_1.2fr]"}`}>
+              <div className="bg-[#f9fafb]/90 print:bg-transparent px-5 py-3 grid grid-cols-[3fr_0.5fr_1fr_1fr] gap-2 items-center text-[9px] font-bold tracking-wider uppercase text-gray-500 rounded-t-lg">
                 <div>PRODUCT DESCRIPTION</div>
-                {invoice.invoiceType !== "Invoice" && <div className="text-center">HSN</div>}
                 <div className="text-center">QTY</div>
                 <div className="text-right">RATE</div>
-                {invoice.invoiceType !== "Invoice" && <div className="text-right">TAXABLE VAL</div>}
-                {invoice.invoiceType !== "Invoice" && <div className="text-center">GST %</div>}
                 <div className="text-right">TOTAL (INR)</div>
               </div>
               
               <div className="flex flex-col text-xs divide-y divide-gray-100 bg-white/60 print:bg-transparent">
-                {(!invoice.items || invoice.items.length === 0) ? (
+                {(!quotation.items || quotation.items.length === 0) ? (
                    <div className="py-8 text-center text-gray-400 italic">No items</div>
                 ) : (
-                  invoice.items.map((item, i) => {
-                    const taxableVal = item.rate * item.qty * (1 - item.discountPercent / 100);
+                  quotation.items.map((item, i) => {
                     return (
-                      <div key={i} className={`px-5 py-5 grid gap-2 items-center text-gray-600 ${invoice.invoiceType === "Invoice" ? "grid-cols-[3fr_0.5fr_1fr_1fr]" : "grid-cols-[2.5fr_0.6fr_0.5fr_1fr_1fr_0.8fr_1.2fr]"}`}>
+                      <div key={i} className="px-5 py-5 grid grid-cols-[3fr_0.5fr_1fr_1fr] gap-2 items-center text-gray-600">
                         <div>
                           <p className="font-bold text-gray-900 mb-1">{item.productName || "—"}</p>
                           {item.category && <p className="text-[10px] text-gray-500 leading-tight">{item.category}</p>}
                         </div>
-                        {invoice.invoiceType !== "Invoice" && <div className="text-center font-medium text-gray-800">{item.hsnCode || "—"}</div>}
                         <div className="text-center font-medium text-gray-800">{String(item.qty).padStart(2, "0")}</div>
                         <div className="text-right">{formatCurrency(item.rate)}</div>
-                        {invoice.invoiceType !== "Invoice" && <div className="text-right">{formatCurrency(taxableVal)}</div>}
-                        {invoice.invoiceType !== "Invoice" && <div className="text-center">{item.gstPercent}%</div>}
                         <div className="text-right font-bold text-gray-900">{formatCurrency(item.total)}</div>
                       </div>
                     );
@@ -363,32 +348,16 @@ export default function InvoicePreviewPage() {
             {/* Bottom Details Section */}
             <div className="grid grid-cols-[1fr_1.1fr] gap-8 mb-12">
               
-              {/* Left Side: Bank Details (conditional) */}
-              {(invoice.showBankDetails !== false) ? (
+              {/* Left Side: Terms & Conditions */}
+              {quotation.termsAndConditions ? (
                 <div className="bg-white/60 print:bg-transparent p-6 rounded-lg self-start border border-gray-100/50 shadow-sm mt-3 relative z-10">
-                  <p className="text-[9px] font-bold tracking-widest uppercase text-gray-800 mb-5">BANK DETAILS</p>
-                  <div className="text-[11px] text-gray-500 space-y-3">
-                    <div className="flex justify-between">
-                      <span>Bank Name:</span>
-                      <span className="font-bold text-gray-900">The Varachha Co-Op Bank Ltd.</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>A/C Name:</span>
-                      <span className="font-bold text-gray-900 uppercase">SHIVAM ENTERPRISES</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>A/C Number:</span>
-                      <span className="font-bold text-gray-900">01330110315458</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>IFSC Code:</span>
-                      <span className="font-bold text-gray-900">VARA0289013</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Branch:</span>
-                      <span className="font-bold text-gray-900">MOTA VARACHHA BRANCH</span>
-                    </div>
-                  </div>
+                  <p className="text-[9px] font-bold tracking-widest uppercase text-gray-800 mb-5">TERMS & CONDITIONS</p>
+                  <ul className="text-[11px] text-gray-600 list-disc pl-4 space-y-1.5 marker:text-gray-400">
+                    {quotation.termsAndConditions.split('\n').map((condition, idx) => {
+                      if (!condition.trim()) return null;
+                      return <li key={idx} className="pl-1">{condition}</li>;
+                    })}
+                  </ul>
                 </div>
               ) : (
                 <div></div>
@@ -398,46 +367,24 @@ export default function InvoicePreviewPage() {
               <div className="text-xs flex flex-col justify-between pt-2 relative z-10">
                 <div className="space-y-2.5 px-2 bg-white/60 print:bg-transparent rounded-lg p-2">
                   <div className="flex justify-between text-gray-600">
-                    <span>Subtotal{invoice.invoiceType !== "Invoice" ? " (Taxable Value)" : ""}:</span>
-                    <span className="font-semibold text-gray-900">{formatCurrency(invoice.subtotal)}</span>
+                    <span>Subtotal:</span>
+                    <span className="font-semibold text-gray-900">{formatCurrency(quotation.subtotal)}</span>
                   </div>
-                  {invoice.totalDiscount > 0 && (
+                  {quotation.totalDiscount > 0 && (
                   <div className="flex justify-between text-gray-500">
                     <span>Discount:</span>
-                    <span className="text-red-500">-{formatCurrency(invoice.totalDiscount)}</span>
+                    <span className="text-red-500">-{formatCurrency(quotation.totalDiscount)}</span>
                   </div>
-                  )}
-                  {invoice.invoiceType !== "Invoice" && (
-                    <>
-                      <div className="flex justify-between text-gray-500">
-                        <span>CGST ({(invoice.items[0]?.gstPercent || 18) / 2}%):</span>
-                        <span>{formatCurrency(cgst)}</span>
-                      </div>
-                      <div className="flex justify-between text-gray-500">
-                        <span>SGST ({(invoice.items[0]?.gstPercent || 18) / 2}%):</span>
-                        <span>{formatCurrency(sgst)}</span>
-                      </div>
-                      <div className="flex justify-between text-gray-500">
-                        <span>IGST (0%):</span>
-                        <span>₹0.00</span>
-                      </div>
-                    </>
-                  )}
-                  {(invoice.transportCharges > 0 || invoice.unloadingCharges > 0) && (
-                    <div className="flex justify-between text-gray-600 mt-2">
-                      <span>Transport & Handling:</span>
-                      <span className="font-semibold text-gray-900">{formatCurrency((invoice.transportCharges || 0) + (invoice.unloadingCharges || 0))}</span>
-                    </div>
                   )}
                 </div>
 
                 <div className="mt-6">
                   <div className="bg-[#fcfaf5] px-6 py-4 rounded-lg flex justify-between items-center border border-[#f0e8cb]">
                     <span className="font-extrabold text-[#7a641f] text-sm">Grand Total:</span>
-                    <span className="text-2xl font-black text-[#7a641f]">{formatCurrency(invoice.grandTotal)}</span>
+                    <span className="text-2xl font-black text-[#7a641f]">{formatCurrency(quotation.grandTotal)}</span>
                   </div>
                   <p className="text-[8px] tracking-[0.05em] text-gray-400 text-center mt-3 uppercase font-medium">
-                    {amountInWords(invoice.grandTotal)}
+                    {amountInWords(quotation.grandTotal)}
                   </p>
                 </div>
                 
@@ -445,11 +392,11 @@ export default function InvoicePreviewPage() {
                 <div className="mt-6 px-2 space-y-2 border-t border-gray-100 pt-4">
                    <div className="flex justify-between text-green-700 font-medium">
                      <span>Amount Paid:</span>
-                     <span>{formatCurrency(invoice.amountPaid || 0)}</span>
+                     <span>{formatCurrency(quotation.amountPaid || 0)}</span>
                    </div>
                    <div className="flex justify-between text-red-600 font-bold">
                      <span>Balance Due:</span>
-                     <span>{formatCurrency(invoice.pendingAmount || 0)}</span>
+                     <span>{formatCurrency(quotation.pendingAmount || 0)}</span>
                    </div>
                 </div>
               </div>

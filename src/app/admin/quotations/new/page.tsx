@@ -33,49 +33,43 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 
-interface InvoiceItem {
+interface quotationItem {
   productName: string;
-  hsnCode: string;
   category: string;
   qty: number;
   rate: number;
-  gstPercent: number;
   discountPercent: number;
   total: number;
 }
 
-const emptyItem: InvoiceItem = {
+const emptyItem: quotationItem = {
   productName: "",
-  hsnCode: "",
   category: "",
   qty: 1,
   rate: 0,
-  gstPercent: 18,
   discountPercent: 0,
   total: 0,
 };
 
 
 
-function calculateItemTotal(item: InvoiceItem, invoiceType: "Tax Invoice" | "Invoice"): number {
+function calculateItemTotal(item: quotationItem): number {
   const base = item.rate * item.qty;
   const discounted = base * (1 - item.discountPercent / 100);
-  const gst = invoiceType === "Tax Invoice" ? item.gstPercent : 0;
-  const withGst = discounted * (1 + gst / 100);
-  return Math.round(withGst * 100) / 100;
+  return Math.round(discounted * 100) / 100;
 }
 
-interface InvoiceFormProps {
+interface quotationFormProps {
   editId?: string;
 }
 
-export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
+export default function NewquotationPage({ editId }: quotationFormProps = {}) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [isSavingDraft, setIsSavingDraft] = useState(false);
 
-  // Invoice details
-  const [invoiceDate, setInvoiceDate] = useState(
+  // quotation details
+  const [quotationDate, setquotationDate] = useState(
     new Date().toISOString().split("T")[0]
   );
   const [companyName, setCompanyName] = useState("Shivam Enterprises");
@@ -87,15 +81,11 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
-  const [customerGst, setCustomerGst] = useState("");
   const [billingAddress, setBillingAddress] = useState("");
 
   // Shipping
   const [shippingSameAsBilling, setShippingSameAsBilling] = useState(true);
   const [shippingAddress, setShippingAddress] = useState("");
-
-  // Invoice Type
-  const [invoiceType, setInvoiceType] = useState<"Tax Invoice" | "Invoice">("Tax Invoice");
 
   // Payment
   const [paymentMode, setPaymentMode] = useState("Card");
@@ -103,15 +93,10 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
   const [amountPaid, setAmountPaid] = useState(0);
 
   // Line items
-  const [items, setItems] = useState<InvoiceItem[]>([{ ...emptyItem }]);
+  const [items, setItems] = useState<quotationItem[]>([{ ...emptyItem }]);
 
-  // Logistics
-  const [transportCharges, setTransportCharges] = useState(0);
-  const [unloadingCharges, setUnloadingCharges] = useState(0);
-  const [specialNotes, setSpecialNotes] = useState("");
-
-  // Bank details toggle
-  const [showBankDetails, setShowBankDetails] = useState(true);
+  // Terms & Conditions
+  const [termsList, setTermsList] = useState<string[]>([""]);
 
   // Products from Firebase (for autocomplete)
   const [products, setProducts] = useState<any[]>([]);
@@ -125,14 +110,14 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
     return () => unsub();
   }, []);
 
-  // Load existing invoice for editing
+  // Load existing quotation for editing
   useEffect(() => {
     if (editId) {
       const load = async () => {
-        const snap = await getDoc(doc(db, "invoices", editId));
+        const snap = await getDoc(doc(db, "quotations", editId));
         if (snap.exists()) {
           const data = snap.data();
-          setInvoiceDate(data.invoiceDate || "");
+          setquotationDate(data.quotationDate || "");
           setCompanyName(data.companyName || "Shivam Enterprises");
           setCompanyAddress(data.companyAddress || "");
           setOrderType(data.orderType || "Retail");
@@ -140,8 +125,6 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
           setCustomerName(data.customerName || "");
           setCustomerPhone(data.customerPhone || "");
           setCustomerEmail(data.customerEmail || "");
-          setCustomerGst(data.customerGst || "");
-          setInvoiceType(data.invoiceType || "Tax Invoice");
           setBillingAddress(data.billingAddress || "");
           setShippingSameAsBilling(data.shippingSameAsBilling ?? true);
           setShippingAddress(data.shippingAddress || "");
@@ -151,10 +134,7 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
           setItems(
             data.items?.length > 0 ? data.items : [{ ...emptyItem }]
           );
-          setTransportCharges(data.transportCharges || 0);
-          setUnloadingCharges(data.unloadingCharges || 0);
-          setSpecialNotes(data.specialNotes || "");
-          setShowBankDetails(data.showBankDetails ?? true);
+          setTermsList(data.termsAndConditions ? data.termsAndConditions.split('\n') : [""]);
         }
       };
       load();
@@ -165,7 +145,7 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
   const calculations = useMemo(() => {
     const updatedItems = items.map((item) => ({
       ...item,
-      total: calculateItemTotal(item, invoiceType),
+      total: calculateItemTotal(item),
     }));
 
     const subtotal = updatedItems.reduce(
@@ -177,19 +157,9 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
         sum + item.rate * item.qty * (item.discountPercent / 100),
       0
     );
-    const totalGst = invoiceType === "Tax Invoice" ? updatedItems.reduce(
-      (sum, item) =>
-        sum +
-        item.rate *
-          item.qty *
-          (1 - item.discountPercent / 100) *
-          (item.gstPercent / 100),
-      0
-    ) : 0;
-    const transport = transportCharges + unloadingCharges;
     const grandTotal =
       Math.round(
-        (subtotal - totalDiscount + totalGst + transport) * 100
+        (subtotal - totalDiscount) * 100
       ) / 100;
     const pendingAmount = Math.max(0, grandTotal - amountPaid);
 
@@ -197,22 +167,20 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
       updatedItems,
       subtotal: Math.round(subtotal * 100) / 100,
       totalDiscount: Math.round(totalDiscount * 100) / 100,
-      totalGst: Math.round(totalGst * 100) / 100,
-      transport,
       grandTotal,
       pendingAmount: Math.round(pendingAmount * 100) / 100,
     };
-  }, [items, transportCharges, unloadingCharges, amountPaid]);
+  }, [items, amountPaid]);
 
   const updateItem = (
     index: number,
-    field: keyof InvoiceItem,
+    field: keyof quotationItem,
     value: any
   ) => {
     setItems((prev) => {
       const updated = [...prev];
       updated[index] = { ...updated[index], [field]: value };
-      updated[index].total = calculateItemTotal(updated[index], invoiceType);
+      updated[index].total = calculateItemTotal(updated[index]);
       return updated;
     });
   };
@@ -226,9 +194,9 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
     setItems((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const generateInvoiceNumber = () => {
+  const generatequotationNumber = () => {
     const num = Math.floor(Math.random() * 9000) + 1000;
-    return `INV-${num}`;
+    return `QUO-${num}`;
   };
 
   const determineStatus = (): "Paid" | "Partial" | "Pending" => {
@@ -237,10 +205,10 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
     return "Pending";
   };
 
-  const buildInvoiceData = () => {
+  const buildquotationData = () => {
     return {
-      invoiceNumber: editId ? undefined : generateInvoiceNumber(),
-      invoiceDate,
+      quotationNumber: editId ? undefined : generatequotationNumber(),
+      quotationDate,
       deliveryDate,
       companyName,
       companyAddress,
@@ -248,8 +216,6 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
       customerName,
       customerPhone,
       customerEmail,
-      customerGst,
-      invoiceType,
       billingAddress,
       shippingSameAsBilling,
       shippingAddress: shippingSameAsBilling
@@ -259,13 +225,9 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
       dueDate,
       amountPaid,
       items: calculations.updatedItems,
-      transportCharges,
-      unloadingCharges,
-      specialNotes,
-      showBankDetails,
+      termsAndConditions: termsList.filter(t => t.trim() !== "").join('\n'),
       subtotal: calculations.subtotal,
       totalDiscount: calculations.totalDiscount,
-      totalGst: calculations.totalGst,
       grandTotal: calculations.grandTotal,
       pendingAmount: calculations.pendingAmount,
       status: determineStatus(),
@@ -276,17 +238,17 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
   const handleSaveDraft = async () => {
     setIsSavingDraft(true);
     try {
-      const data = buildInvoiceData();
+      const data = buildquotationData();
       if (editId) {
-        const { invoiceNumber, ...rest } = data;
-        await updateDoc(doc(db, "invoices", editId), rest);
+        const { quotationNumber, ...rest } = data;
+        await updateDoc(doc(db, "quotations", editId), rest);
       } else {
-        await addDoc(collection(db, "invoices"), {
+        await addDoc(collection(db, "quotations"), {
           ...data,
           createdAt: serverTimestamp(),
         });
       }
-      router.push("/admin/invoices");
+      router.push("/admin/quotations");
     } catch (error) {
       console.error("Error saving draft:", error);
       alert("Failed to save draft.");
@@ -307,21 +269,21 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
 
     setIsLoading(true);
     try {
-      const data = buildInvoiceData();
+      const data = buildquotationData();
       if (editId) {
-        const { invoiceNumber, ...rest } = data;
-        await updateDoc(doc(db, "invoices", editId), rest);
-        router.push(`/admin/invoices/${editId}`);
+        const { quotationNumber, ...rest } = data;
+        await updateDoc(doc(db, "quotations", editId), rest);
+        router.push(`/admin/quotations/${editId}`);
       } else {
-        const docRef = await addDoc(collection(db, "invoices"), {
+        const docRef = await addDoc(collection(db, "quotations"), {
           ...data,
           createdAt: serverTimestamp(),
         });
-        router.push(`/admin/invoices/${docRef.id}`);
+        router.push(`/admin/quotations/${docRef.id}`);
       }
     } catch (error) {
-      console.error("Error saving invoice:", error);
-      alert("Failed to save invoice.");
+      console.error("Error saving quotation:", error);
+      alert("Failed to save quotation.");
     } finally {
       setIsLoading(false);
     }
@@ -361,25 +323,11 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-3xl font-poppins font-bold text-primary mb-1">
-            {editId ? `Edit ${invoiceType}` : `New Sales ${invoiceType}`}
+            {editId ? "Edit quotation" : "New Sales quotation"}
           </h1>
           <p className="text-gray-500 text-sm">
-            Generate a professional invoice for kitchen appliance orders.
+            Generate a professional tax quotation for kitchen appliance orders.
           </p>
-          <div className="flex gap-2 mt-4 bg-gray-100 p-1 rounded-lg w-max">
-            <button
-              onClick={() => setInvoiceType("Tax Invoice")}
-              className={`px-4 py-2 rounded-md text-sm font-semibold transition-all ${invoiceType === "Tax Invoice" ? "bg-white text-accent shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
-            >
-              Tax Invoice
-            </button>
-            <button
-              onClick={() => setInvoiceType("Invoice")}
-              className={`px-4 py-2 rounded-md text-sm font-semibold transition-all ${invoiceType === "Invoice" ? "bg-white text-accent shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
-            >
-              Invoice (No GST)
-            </button>
-          </div>
         </div>
         <div className="flex items-center gap-3">
           <button
@@ -393,7 +341,7 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
           <button
             onClick={() => {
               if (editId) {
-                router.push(`/admin/invoices/${editId}`);
+                router.push(`/admin/quotations/${editId}`);
               }
             }}
             disabled={!editId}
@@ -407,20 +355,20 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
 
       {/* Main form grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Invoice Details */}
+        {/* quotation Details */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
           {sectionHeader(
             <FileText className="w-4 h-4" />,
-            "Invoice Details"
+            "quotation Details"
           )}
 
           <div className="space-y-4">
             <div>
-              <label className={labelClass}>Invoice Date</label>
+              <label className={labelClass}>quotation Date</label>
               <input
                 type="date"
-                value={invoiceDate}
-                onChange={(e) => setInvoiceDate(e.target.value)}
+                value={quotationDate}
+                onChange={(e) => setquotationDate(e.target.value)}
                 className={inputClass}
               />
             </div>
@@ -530,18 +478,7 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              {invoiceType === "Tax Invoice" && (
-              <div>
-                <label className={labelClass}>GST Number / Tax ID</label>
-                <input
-                  type="text"
-                  value={customerGst}
-                  onChange={(e) => setCustomerGst(e.target.value)}
-                  placeholder="22AAAAA0000A1Z5"
-                  className={inputClass}
-                />
-              </div>
-              )}
+
               <div>
                 <label className={labelClass}>Billing Address</label>
                 <input
@@ -615,40 +552,6 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
               </div>
             </div>
 
-            {/* Bank Details Checkbox */}
-            <div className="mt-5 pt-4 border-t border-gray-100">
-              <label className="flex items-center gap-3 cursor-pointer group" htmlFor="showBankDetails">
-                <div className="relative">
-                  <input
-                    type="checkbox"
-                    id="showBankDetails"
-                    checked={showBankDetails}
-                    onChange={(e) => setShowBankDetails(e.target.checked)}
-                    className="sr-only peer"
-                  />
-                  <div className={`w-5 h-5 rounded-md border-2 transition-all flex items-center justify-center ${
-                    showBankDetails
-                      ? 'bg-accent border-accent shadow-sm'
-                      : 'bg-gray-50 border-gray-300 group-hover:border-gray-400'
-                  }`}>
-                    {showBankDetails && (
-                      <svg className="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none">
-                        <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Landmark className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm font-semibold text-gray-700 group-hover:text-gray-900 transition-colors">
-                    Include Bank Details in Invoice
-                  </span>
-                </div>
-              </label>
-              <p className="text-[10px] text-gray-400 mt-1.5 ml-8">
-                When checked, bank account details will be printed on the invoice for bank transfer payments.
-              </p>
-            </div>
           </div>
         </div>
 
@@ -733,22 +636,14 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
                 <th className="pb-3 text-[10px] font-bold tracking-[0.15em] uppercase text-gray-400 w-[24%]">
                   Product Name & Category
                 </th>
-                {invoiceType === "Tax Invoice" && (
-                <th className="pb-3 text-[10px] font-bold tracking-[0.15em] uppercase text-gray-400 text-center w-[10%]">
-                  HSN
-                </th>
-                )}
+
                 <th className="pb-3 text-[10px] font-bold tracking-[0.15em] uppercase text-gray-400 text-center w-[8%]">
                   Qty
                 </th>
                 <th className="pb-3 text-[10px] font-bold tracking-[0.15em] uppercase text-gray-400 text-center w-[14%]">
                   Rate (₹)
                 </th>
-                {invoiceType === "Tax Invoice" && (
-                <th className="pb-3 text-[10px] font-bold tracking-[0.15em] uppercase text-gray-400 text-center w-[10%]">
-                  GST %
-                </th>
-                )}
+
                 <th className="pb-3 text-[10px] font-bold tracking-[0.15em] uppercase text-gray-400 text-center w-[12%]">
                   Discount (%)
                 </th>
@@ -787,19 +682,7 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
                       className="w-full px-3 py-1 bg-transparent border-0 text-xs text-accent focus:outline-none focus:bg-gray-50 rounded uppercase tracking-wide"
                     />
                   </td>
-                  {invoiceType === "Tax Invoice" && (
-                  <td className="py-3 px-2">
-                    <input
-                      type="text"
-                      value={item.hsnCode || ""}
-                      onChange={(e) =>
-                        updateItem(index, "hsnCode", e.target.value)
-                      }
-                      placeholder="HSN"
-                      className="w-full text-center px-2 py-2 bg-gray-50 rounded-lg border border-gray-200 text-xs focus:outline-none focus:ring-1 focus:ring-accent"
-                    />
-                  </td>
-                  )}
+
                   <td className="py-3 px-2">
                     <input
                       type="number"
@@ -831,23 +714,7 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
                       className="w-full text-center px-2 py-2 bg-gray-50 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-1 focus:ring-accent"
                     />
                   </td>
-                  {invoiceType === "Tax Invoice" && (
-                  <td className="py-3 px-2">
-                    <input
-                      type="number"
-                      value={item.gstPercent}
-                      onChange={(e) =>
-                        updateItem(
-                          index,
-                          "gstPercent",
-                          parseFloat(e.target.value) || 0
-                        )
-                      }
-                      min={0}
-                      className="w-full text-center px-2 py-2 bg-gray-50 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-1 focus:ring-accent"
-                    />
-                  </td>
-                  )}
+
                   <td className="py-3 px-2">
                     <input
                       type="number"
@@ -866,7 +733,7 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
                   </td>
                   <td className="py-3 px-2 text-right">
                     <span className="font-bold text-primary text-sm">
-                      {formatCurrency(calculateItemTotal(item, invoiceType))}
+                      {formatCurrency(calculateItemTotal(item))}
                     </span>
                   </td>
                   <td className="py-3 text-right">
@@ -895,60 +762,51 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
         </button>
       </div>
 
-      {/* Logistics & Notes + Final Summary */}
+            {/* Final Bill Summary */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Logistics */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 flex flex-col">
           {sectionHeader(
-            <Truck className="w-4 h-4" />,
-            "Logistic Charges & Notes"
+            <FileText className="w-4 h-4" />,
+            "Terms & Conditions"
           )}
-
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className={labelClass}>Transport Charges (₹)</label>
+          <div className="flex-1 flex flex-col gap-3">
+            <label className={labelClass}>Manual Conditions</label>
+            {termsList.map((term, index) => (
+              <div key={index} className="flex items-center gap-2">
                 <input
-                  type="number"
-                  value={transportCharges}
-                  onChange={(e) =>
-                    setTransportCharges(parseFloat(e.target.value) || 0)
-                  }
-                  min={0}
+                  type="text"
+                  value={term}
+                  onChange={(e) => {
+                    const newTerms = [...termsList];
+                    newTerms[index] = e.target.value;
+                    setTermsList(newTerms);
+                  }}
+                  placeholder="e.g. Quotation is valid for 30 days."
                   className={inputClass}
                 />
+                <button
+                  onClick={() => {
+                    const newTerms = termsList.filter((_, i) => i !== index);
+                    setTermsList(newTerms.length ? newTerms : [""]);
+                  }}
+                  className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
               </div>
-              <div>
-                <label className={labelClass}>
-                  Unloading/Installation (₹)
-                </label>
-                <input
-                  type="number"
-                  value={unloadingCharges}
-                  onChange={(e) =>
-                    setUnloadingCharges(parseFloat(e.target.value) || 0)
-                  }
-                  min={0}
-                  className={inputClass}
-                />
-              </div>
-            </div>
-            <div>
-              <label className={labelClass}>Special Instructions / Notes</label>
-              <textarea
-                value={specialNotes}
-                onChange={(e) => setSpecialNotes(e.target.value)}
-                placeholder="Mention any specific installation requirements or warranty terms discussed..."
-                className={`${inputClass} min-h-[100px] resize-y`}
-              />
-            </div>
+            ))}
+            <button
+              onClick={() => setTermsList([...termsList, ""])}
+              className="flex items-center gap-2 mt-2 text-sm font-bold text-accent hover:text-[#c5a130] transition-colors self-start"
+            >
+              <Plus className="w-4 h-4" />
+              Add new line
+            </button>
           </div>
         </div>
-
-        {/* Final Bill Summary */}
         <div className="bg-[#FAF9F6] rounded-xl border border-accent/20 shadow-sm p-6 flex flex-col">
           <h3 className="text-[10px] font-bold tracking-[0.25em] uppercase text-accent mb-5">
-            Final Bill Summary
+            Final Quotation Summary
           </h3>
 
           <div className="flex flex-col gap-3 text-sm">
@@ -962,20 +820,6 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
               <span className="text-gray-600">Item Discount</span>
               <span className="font-semibold text-red-500">
                 -{formatCurrency(calculations.totalDiscount)}
-              </span>
-            </div>
-            {invoiceType === "Tax Invoice" && (
-            <div className="flex justify-between">
-              <span className="text-gray-600">Estimated GST (18%)</span>
-              <span className="font-semibold text-green-600">
-                +{formatCurrency(calculations.totalGst)}
-              </span>
-            </div>
-            )}
-            <div className="flex justify-between">
-              <span className="text-gray-600">Transport & Handling</span>
-              <span className="font-semibold text-primary">
-                {formatCurrency(calculations.transport)}
               </span>
             </div>
           </div>
@@ -1008,7 +852,7 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
           ) : (
             <>
               <CheckCircle2 className="w-5 h-5" />
-              Confirm & Authorize Invoice
+              Confirm & Authorize quotation
             </>
           )}
         </button>

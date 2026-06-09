@@ -103,10 +103,7 @@ export default function StockManagement() {
   const [sortConfig, setSortConfig] = useState<{ key: keyof StockEntry; direction: "asc" | "desc" }>({ key: "createdAt", direction: "desc" });
   const [auditFilter, setAuditFilter] = useState<"All" | "CREATE" | "UPDATE" | "DELETE">("All");
 
-  /* Date range */
-  const currentMonth = getMonthBounds(0);
-  const [dateStart, setDateStart] = useState(currentMonth.start);
-  const [dateEnd, setDateEnd] = useState(currentMonth.end);
+  /* Date range removed */
 
   /* Modals & panels */
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -268,12 +265,8 @@ export default function StockManagement() {
 
   /* ─── Date-filtered entries ─── */
   const dateFiltered = useMemo(() => {
-    return entries.filter((e) => {
-      const d = toDateStr(e.date);
-      if (!d) return true;
-      return d >= dateStart && d <= dateEnd;
-    });
-  }, [entries, dateStart, dateEnd]);
+    return entries;
+  }, [entries]);
 
   /* ─── Summary Cards ─── */
   const uniqueSkusMap = useMemo(() => {
@@ -829,12 +822,6 @@ export default function StockManagement() {
           <p className="text-gray-500 mt-1">Real-time oversight of inbound and return stock channels.</p>
         </div>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-gray-400" />
-            <input type="date" value={dateStart} onChange={(e) => setDateStart(e.target.value)} className="bg-gray-50 rounded-lg border border-gray-200 text-sm px-3 py-2 outline-none focus:ring-1 focus:ring-accent" />
-            <span className="text-gray-400 text-sm">to</span>
-            <input type="date" value={dateEnd} onChange={(e) => setDateEnd(e.target.value)} className="bg-gray-50 rounded-lg border border-gray-200 text-sm px-3 py-2 outline-none focus:ring-1 focus:ring-accent" />
-          </div>
           <div className="relative">
             <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
             <input type="text" placeholder="Search SKU, name..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full sm:w-64 pl-9 pr-3 py-2 bg-gray-50 rounded-lg border border-gray-200 text-sm outline-none focus:ring-1 focus:ring-accent" />
