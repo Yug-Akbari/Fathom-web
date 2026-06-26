@@ -21,6 +21,7 @@ import {
   Upload,
   UserPlus,
   Landmark,
+  PenLine,
 } from "lucide-react";
 import { db } from "@/lib/firebase";
 import {
@@ -113,6 +114,9 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
   // Bank details toggle
   const [showBankDetails, setShowBankDetails] = useState(true);
 
+  // Signature
+  const [showSignature, setShowSignature] = useState(true);
+
   // Products from Firebase (for autocomplete)
   const [products, setProducts] = useState<any[]>([]);
 
@@ -155,6 +159,7 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
           setUnloadingCharges(data.unloadingCharges || 0);
           setSpecialNotes(data.specialNotes || "");
           setShowBankDetails(data.showBankDetails ?? true);
+          setShowSignature(data.showSignature ?? true);
         }
       };
       load();
@@ -263,6 +268,7 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
       unloadingCharges,
       specialNotes,
       showBankDetails,
+      showSignature,
       subtotal: calculations.subtotal,
       totalDiscount: calculations.totalDiscount,
       totalGst: calculations.totalGst,
@@ -991,6 +997,41 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Signature Checkbox */}
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+        <label className="flex items-center gap-3 cursor-pointer group" htmlFor="showSignature">
+          <div className="relative">
+            <input
+              type="checkbox"
+              id="showSignature"
+              checked={showSignature}
+              onChange={(e) => setShowSignature(e.target.checked)}
+              className="sr-only peer"
+            />
+            <div className={`w-5 h-5 rounded-md border-2 transition-all flex items-center justify-center ${
+              showSignature
+                ? 'bg-accent border-accent shadow-sm'
+                : 'bg-gray-50 border-gray-300 group-hover:border-gray-400'
+            }`}>
+              {showSignature && (
+                <svg className="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none">
+                  <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <PenLine className="w-4 h-4 text-gray-400" />
+            <span className="text-sm font-semibold text-gray-700 group-hover:text-gray-900 transition-colors">
+              Include Digital Signature on Invoice
+            </span>
+          </div>
+        </label>
+        <p className="text-[10px] text-gray-400 mt-1.5 ml-8">
+          When checked, the company authorized signature will be printed on the invoice document.
+        </p>
       </div>
 
       {/* Confirm Button */}

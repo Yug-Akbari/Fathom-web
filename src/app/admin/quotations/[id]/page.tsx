@@ -13,7 +13,7 @@ interface quotationItem {
   category: string;
   qty: number;
   rate: number;
-  discountPercent: number;
+  gstPercent: number;
   total: number;
 }
 
@@ -29,6 +29,7 @@ interface quotation {
   customerPhone: string;
   customerEmail: string;
   customerGst: string;
+  gstApplicable: boolean;
   billingAddress: string;
   shippingSameAsBilling: boolean;
   shippingAddress: string;
@@ -41,11 +42,11 @@ interface quotation {
   specialNotes: string;
   termsAndConditions?: string;
   subtotal: number;
-  totalDiscount: number;
   totalGst: number;
   grandTotal: number;
   pendingAmount: number;
   status: "Paid" | "Partial" | "Pending";
+  showSignature?: boolean;
   createdAt: any;
 }
 
@@ -311,16 +312,18 @@ export default function quotationPreviewPage() {
                 <div className="mt-4 space-y-1">
                   {quotation.customerEmail && <p><span className="font-semibold text-gray-800">Email:</span> {quotation.customerEmail}</p>}
                   {quotation.customerPhone && <p><span className="font-semibold text-gray-800">Contact:</span> {quotation.customerPhone}</p>}
+                  {quotation.gstApplicable && quotation.customerGst && <p><span className="font-semibold text-gray-800">GSTIN:</span> {quotation.customerGst}</p>}
                 </div>
               </div>
             </div>
 
             {/* Products Table */}
             <div className="mb-10 rounded-lg overflow-hidden flex flex-col pt-4 relative z-10">
-              <div className="bg-[#f9fafb]/90 print:bg-transparent px-5 py-3 grid grid-cols-[3fr_0.5fr_1fr_1fr] gap-2 items-center text-[9px] font-bold tracking-wider uppercase text-gray-500 rounded-t-lg">
+              <div className={`bg-[#f9fafb]/90 print:bg-transparent px-5 py-3 grid ${quotation.gstApplicable ? 'grid-cols-[3fr_0.5fr_1fr_0.7fr_1fr]' : 'grid-cols-[3fr_0.5fr_1fr_1fr]'} gap-2 items-center text-[9px] font-bold tracking-wider uppercase text-gray-500 rounded-t-lg`}>
                 <div>PRODUCT DESCRIPTION</div>
                 <div className="text-center">QTY</div>
                 <div className="text-right">RATE</div>
+                {quotation.gstApplicable && <div className="text-center">GST %</div>}
                 <div className="text-right">TOTAL (INR)</div>
               </div>
               
@@ -330,13 +333,14 @@ export default function quotationPreviewPage() {
                 ) : (
                   quotation.items.map((item, i) => {
                     return (
-                      <div key={i} className="px-5 py-5 grid grid-cols-[3fr_0.5fr_1fr_1fr] gap-2 items-center text-gray-600">
+                      <div key={i} className={`px-5 py-5 grid ${quotation.gstApplicable ? 'grid-cols-[3fr_0.5fr_1fr_0.7fr_1fr]' : 'grid-cols-[3fr_0.5fr_1fr_1fr]'} gap-2 items-center text-gray-600`}>
                         <div>
                           <p className="font-bold text-gray-900 mb-1">{item.productName || "—"}</p>
                           {item.category && <p className="text-[10px] text-gray-500 leading-tight">{item.category}</p>}
                         </div>
                         <div className="text-center font-medium text-gray-800">{String(item.qty).padStart(2, "0")}</div>
                         <div className="text-right">{formatCurrency(item.rate)}</div>
+                        {quotation.gstApplicable && <div className="text-center text-gray-600">{item.gstPercent || 0}%</div>}
                         <div className="text-right font-bold text-gray-900">{formatCurrency(item.total)}</div>
                       </div>
                     );
@@ -370,10 +374,10 @@ export default function quotationPreviewPage() {
                     <span>Subtotal:</span>
                     <span className="font-semibold text-gray-900">{formatCurrency(quotation.subtotal)}</span>
                   </div>
-                  {quotation.totalDiscount > 0 && (
+                  {quotation.gstApplicable && quotation.totalGst > 0 && (
                   <div className="flex justify-between text-gray-500">
-                    <span>Discount:</span>
-                    <span className="text-red-500">-{formatCurrency(quotation.totalDiscount)}</span>
+                    <span>GST:</span>
+                    <span className="text-green-600 font-semibold">+{formatCurrency(quotation.totalGst)}</span>
                   </div>
                   )}
                 </div>
@@ -387,31 +391,22 @@ export default function quotationPreviewPage() {
                     {amountInWords(quotation.grandTotal)}
                   </p>
                 </div>
-                
-                {/* Amount Paid / Pending section */}
-                <div className="mt-6 px-2 space-y-2 border-t border-gray-100 pt-4">
-                   <div className="flex justify-between text-green-700 font-medium">
-                     <span>Amount Paid:</span>
-                     <span>{formatCurrency(quotation.amountPaid || 0)}</span>
-                   </div>
-                   <div className="flex justify-between text-red-600 font-bold">
-                     <span>Balance Due:</span>
-                     <span>{formatCurrency(quotation.pendingAmount || 0)}</span>
-                   </div>
-                </div>
               </div>
             </div>
 
-            {/* Signature Container (Terms & Conditions removed) */}
+            {/* Signature Container */}
             <div className="flex items-end justify-end mt-16 pt-8">
               <div className="w-56 text-center flex flex-col items-center">
-                {/* Signature Image Placeholder */}
-                <div className="h-16 w-full mb-1 flex justify-center items-center relative z-10">
-                  <span className="text-3xl text-gray-300 opacity-60 font-serif italic">Authorised</span>
+                {/* Signature Image */}
+                <div className="h-20 w-full mb-1 flex justify-center items-center relative z-10">
+                  {(quotation.showSignature !== false) ? (
+                    <Image src="/images/company-signature.png" alt="Authorized Signature" width={200} height={80} className="h-20 w-auto object-contain" />
+                  ) : (
+                    <span className="text-3xl text-gray-300 opacity-60 font-serif italic">Authorised</span>
+                  )}
                 </div>
                 <div className="border-t border-gray-400 w-full pt-2">
                   <p className="text-[10px] font-bold text-gray-900">Authorized Signatory</p>
-                  <p className="text-[8px] text-gray-500 mt-1 uppercase">For Shivam Enterprises</p>
                 </div>
               </div>
             </div>

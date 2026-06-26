@@ -42,6 +42,7 @@ interface Invoice {
   unloadingCharges: number;
   specialNotes: string;
   showBankDetails?: boolean;
+  showSignature?: boolean;
   invoiceType?: "Tax Invoice" | "Invoice";
   subtotal: number;
   totalDiscount: number;
@@ -455,16 +456,19 @@ export default function InvoicePreviewPage() {
               </div>
             </div>
 
-            {/* Signature Container (Terms & Conditions removed) */}
+            {/* Signature Container */}
             <div className="flex items-end justify-end mt-16 pt-8">
               <div className="w-56 text-center flex flex-col items-center">
-                {/* Signature Image Placeholder */}
-                <div className="h-16 w-full mb-1 flex justify-center items-center relative z-10">
-                  <span className="text-3xl text-gray-300 opacity-60 font-serif italic">Authorised</span>
+                {/* Signature Image */}
+                <div className="h-20 w-full mb-1 flex justify-center items-center relative z-10">
+                  {(invoice.showSignature !== false) ? (
+                    <Image src="/images/company-signature.png" alt="Authorized Signature" width={200} height={80} className="h-20 w-auto object-contain" />
+                  ) : (
+                    <span className="text-3xl text-gray-300 opacity-60 font-serif italic">Authorised</span>
+                  )}
                 </div>
                 <div className="border-t border-gray-400 w-full pt-2">
                   <p className="text-[10px] font-bold text-gray-900">Authorized Signatory</p>
-                  <p className="text-[8px] text-gray-500 mt-1 uppercase">For Shivam Enterprises</p>
                 </div>
               </div>
             </div>

@@ -20,6 +20,7 @@ import {
   Save,
   Upload,
   UserPlus,
+  PenLine,
   Landmark,
 } from "lucide-react";
 import { db } from "@/lib/firebase";
@@ -38,7 +39,7 @@ interface quotationItem {
   category: string;
   qty: number;
   rate: number;
-  discountPercent: number;
+  gstPercent: number;
   total: number;
 }
 
@@ -47,16 +48,17 @@ const emptyItem: quotationItem = {
   category: "",
   qty: 1,
   rate: 0,
-  discountPercent: 0,
+  gstPercent: 18,
   total: 0,
 };
 
-
-
-function calculateItemTotal(item: quotationItem): number {
+function calculateItemTotal(item: quotationItem, includeGst: boolean): number {
   const base = item.rate * item.qty;
-  const discounted = base * (1 - item.discountPercent / 100);
-  return Math.round(discounted * 100) / 100;
+  if (includeGst) {
+    const gstAmount = base * (item.gstPercent / 100);
+    return Math.round((base + gstAmount) * 100) / 100;
+  }
+  return Math.round(base * 100) / 100;
 }
 
 interface quotationFormProps {
@@ -87,6 +89,10 @@ export default function NewquotationPage({ editId }: quotationFormProps = {}) {
   const [shippingSameAsBilling, setShippingSameAsBilling] = useState(true);
   const [shippingAddress, setShippingAddress] = useState("");
 
+  // GST
+  const [gstApplicable, setGstApplicable] = useState(false);
+  const [customerGst, setCustomerGst] = useState("");
+
   // Payment
   const [paymentMode, setPaymentMode] = useState("Card");
   const [dueDate, setDueDate] = useState("");
@@ -97,6 +103,9 @@ export default function NewquotationPage({ editId }: quotationFormProps = {}) {
 
   // Terms & Conditions
   const [termsList, setTermsList] = useState<string[]>([""]);
+
+  // Signature
+  const [showSignature, setShowSignature] = useState(true);
 
   // Products from Firebase (for autocomplete)
   const [products, setProducts] = useState<any[]>([]);
@@ -128,6 +137,8 @@ export default function NewquotationPage({ editId }: quotationFormProps = {}) {
           setBillingAddress(data.billingAddress || "");
           setShippingSameAsBilling(data.shippingSameAsBilling ?? true);
           setShippingAddress(data.shippingAddress || "");
+          setGstApplicable(data.gstApplicable ?? false);
+          setCustomerGst(data.customerGst || "");
           setPaymentMode(data.paymentMode || "Card");
           setDueDate(data.dueDate || "");
           setAmountPaid(data.amountPaid || 0);
@@ -135,6 +146,7 @@ export default function NewquotationPage({ editId }: quotationFormProps = {}) {
             data.items?.length > 0 ? data.items : [{ ...emptyItem }]
           );
           setTermsList(data.termsAndConditions ? data.termsAndConditions.split('\n') : [""]);
+          setShowSignature(data.showSignature ?? true);
         }
       };
       load();
@@ -145,32 +157,34 @@ export default function NewquotationPage({ editId }: quotationFormProps = {}) {
   const calculations = useMemo(() => {
     const updatedItems = items.map((item) => ({
       ...item,
-      total: calculateItemTotal(item),
+      total: calculateItemTotal(item, gstApplicable),
     }));
 
     const subtotal = updatedItems.reduce(
       (sum, item) => sum + item.rate * item.qty,
       0
     );
-    const totalDiscount = updatedItems.reduce(
-      (sum, item) =>
-        sum + item.rate * item.qty * (item.discountPercent / 100),
-      0
-    );
+    const totalGst = gstApplicable
+      ? updatedItems.reduce(
+          (sum, item) =>
+            sum + item.rate * item.qty * (item.gstPercent / 100),
+          0
+        )
+      : 0;
     const grandTotal =
       Math.round(
-        (subtotal - totalDiscount) * 100
+        (subtotal + totalGst) * 100
       ) / 100;
     const pendingAmount = Math.max(0, grandTotal - amountPaid);
 
     return {
       updatedItems,
       subtotal: Math.round(subtotal * 100) / 100,
-      totalDiscount: Math.round(totalDiscount * 100) / 100,
+      totalGst: Math.round(totalGst * 100) / 100,
       grandTotal,
       pendingAmount: Math.round(pendingAmount * 100) / 100,
     };
-  }, [items, amountPaid]);
+  }, [items, amountPaid, gstApplicable]);
 
   const updateItem = (
     index: number,
@@ -180,7 +194,7 @@ export default function NewquotationPage({ editId }: quotationFormProps = {}) {
     setItems((prev) => {
       const updated = [...prev];
       updated[index] = { ...updated[index], [field]: value };
-      updated[index].total = calculateItemTotal(updated[index]);
+      updated[index].total = calculateItemTotal(updated[index], gstApplicable);
       return updated;
     });
   };
@@ -221,16 +235,19 @@ export default function NewquotationPage({ editId }: quotationFormProps = {}) {
       shippingAddress: shippingSameAsBilling
         ? billingAddress
         : shippingAddress,
+      gstApplicable,
+      customerGst: gstApplicable ? customerGst : "",
       paymentMode,
       dueDate,
       amountPaid,
       items: calculations.updatedItems,
       termsAndConditions: termsList.filter(t => t.trim() !== "").join('\n'),
       subtotal: calculations.subtotal,
-      totalDiscount: calculations.totalDiscount,
+      totalGst: calculations.totalGst,
       grandTotal: calculations.grandTotal,
       pendingAmount: calculations.pendingAmount,
       status: determineStatus(),
+      showSignature,
       updatedAt: serverTimestamp(),
     };
   };
@@ -478,7 +495,6 @@ export default function NewquotationPage({ editId }: quotationFormProps = {}) {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-
               <div>
                 <label className={labelClass}>Billing Address</label>
                 <input
@@ -489,6 +505,48 @@ export default function NewquotationPage({ editId }: quotationFormProps = {}) {
                   className={inputClass}
                 />
               </div>
+            </div>
+
+            {/* GST Toggle & Number */}
+            <div className="border-t border-gray-100 pt-4 mt-1">
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setGstApplicable(!gstApplicable)}
+                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 focus:outline-none ${
+                    gstApplicable ? "bg-accent" : "bg-gray-300"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transform transition-transform duration-200 ${
+                      gstApplicable ? "translate-x-[18px]" : "translate-x-[3px]"
+                    }`}
+                  />
+                </button>
+                <label className="text-xs font-bold text-gray-600 uppercase tracking-wide cursor-pointer" onClick={() => setGstApplicable(!gstApplicable)}>
+                  GST Applicable
+                </label>
+              </div>
+
+              {gstApplicable && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mt-3"
+                >
+                  <label className={labelClass}>GST Number (GSTIN)</label>
+                  <input
+                    type="text"
+                    value={customerGst}
+                    onChange={(e) => setCustomerGst(e.target.value.toUpperCase())}
+                    placeholder="e.g. 24AABCU9603R1ZM"
+                    maxLength={15}
+                    className={inputClass}
+                  />
+                  <p className="text-[10px] text-gray-400 mt-1">15-character alphanumeric GST Identification Number</p>
+                </motion.div>
+              )}
             </div>
           </div>
         </div>
@@ -633,21 +691,23 @@ export default function NewquotationPage({ editId }: quotationFormProps = {}) {
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-gray-100">
-                <th className="pb-3 text-[10px] font-bold tracking-[0.15em] uppercase text-gray-400 w-[24%]">
+                <th className="pb-3 text-[10px] font-bold tracking-[0.15em] uppercase text-gray-400 w-[30%]">
                   Product Name & Category
                 </th>
 
-                <th className="pb-3 text-[10px] font-bold tracking-[0.15em] uppercase text-gray-400 text-center w-[8%]">
+                <th className="pb-3 text-[10px] font-bold tracking-[0.15em] uppercase text-gray-400 text-center w-[10%]">
                   Qty
                 </th>
-                <th className="pb-3 text-[10px] font-bold tracking-[0.15em] uppercase text-gray-400 text-center w-[14%]">
+                <th className="pb-3 text-[10px] font-bold tracking-[0.15em] uppercase text-gray-400 text-center w-[16%]">
                   Rate (₹)
                 </th>
 
-                <th className="pb-3 text-[10px] font-bold tracking-[0.15em] uppercase text-gray-400 text-center w-[12%]">
-                  Discount (%)
-                </th>
-                <th className="pb-3 text-[10px] font-bold tracking-[0.15em] uppercase text-gray-400 text-right w-[16%]">
+                {gstApplicable && (
+                  <th className="pb-3 text-[10px] font-bold tracking-[0.15em] uppercase text-gray-400 text-center w-[12%]">
+                    GST (%)
+                  </th>
+                )}
+                <th className="pb-3 text-[10px] font-bold tracking-[0.15em] uppercase text-gray-400 text-right w-[18%]">
                   Total (₹)
                 </th>
                 <th className="pb-3 w-[6%]"></th>
@@ -715,25 +775,27 @@ export default function NewquotationPage({ editId }: quotationFormProps = {}) {
                     />
                   </td>
 
-                  <td className="py-3 px-2">
-                    <input
-                      type="number"
-                      value={item.discountPercent}
-                      onChange={(e) =>
-                        updateItem(
-                          index,
-                          "discountPercent",
-                          parseFloat(e.target.value) || 0
-                        )
-                      }
-                      min={0}
-                      max={100}
-                      className="w-full text-center px-2 py-2 bg-gray-50 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-1 focus:ring-accent"
-                    />
-                  </td>
+                  {gstApplicable && (
+                    <td className="py-3 px-2">
+                      <input
+                        type="number"
+                        value={item.gstPercent}
+                        onChange={(e) =>
+                          updateItem(
+                            index,
+                            "gstPercent",
+                            parseFloat(e.target.value) || 0
+                          )
+                        }
+                        min={0}
+                        max={100}
+                        className="w-full text-center px-2 py-2 bg-gray-50 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-1 focus:ring-accent"
+                      />
+                    </td>
+                  )}
                   <td className="py-3 px-2 text-right">
                     <span className="font-bold text-primary text-sm">
-                      {formatCurrency(calculateItemTotal(item))}
+                      {formatCurrency(calculateItemTotal(item, gstApplicable))}
                     </span>
                   </td>
                   <td className="py-3 text-right">
@@ -816,12 +878,14 @@ export default function NewquotationPage({ editId }: quotationFormProps = {}) {
                 {formatCurrency(calculations.subtotal)}
               </span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Item Discount</span>
-              <span className="font-semibold text-red-500">
-                -{formatCurrency(calculations.totalDiscount)}
-              </span>
-            </div>
+            {gstApplicable && calculations.totalGst > 0 && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">GST</span>
+                <span className="font-semibold text-green-600">
+                  +{formatCurrency(calculations.totalGst)}
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="border-t border-accent/20 mt-5 pt-5 flex-1 flex flex-col justify-end">
@@ -835,6 +899,41 @@ export default function NewquotationPage({ editId }: quotationFormProps = {}) {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Signature Checkbox */}
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+        <label className="flex items-center gap-3 cursor-pointer group" htmlFor="showSignature">
+          <div className="relative">
+            <input
+              type="checkbox"
+              id="showSignature"
+              checked={showSignature}
+              onChange={(e) => setShowSignature(e.target.checked)}
+              className="sr-only peer"
+            />
+            <div className={`w-5 h-5 rounded-md border-2 transition-all flex items-center justify-center ${
+              showSignature
+                ? 'bg-accent border-accent shadow-sm'
+                : 'bg-gray-50 border-gray-300 group-hover:border-gray-400'
+            }`}>
+              {showSignature && (
+                <svg className="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none">
+                  <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <PenLine className="w-4 h-4 text-gray-400" />
+            <span className="text-sm font-semibold text-gray-700 group-hover:text-gray-900 transition-colors">
+              Include Digital Signature on Quotation
+            </span>
+          </div>
+        </label>
+        <p className="text-[10px] text-gray-400 mt-1.5 ml-8">
+          When checked, the company authorized signature will be printed on the quotation document.
+        </p>
       </div>
 
       {/* Confirm Button */}
