@@ -81,6 +81,8 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
   );
   const [companyName, setCompanyName] = useState("Shivam Enterprises");
   const [companyAddress, setCompanyAddress] = useState("126, Green Plaza, Near Golden Chowk, Mota Varachha, Surat, Gujarat - 394101");
+  const [companyGstApplicable, setCompanyGstApplicable] = useState(false);
+  const [companyGst, setCompanyGst] = useState("");
   const [orderType, setOrderType] = useState("Retail");
   const [deliveryDate, setDeliveryDate] = useState("");
 
@@ -139,6 +141,8 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
           setInvoiceDate(data.invoiceDate || "");
           setCompanyName(data.companyName || "Shivam Enterprises");
           setCompanyAddress(data.companyAddress || "");
+          setCompanyGstApplicable(data.companyGstApplicable ?? false);
+          setCompanyGst(data.companyGst || "");
           setOrderType(data.orderType || "Retail");
           setDeliveryDate(data.deliveryDate || "");
           setCustomerName(data.customerName || "");
@@ -249,6 +253,8 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
       deliveryDate,
       companyName,
       companyAddress,
+      companyGstApplicable,
+      companyGst: companyGstApplicable ? companyGst : "",
       orderType,
       customerName,
       customerPhone,
@@ -449,6 +455,48 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
                 placeholder="Street, City, State, Zip Code"
                 className={inputClass}
               />
+            </div>
+
+            {/* Company GST Toggle & Number */}
+            <div className="border-t border-gray-100 pt-4 mt-1">
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setCompanyGstApplicable(!companyGstApplicable)}
+                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 focus:outline-none ${
+                    companyGstApplicable ? "bg-accent" : "bg-gray-300"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transform transition-transform duration-200 ${
+                      companyGstApplicable ? "translate-x-[18px]" : "translate-x-[3px]"
+                    }`}
+                  />
+                </button>
+                <label className="text-xs font-bold text-gray-600 uppercase tracking-wide cursor-pointer" onClick={() => setCompanyGstApplicable(!companyGstApplicable)}>
+                  GST Applicable
+                </label>
+              </div>
+
+              {companyGstApplicable && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mt-3"
+                >
+                  <label className={labelClass}>GST Number (GSTIN)</label>
+                  <input
+                    type="text"
+                    value={companyGst}
+                    onChange={(e) => setCompanyGst(e.target.value.toUpperCase())}
+                    placeholder="e.g. 24AABCU9603R1ZM"
+                    maxLength={15}
+                    className={inputClass}
+                  />
+                  <p className="text-[10px] text-gray-400 mt-1">15-character alphanumeric GST Identification Number</p>
+                </motion.div>
+              )}
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>

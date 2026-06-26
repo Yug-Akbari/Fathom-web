@@ -26,6 +26,8 @@ interface Invoice {
   deliveryDate: string;
   companyName: string;
   companyAddress: string;
+  companyGstApplicable?: boolean;
+  companyGst?: string;
   orderType: string;
   customerName: string;
   customerPhone: string;
@@ -307,7 +309,7 @@ export default function InvoicePreviewPage() {
                 {invoice.companyName && <p className="font-bold text-gray-900 text-lg mb-2 uppercase">{invoice.companyName}</p>}
                 {invoice.companyAddress && <p className="whitespace-pre-line text-sm">{invoice.companyAddress}</p>}
                 <div className="mt-4 space-y-1">
-                  {invoice.invoiceType !== "Invoice" && <p><span className="font-semibold text-gray-800">GSTIN:</span> 24AFWFS8557F1Z8</p>}
+                  {invoice.companyGstApplicable && invoice.companyGst && <p><span className="font-semibold text-gray-800">GSTIN:</span> {invoice.companyGst}</p>}
                   <p><span className="font-semibold text-gray-800">Email:</span> fathom.support@gmail.com</p>
                 </div>
               </div>

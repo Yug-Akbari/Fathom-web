@@ -24,6 +24,8 @@ interface quotation {
   deliveryDate: string;
   companyName: string;
   companyAddress: string;
+  companyGstApplicable?: boolean;
+  companyGst?: string;
   orderType: string;
   customerName: string;
   customerPhone: string;
@@ -302,6 +304,7 @@ export default function quotationPreviewPage() {
                 {quotation.companyAddress && <p className="whitespace-pre-line text-sm">{quotation.companyAddress}</p>}
                 <div className="mt-4 space-y-1">
                   <p><span className="font-semibold text-gray-800">Email:</span> fathom.support@gmail.com</p>
+                  {quotation.companyGstApplicable && quotation.companyGst && <p><span className="font-semibold text-gray-800">GSTIN:</span> {quotation.companyGst}</p>}
                 </div>
               </div>
               
