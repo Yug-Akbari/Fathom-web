@@ -1,18 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Shield, Truck, Award } from "lucide-react";
+import { Award } from "lucide-react";
 
 const features = [
   {
     icon: Award,
     title: "Trusted Quality",
     description: "Built to last with strict quality standards.",
-  },
-  {
-    icon: Truck,
-    title: "Free Shipping",
-    description: "Complimentary delivery on all orders.",
   },
 ];
 
@@ -54,7 +49,7 @@ export default function TrustStrip() {
         </motion.h2>
 
         <motion.div 
-          className="grid grid-cols-1 md:grid-cols-2 gap-12 text-center max-w-4xl mx-auto"
+          className="grid grid-cols-1 gap-12 text-center max-w-md mx-auto"
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"

@@ -48,6 +48,7 @@ interface quotation {
   grandTotal: number;
   pendingAmount: number;
   status: "Paid" | "Partial" | "Pending";
+  showBankDetails?: boolean;
   showSignature?: boolean;
   createdAt: any;
 }
@@ -354,21 +355,51 @@ export default function quotationPreviewPage() {
 
             {/* Bottom Details Section */}
             <div className="grid grid-cols-[1fr_1.1fr] gap-8 mb-12">
-              
-              {/* Left Side: Terms & Conditions */}
-              {quotation.termsAndConditions ? (
-                <div className="bg-white/60 print:bg-transparent p-6 rounded-lg self-start border border-gray-100/50 shadow-sm mt-3 relative z-10">
-                  <p className="text-[9px] font-bold tracking-widest uppercase text-gray-800 mb-5">TERMS & CONDITIONS</p>
-                  <ul className="text-[11px] text-gray-600 list-disc pl-4 space-y-1.5 marker:text-gray-400">
-                    {quotation.termsAndConditions.split('\n').map((condition, idx) => {
-                      if (!condition.trim()) return null;
-                      return <li key={idx} className="pl-1">{condition}</li>;
-                    })}
-                  </ul>
-                </div>
-              ) : (
-                <div></div>
-              )}
+               
+              {/* Left Side: Bank Details + Terms & Conditions */}
+              <div className="flex flex-col gap-4">
+                {/* Bank Details (conditional) */}
+                {(quotation.showBankDetails !== false) && (
+                  <div className="bg-white/60 print:bg-transparent p-6 rounded-lg self-start border border-gray-100/50 shadow-sm mt-3 relative z-10 w-full">
+                    <p className="text-[9px] font-bold tracking-widest uppercase text-gray-800 mb-5">BANK DETAILS</p>
+                    <div className="text-[11px] text-gray-500 space-y-3">
+                      <div className="flex justify-between">
+                        <span>Bank Name:</span>
+                        <span className="font-bold text-gray-900">The Varachha Co-Op Bank Ltd.</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>A/C Name:</span>
+                        <span className="font-bold text-gray-900 uppercase">SHIVAM ENTERPRISES</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>A/C Number:</span>
+                        <span className="font-bold text-gray-900">01330110315458</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>IFSC Code:</span>
+                        <span className="font-bold text-gray-900">VARA0289013</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Branch:</span>
+                        <span className="font-bold text-gray-900">MOTA VARACHHA BRANCH</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Terms & Conditions */}
+                {quotation.termsAndConditions && (
+                  <div className="bg-white/60 print:bg-transparent p-6 rounded-lg self-start border border-gray-100/50 shadow-sm mt-3 relative z-10 w-full">
+                    <p className="text-[9px] font-bold tracking-widest uppercase text-gray-800 mb-5">TERMS & CONDITIONS</p>
+                    <ul className="text-[11px] text-gray-600 list-disc pl-4 space-y-1.5 marker:text-gray-400">
+                      {quotation.termsAndConditions.split('\n').map((condition, idx) => {
+                        if (!condition.trim()) return null;
+                        return <li key={idx} className="pl-1">{condition}</li>;
+                      })}
+                    </ul>
+                  </div>
+                )}
+              </div>
 
               {/* Right Side: Totals */}
               <div className="text-xs flex flex-col justify-between pt-2 relative z-10">
