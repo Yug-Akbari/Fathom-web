@@ -104,7 +104,12 @@ export default function NewquotationPage({ editId }: quotationFormProps = {}) {
   const [items, setItems] = useState<quotationItem[]>([{ ...emptyItem }]);
 
   // Terms & Conditions
-  const [termsList, setTermsList] = useState<string[]>([""]);
+  const [termsList, setTermsList] = useState<string[]>([
+    "Payment Method : Advance payment by account transfer/UPI",
+    "Delivery : Within 6-7 working days from order confirmation",
+    "Return Policy : Only manufacturing defect",
+    "Quotation Validity : 10 Days",
+  ]);
 
   // Bank details toggle
   const [showBankDetails, setShowBankDetails] = useState(true);
