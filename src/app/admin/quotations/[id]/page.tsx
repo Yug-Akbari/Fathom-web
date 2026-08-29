@@ -7,6 +7,8 @@ import { Printer, Download, ArrowLeft, Edit, Trash2, CheckCircle, XCircle } from
 import Image from "next/image";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, deleteDoc, updateDoc } from "firebase/firestore";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 interface quotationItem {
   productName: string;
@@ -86,7 +88,19 @@ export default function quotationPreviewPage() {
       try {
         const snap = await getDoc(doc(db, "quotations", quotationId));
         if (snap.exists()) {
-          setquotation({ id: snap.id, ...snap.data() } as quotation);
+          const quotationData = { id: snap.id, ...snap.data() } as quotation;
+          setquotation(quotationData);
+          
+          // Check if we need to auto-send email
+          const sendEmailTo = localStorage.getItem(`sendMail_${quotationId}`);
+          const sendEmailType = localStorage.getItem(`sendMailType_${quotationId}`);
+          if (sendEmailTo) {
+             setTimeout(() => {
+                generateAndSendPdf(sendEmailTo, sendEmailType || "Quotation", quotationData.customerName, quotationData);
+                localStorage.removeItem(`sendMail_${quotationId}`);
+                localStorage.removeItem(`sendMailType_${quotationId}`);
+             }, 1500); // Wait for fonts and images to render
+          }
         }
       } catch (error) {
         console.error("Error loading quotation:", error);
@@ -96,6 +110,38 @@ export default function quotationPreviewPage() {
     };
     loadquotation();
   }, [quotationId]);
+
+  const generateAndSendPdf = async (email: string, type: string, customerName: string, documentData: quotation) => {
+    const element = document.querySelector('.print-area') as HTMLElement;
+    if (!element) return;
+    
+    try {
+      // Capture the element
+      const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+      const imgData = canvas.toDataURL('image/jpeg', 1.0);
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+      const pdfBase64 = pdf.output('datauristring');
+      
+      await fetch("/api/send-document", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          pdfBase64,
+          type,
+          customerEmail: email,
+          customerName,
+          documentData
+        })
+      });
+      console.log(`Email sent successfully to ${email}`);
+    } catch (err) {
+      console.error("Error generating/sending PDF:", err);
+    }
+  };
 
   const handlePrint = () => {
     window.print();

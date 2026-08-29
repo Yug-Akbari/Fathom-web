@@ -134,6 +134,22 @@ export default function ContactForm() {
                   interestedProductIds: [],
                   createdAt: new Date().toISOString()
                 });
+
+                // Send automated email notification
+                await fetch("/api/contact", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    name,
+                    email,
+                    phone,
+                    category,
+                    message,
+                  }),
+                });
+
                 setIsSuccess(true);
                 setName("");
                 setEmail("");

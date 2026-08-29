@@ -117,6 +117,9 @@ export default function NewquotationPage({ editId }: quotationFormProps = {}) {
   // Signature
   const [showSignature, setShowSignature] = useState(true);
 
+  // Send Mail
+  const [sendMail, setSendMail] = useState(false);
+
   // Products from Firebase (for autocomplete)
   const [products, setProducts] = useState<any[]>([]);
 
@@ -303,17 +306,26 @@ export default function NewquotationPage({ editId }: quotationFormProps = {}) {
     setIsLoading(true);
     try {
       const data = buildquotationData();
+      let docId = editId;
       if (editId) {
         const { quotationNumber, ...rest } = data;
         await updateDoc(doc(db, "quotations", editId), rest);
-        router.push(`/admin/quotations/${editId}`);
       } else {
         const docRef = await addDoc(collection(db, "quotations"), {
           ...data,
           createdAt: serverTimestamp(),
         });
-        router.push(`/admin/quotations/${docRef.id}`);
+        docId = docRef.id;
       }
+
+      if (sendMail && customerEmail) {
+        localStorage.setItem(`sendMail_${docId}`, customerEmail);
+        localStorage.setItem(`sendMailType_${docId}`, "Quotation");
+      } else if (sendMail && !customerEmail) {
+        alert("Quotation saved. Could not schedule email because customer email is missing.");
+      }
+
+      router.push(`/admin/quotations/${docId}`);
     } catch (error) {
       console.error("Error saving quotation:", error);
       alert("Failed to save quotation.");
@@ -1029,7 +1041,31 @@ export default function NewquotationPage({ editId }: quotationFormProps = {}) {
       </div>
 
       {/* Confirm Button */}
-      <div className="bg-gradient-to-r from-accent/10 via-accent/5 to-transparent rounded-xl border border-accent/20 p-6 flex flex-col items-center gap-3">
+      <div className="bg-gradient-to-r from-accent/10 via-accent/5 to-transparent rounded-xl border border-accent/20 p-6 flex flex-col items-center gap-4">
+        <label className="flex items-center gap-3 cursor-pointer group mb-2">
+          <div className="relative">
+            <input
+              type="checkbox"
+              checked={sendMail}
+              onChange={(e) => setSendMail(e.target.checked)}
+              className="sr-only peer"
+            />
+            <div className={`w-5 h-5 rounded-md border-2 transition-all flex items-center justify-center ${
+              sendMail
+                ? 'bg-accent border-accent shadow-sm'
+                : 'bg-white border-accent/50 group-hover:border-accent'
+            }`}>
+              {sendMail && (
+                <svg className="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none">
+                  <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+            </div>
+          </div>
+          <span className="text-sm font-semibold text-gray-700">
+            Send Email to Customer
+          </span>
+        </label>
         <button
           onClick={handleConfirm}
           disabled={isLoading}
@@ -1043,7 +1079,7 @@ export default function NewquotationPage({ editId }: quotationFormProps = {}) {
           ) : (
             <>
               <CheckCircle2 className="w-5 h-5" />
-              Confirm & Authorize quotation
+              Confirm & Authorize Quotation
             </>
           )}
         </button>

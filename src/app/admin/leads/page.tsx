@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Lead } from "@/lib/adminData";
 import Image from "next/image";
 import { db } from "@/lib/firebase";
-import { collection, onSnapshot, doc, updateDoc } from "firebase/firestore";
+import { collection, onSnapshot, doc, updateDoc, deleteDoc } from "firebase/firestore";
 
 export default function LeadManagement() {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
@@ -33,6 +33,18 @@ export default function LeadManagement() {
       setSelectedLead({...selectedLead, status: newStatus as any});
     }
   };
+
+  const deleteLead = async (id: string, isRealDoc: boolean) => {
+    if (confirm("Are you sure you want to delete this lead?")) {
+      if (isRealDoc) {
+        await deleteDoc(doc(db, "leads", id));
+      } else {
+        setLeads(leads.filter(l => l.id !== id));
+      }
+      setSelectedLead(null);
+    }
+  };
+
 
   // Close the panel on background click
   const handleClose = () => setSelectedLead(null);
@@ -235,6 +247,13 @@ export default function LeadManagement() {
                   Mark Resolved
                 </button>
               </div>
+              <button 
+                onClick={() => deleteLead(selectedLead.id, !selectedLead.id.startsWith("L-"))}
+                className="border border-red-200 bg-red-50 text-red-600 font-bold text-xs tracking-wider uppercase py-3 rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center gap-2 mt-1"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg>
+                Delete Lead
+              </button>
             </div>
 
           </motion.div>

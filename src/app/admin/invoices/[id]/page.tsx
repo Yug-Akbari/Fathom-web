@@ -7,6 +7,8 @@ import { Printer, Download, ArrowLeft, Edit, Trash2, CheckCircle, XCircle } from
 import Image from "next/image";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, deleteDoc, updateDoc } from "firebase/firestore";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 interface InvoiceItem {
   productName: string;
@@ -88,7 +90,19 @@ export default function InvoicePreviewPage() {
       try {
         const snap = await getDoc(doc(db, "invoices", invoiceId));
         if (snap.exists()) {
-          setInvoice({ id: snap.id, ...snap.data() } as Invoice);
+          const invoiceData = { id: snap.id, ...snap.data() } as Invoice;
+          setInvoice(invoiceData);
+          
+          // Check if we need to auto-send email
+          const sendEmailTo = localStorage.getItem(`sendMail_${invoiceId}`);
+          const sendEmailType = localStorage.getItem(`sendMailType_${invoiceId}`);
+          if (sendEmailTo) {
+             setTimeout(() => {
+                generateAndSendPdf(sendEmailTo, sendEmailType || "Invoice", invoiceData.customerName, invoiceData);
+                localStorage.removeItem(`sendMail_${invoiceId}`);
+                localStorage.removeItem(`sendMailType_${invoiceId}`);
+             }, 1500); // Wait for fonts and images to render
+          }
         }
       } catch (error) {
         console.error("Error loading invoice:", error);
@@ -98,6 +112,38 @@ export default function InvoicePreviewPage() {
     };
     loadInvoice();
   }, [invoiceId]);
+
+  const generateAndSendPdf = async (email: string, type: string, customerName: string, documentData: Invoice) => {
+    const element = document.querySelector('.print-area') as HTMLElement;
+    if (!element) return;
+    
+    try {
+      // Capture the element
+      const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+      const imgData = canvas.toDataURL('image/jpeg', 1.0);
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+      const pdfBase64 = pdf.output('datauristring');
+      
+      await fetch("/api/send-document", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          pdfBase64,
+          type,
+          customerEmail: email,
+          customerName,
+          documentData
+        })
+      });
+      console.log(`Email sent successfully to ${email}`);
+    } catch (err) {
+      console.error("Error generating/sending PDF:", err);
+    }
+  };
 
   const handlePrint = () => {
     window.print();
