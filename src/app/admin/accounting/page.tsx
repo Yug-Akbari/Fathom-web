@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { 
   Download, 
   Plus, 
@@ -13,7 +14,9 @@ import {
   Filter,
   MoreHorizontal,
   Edit,
-  Trash2
+  Trash2,
+  Layers,
+  X
 } from "lucide-react";
 import { db } from "@/lib/firebase";
 import { 
@@ -50,9 +53,27 @@ interface AccountingEntry {
   quantity?: number;
   condition?: string;
   productName?: string;
+  batchId?: string;
+  batchName?: string;
+  reimbursement?: string;
+  note?: string;
+}
+
+interface FbaBatch {
+  id: string;
+  name: string;
+  createdAt: any;
 }
 
 export default function AccountingPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AccountingContent />
+    </Suspense>
+  );
+}
+
+function AccountingContent() {
   const [productName, setProductName] = useState("");
   const [shipDate, setShipDate] = useState("");
   const [orderId, setOrderId] = useState("");
@@ -70,10 +91,47 @@ export default function AccountingPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState<{ key: keyof AccountingEntry | null, direction: 'asc' | 'desc' }>({ key: null, direction: 'asc' });
 
+  const searchParams = useSearchParams();
+  const queryBatchId = searchParams?.get("batchId");
+
   const [entries, setEntries] = useState<AccountingEntry[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Batch states
+  const [batches, setBatches] = useState<FbaBatch[]>([]);
+  const [activeBatchId, setActiveBatchId] = useState<string>("all");
+  const [isCreateBatchModalOpen, setIsCreateBatchModalOpen] = useState(false);
+  const [newBatchName, setNewBatchName] = useState("");
+  const [formBatchId, setFormBatchId] = useState<string>("");
+
+  // Fetch batches from Firebase
+  useEffect(() => {
+    const q = query(collection(db, "fba_batches"), orderBy("createdAt", "desc"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetchedBatches: FbaBatch[] = [];
+      snapshot.forEach((doc) => {
+        fetchedBatches.push({ id: doc.id, ...doc.data() as Omit<FbaBatch, 'id'> });
+      });
+      setBatches(fetchedBatches);
+      
+      setFormBatchId((prev) => {
+        if (!prev && fetchedBatches.length > 0) return fetchedBatches[0].id;
+        return prev;
+      });
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (queryBatchId) {
+      setActiveBatchId(queryBatchId);
+    } else {
+      setActiveBatchId("all");
+    }
+  }, [queryBatchId]);
 
   // Fetch entries from Firebase
   useEffect(() => {
@@ -113,6 +171,27 @@ export default function AccountingPage() {
     setQuantity("1");
     setCondition("Sellable");
     setEditingId(null);
+    // Note: intentionally keeping formBatchId so the next entry defaults to the same batch
+  };
+
+  const handleCreateBatch = async () => {
+    if (!newBatchName.trim()) return;
+    setIsLoading(true);
+    try {
+      const docRef = await addDoc(collection(db, "fba_batches"), {
+        name: newBatchName.trim(),
+        createdAt: serverTimestamp(),
+      });
+      setFormBatchId(docRef.id);
+      setActiveBatchId(docRef.id);
+      setNewBatchName("");
+      setIsCreateBatchModalOpen(false);
+    } catch (error) {
+      console.error("Error creating batch:", error);
+      alert("Failed to create batch.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Helper: sync stock entry & damage log for a given doc ID
@@ -319,6 +398,8 @@ export default function AccountingPage() {
       quantity: qtyVal,
       condition: condition,
       productName: productName,
+      batchId: activeBatchId !== "all" ? activeBatchId : (formBatchId || ""),
+      batchName: batches.find(b => b.id === (activeBatchId !== "all" ? activeBatchId : formBatchId))?.name || "",
     };
     
     try {
@@ -371,6 +452,7 @@ export default function AccountingPage() {
     setNote(entry.note || "");
     setQuantity(entry.quantity?.toString() || "1");
     setCondition(entry.condition || "Sellable");
+    setFormBatchId(entry.batchId || "");
     setEditingId(entry.id);
     
     // Scroll to top
@@ -396,9 +478,11 @@ export default function AccountingPage() {
     }
   };
 
-  const filteredEntries = filterSku 
-    ? entries.filter(entry => entry.sku.toLowerCase().includes(filterSku.toLowerCase()))
-    : entries;
+  const filteredEntries = entries.filter(entry => {
+    if (activeBatchId !== "all" && entry.batchId !== activeBatchId) return false;
+    if (filterSku && !entry.sku.toLowerCase().includes(filterSku.toLowerCase())) return false;
+    return true;
+  });
 
   const searchedEntries = searchTerm
     ? filteredEntries.filter(entry => {
@@ -509,9 +593,9 @@ export default function AccountingPage() {
           <div className="flex items-center gap-3">
             <button 
               onClick={() => {
-                const headers = ["Ref ID", "Date", "SKU", "Type", "Amount", "Status", "Return Type", "State", "Reimbursement", "Notified", "Note"];
+                const headers = ["Batch", "Ref ID", "Date", "SKU", "Type", "Amount", "Status", "Return Type", "State", "Reimbursement", "Notified", "Note"];
                 const rows = sortedEntries.map(e => [
-                  e.refId, e.date, e.sku, e.type, e.amount, e.status, 
+                  e.batchName || "N/A", e.refId, e.date, e.sku, e.type, e.amount, e.status, 
                   e.returnType || "", e.state || "", e.reimbursement || "", e.notified ? "Yes" : "No", e.note || ""
                 ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(","));
                 const csv = [headers.join(","), ...rows].join("\n");
@@ -528,6 +612,16 @@ export default function AccountingPage() {
               <Download className="w-4 h-4" />
               Export
             </button>
+            <div className="h-8 w-px bg-gray-200 hidden sm:block mx-1"></div>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setIsCreateBatchModalOpen(true)}
+                className="p-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
+                title="Create New Batch"
+              >
+                <Layers className="w-4 h-4" />
+              </button>
+            </div>
             <button 
               onClick={clearForm}
               className="flex items-center gap-2 px-4 py-2 bg-[#D4AF37] hover:bg-[#c5a130] text-white rounded-lg text-sm font-semibold transition-colors shadow-sm"
@@ -709,6 +803,25 @@ export default function AccountingPage() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
           {/* Row 1 */}
           <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-bold text-gray-500 tracking-wider">BATCH</label>
+            {activeBatchId !== "all" ? (
+              <div className="w-full px-3 py-2 bg-gray-100 rounded-lg border border-gray-200 text-sm font-medium text-gray-700 select-none flex items-center h-[38px]">
+                {batches.find(b => b.id === activeBatchId)?.name || "Unknown Batch"}
+              </div>
+            ) : (
+              <select 
+                className="w-full px-3 py-2 bg-gray-50 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]"
+                value={formBatchId}
+                onChange={(e) => setFormBatchId(e.target.value)}
+              >
+                <option value="">No Batch</option>
+                {batches.map(b => (
+                  <option key={b.id} value={b.id}>{b.name}</option>
+                ))}
+              </select>
+            )}
+          </div>
+          <div className="flex flex-col gap-1.5">
             <label className="text-xs font-bold text-gray-500 tracking-wider">SHIP DATE</label>
             <input 
               type="date" 
@@ -744,6 +857,7 @@ export default function AccountingPage() {
             </datalist>
           </div>
 
+          {/* Row 2 */}
           <div className="flex flex-col gap-1.5 md:col-span-1">
             <label className="text-xs font-bold text-gray-500 tracking-wider">AMOUNT</label>
             <div className="relative">
@@ -759,8 +873,7 @@ export default function AccountingPage() {
               />
             </div>
           </div>
-          {/* Row 2 */}
-          <div className="flex flex-col gap-1.5 md:col-span-2">
+          <div className="flex flex-col gap-1.5 md:col-span-1">
             <label className="text-xs font-bold text-gray-500 tracking-wider">STATE / ADDRESS</label>
             <input 
               type="text" 
@@ -886,6 +999,7 @@ export default function AccountingPage() {
           <table className="w-full text-left text-sm whitespace-nowrap">
             <thead>
               <tr className="text-xs font-bold text-gray-500 tracking-wider border-b border-gray-100 bg-gray-50/50">
+                <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('batchName')}>BATCH <SortIcon columnKey="batchName" /></th>
                 <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('refId')}>REF ID <SortIcon columnKey="refId" /></th>
                 <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('sku')}>SKU <SortIcon columnKey="sku" /></th>
                 <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('type')}>TYPE <SortIcon columnKey="type" /></th>
@@ -906,6 +1020,7 @@ export default function AccountingPage() {
               ) : (
                 sortedEntries.map((entry) => (
                   <tr key={entry.id} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="px-6 py-4 font-medium text-gray-600">{entry.batchName || <span className="text-gray-400">—</span>}</td>
                     <td className="px-6 py-4 font-bold text-gray-900">{entry.refId}</td>
                     <td className="px-6 py-4 font-medium text-gray-700">{entry.sku}</td>
                     <td className="px-6 py-4">
@@ -959,6 +1074,47 @@ export default function AccountingPage() {
           </table>
         </div>
       </div>
+
+      {/* Create Batch Modal */}
+      {isCreateBatchModalOpen && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+            <div className="p-5 flex justify-between items-center border-b border-gray-100">
+              <h3 className="font-bold text-gray-900">Create New Batch</h3>
+              <button onClick={() => setIsCreateBatchModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-5">
+              <label className="text-xs font-bold text-gray-500 tracking-wider mb-2 block">BATCH NAME</label>
+              <input 
+                type="text" 
+                autoFocus
+                placeholder="e.g. Batch 1, January Batch..." 
+                className="w-full px-3 py-2 bg-gray-50 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]"
+                value={newBatchName}
+                onChange={(e) => setNewBatchName(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleCreateBatch()}
+              />
+            </div>
+            <div className="p-5 border-t border-gray-100 flex justify-end gap-3 bg-gray-50/50">
+              <button 
+                onClick={() => setIsCreateBatchModalOpen(false)}
+                className="px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-200 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleCreateBatch}
+                disabled={!newBatchName.trim() || isLoading}
+                className="px-4 py-2 text-sm font-semibold text-white bg-primary hover:bg-gray-800 rounded-lg transition-colors disabled:opacity-50"
+              >
+                {isLoading ? 'Creating...' : 'Create Batch'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

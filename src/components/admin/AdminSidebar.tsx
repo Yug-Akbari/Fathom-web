@@ -1,9 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { Suspense, useState, useEffect } from "react";
+import { db } from "@/lib/firebase";
+import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { useAuth } from "@/lib/AuthContext";
 import { 
   LayoutDashboard, 
@@ -35,6 +38,48 @@ const mainNavItems = [
   { name: "Stock Management", href: "/admin/stock-management", icon: Warehouse },
   { name: "Reviews", href: "/admin/reviews", icon: Star },
 ];
+
+function BatchesSubMenu({ pathname, collectionName, basePath }: { pathname: string, collectionName: string, basePath: string }) {
+  const [batches, setBatches] = useState<{id: string, name: string}[]>([]);
+  const searchParams = useSearchParams();
+  const currentBatchId = searchParams?.get("batchId");
+
+  useEffect(() => {
+    const q = query(collection(db, collectionName), orderBy("createdAt", "desc"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetchedBatches: {id: string, name: string}[] = [];
+      snapshot.forEach((doc) => {
+        fetchedBatches.push({ id: doc.id, name: doc.data().name });
+      });
+      setBatches(fetchedBatches);
+    });
+    return () => unsubscribe();
+  }, [collectionName]);
+
+  if (batches.length === 0) return null;
+
+  return (
+    <div className="flex flex-col w-full pl-[52px] relative z-10 mb-2 mt-[-4px]">
+      <div className="absolute left-[39px] top-0 bottom-4 w-px bg-[#333333]"></div>
+      {batches.map((b) => {
+        const isSubActive = pathname === basePath && currentBatchId === b.id;
+        return (
+          <div key={b.id} className="relative flex items-center h-8">
+            <div className="absolute left-[-13px] top-1/2 w-3 h-px bg-[#333333]"></div>
+            <Link 
+              href={`${basePath}?batchId=${b.id}`}
+              className={`text-xs font-semibold hover:text-white transition-colors pl-2 ${
+                isSubActive ? 'text-accent' : 'text-gray-400'
+              }`}
+            >
+              {b.name}
+            </Link>
+          </div>
+        )
+      })}
+    </div>
+  );
+}
 
 export default function AdminSidebar({ className = "" }: { className?: string }) {
   const pathname = usePathname();
@@ -97,6 +142,24 @@ export default function AdminSidebar({ className = "" }: { className?: string })
                     className="absolute inset-0 bg-white/5 border-l-4 border-accent z-0"
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   />
+                )}
+                
+                {item.name === "FBA Accounting" && (
+                  <Suspense fallback={null}>
+                    <BatchesSubMenu pathname={pathname} collectionName="fba_batches" basePath="/admin/accounting" />
+                  </Suspense>
+                )}
+                
+                {item.name === "FBM Accounting" && (
+                  <Suspense fallback={null}>
+                    <BatchesSubMenu pathname={pathname} collectionName="fbm_batches" basePath="/admin/fbm-accounting" />
+                  </Suspense>
+                )}
+                
+                {item.name === "Offline Accounting" && (
+                  <Suspense fallback={null}>
+                    <BatchesSubMenu pathname={pathname} collectionName="offline_batches" basePath="/admin/offline-accounting" />
+                  </Suspense>
                 )}
               </li>
             );
