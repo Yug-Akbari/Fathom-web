@@ -114,13 +114,10 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
   const [specialNotes, setSpecialNotes] = useState("");
 
   // Bank details toggle
-  const [showBankDetails, setShowBankDetails] = useState(true);
+  const [showBankDetails, setShowBankDetails] = useState(false);
 
   // Signature
-  const [showSignature, setShowSignature] = useState(true);
-
-  // Send Mail
-  const [sendMail, setSendMail] = useState(false);
+  const [showSignature, setShowSignature] = useState(false);
 
   // Products from Firebase (for autocomplete)
   const [products, setProducts] = useState<any[]>([]);
@@ -165,8 +162,8 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
           setTransportCharges(data.transportCharges || 0);
           setUnloadingCharges(data.unloadingCharges || 0);
           setSpecialNotes(data.specialNotes || "");
-          setShowBankDetails(data.showBankDetails ?? true);
-          setShowSignature(data.showSignature ?? true);
+          setShowBankDetails(data.showBankDetails ?? false);
+          setShowSignature(data.showSignature ?? false);
         }
       };
       load();
@@ -333,13 +330,6 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
           createdAt: serverTimestamp(),
         });
         docId = docRef.id;
-      }
-
-      if (sendMail && customerEmail) {
-        localStorage.setItem(`sendMail_${docId}`, customerEmail);
-        localStorage.setItem(`sendMailType_${docId}`, invoiceType);
-      } else if (sendMail && !customerEmail) {
-        alert("Invoice saved. Could not schedule email because customer email is missing.");
       }
 
       router.push(`/admin/invoices/${docId}`);
@@ -1096,31 +1086,6 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
 
       {/* Confirm Button */}
       <div className="bg-gradient-to-r from-accent/10 via-accent/5 to-transparent rounded-xl border border-accent/20 p-6 flex flex-col items-center gap-4">
-        <label className="flex items-center gap-3 cursor-pointer group mb-2">
-          <div className="relative">
-            <input
-              type="checkbox"
-              checked={sendMail}
-              onChange={(e) => setSendMail(e.target.checked)}
-              className="sr-only peer"
-            />
-            <div className={`w-5 h-5 rounded-md border-2 transition-all flex items-center justify-center ${
-              sendMail
-                ? 'bg-accent border-accent shadow-sm'
-                : 'bg-white border-accent/50 group-hover:border-accent'
-            }`}>
-              {sendMail && (
-                <svg className="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none">
-                  <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              )}
-            </div>
-          </div>
-          <span className="text-sm font-semibold text-gray-700">
-            Send Email to Customer
-          </span>
-        </label>
-
         <button
           onClick={handleConfirm}
           disabled={isLoading}

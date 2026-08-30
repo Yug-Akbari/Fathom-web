@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { Printer, Download, ArrowLeft, Edit, Trash2, CheckCircle, XCircle } from "lucide-react";
+import { Printer, Download, ArrowLeft, Edit, Trash2, CheckCircle, XCircle, Mail } from "lucide-react";
 import Image from "next/image";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, deleteDoc, updateDoc } from "firebase/firestore";
@@ -139,9 +139,20 @@ export default function InvoicePreviewPage() {
           documentData
         })
       });
-      console.log(`Email sent successfully to ${email}`);
+      alert(`Email sent successfully to ${email}`);
     } catch (err) {
       console.error("Error generating/sending PDF:", err);
+      alert("Failed to send email");
+    }
+  };
+
+  const handleManualSendEmail = () => {
+    if (!invoice?.customerEmail) {
+      alert("No customer email found for this invoice.");
+      return;
+    }
+    if (window.confirm(`Send this invoice to ${invoice.customerEmail}?`)) {
+       generateAndSendPdf(invoice.customerEmail, invoice.invoiceType || "Invoice", invoice.customerName, invoice);
     }
   };
 
@@ -297,6 +308,13 @@ export default function InvoicePreviewPage() {
               Mark as Not Paid
             </button>
           )}
+          <button
+            onClick={handleManualSendEmail}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 transition-colors"
+          >
+            <Mail className="w-4 h-4" />
+            Send Email
+          </button>
           <button
             onClick={handlePrint}
             className="flex items-center gap-2 px-4 py-2 bg-[#947A26] text-white rounded-lg text-sm font-bold hover:bg-[#7a641f] transition-colors"
