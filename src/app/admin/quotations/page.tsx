@@ -45,6 +45,7 @@ interface quotationItem {
 interface quotation {
   id: string;
   quotationNumber: string;
+  quotationType?: "Quotation" | "Quotation (No GST)";
   quotationDate: string;
   deliveryDate: string;
   salesperson: string;
@@ -53,6 +54,7 @@ interface quotation {
   customerPhone: string;
   customerEmail: string;
   customerGst: string;
+  gstApplicable?: boolean;
   billingAddress: string;
   shippingSameAsBilling: boolean;
   shippingAddress: string;
@@ -537,14 +539,23 @@ export default function quotationsPage() {
                     >
                       {/* quotation ID */}
                       <td className="px-6 py-5">
-                        <button
-                          onClick={() =>
-                            router.push(`/admin/quotations/${inv.id}`)
-                          }
-                          className="font-bold text-primary hover:text-accent transition-colors"
-                        >
-                          #{inv.quotationNumber}
-                        </button>
+                        <div className="flex flex-col items-start gap-1">
+                          <button
+                            onClick={() =>
+                              router.push(`/admin/quotations/${inv.id}`)
+                            }
+                            className="font-bold text-primary hover:text-accent transition-colors"
+                          >
+                            #{inv.quotationNumber}
+                          </button>
+                          <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold ${
+                            inv.quotationType === "Quotation (No GST)" || (!inv.quotationType && inv.gstApplicable === false)
+                              ? "bg-gray-100 text-gray-600"
+                              : "bg-amber-50 text-amber-700"
+                          }`}>
+                            {inv.quotationType === "Quotation (No GST)" || (!inv.quotationType && inv.gstApplicable === false) ? "No GST" : "Quotation"}
+                          </span>
+                        </div>
                       </td>
 
                       {/* Customer Info */}

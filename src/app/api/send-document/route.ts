@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     let htmlContent = "";
     let subject = "";
 
-    if (type === "Quotation") {
+    if (type === "Quotation" || type === "Quotation (No GST)" || type.includes("Quotation")) {
       subject = "Your Quotation from FATHOM";
       htmlContent = `
         <p>Hello ${customerName || 'Customer'},</p>

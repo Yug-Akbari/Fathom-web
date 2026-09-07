@@ -36,6 +36,7 @@ import {
 
 interface quotationItem {
   productName: string;
+  hsnCode?: string;
   category: string;
   qty: number;
   rate: number;
@@ -45,6 +46,7 @@ interface quotationItem {
 
 const emptyItem: quotationItem = {
   productName: "",
+  hsnCode: "",
   category: "",
   qty: 1,
   rate: 0,
@@ -52,10 +54,10 @@ const emptyItem: quotationItem = {
   total: 0,
 };
 
-function calculateItemTotal(item: quotationItem, includeGst: boolean): number {
+function calculateItemTotal(item: quotationItem, quotationType: "Quotation" | "Quotation (No GST)"): number {
   const base = item.rate * item.qty;
-  if (includeGst) {
-    const gstAmount = base * (item.gstPercent / 100);
+  if (quotationType === "Quotation") {
+    const gstAmount = base * ((item.gstPercent || 0) / 100);
     return Math.round((base + gstAmount) * 100) / 100;
   }
   return Math.round(base * 100) / 100;
@@ -63,9 +65,12 @@ function calculateItemTotal(item: quotationItem, includeGst: boolean): number {
 
 interface quotationFormProps {
   editId?: string;
+  params?: any;
+  searchParams?: any;
 }
 
-export default function NewquotationPage({ editId }: quotationFormProps = {}) {
+export default function NewquotationPage(props: quotationFormProps = {}) {
+  const editId = props?.editId;
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [isSavingDraft, setIsSavingDraft] = useState(false);
@@ -91,8 +96,8 @@ export default function NewquotationPage({ editId }: quotationFormProps = {}) {
   const [shippingSameAsBilling, setShippingSameAsBilling] = useState(true);
   const [shippingAddress, setShippingAddress] = useState("");
 
-  // GST
-  const [gstApplicable, setGstApplicable] = useState(false);
+  // Quotation Type
+  const [quotationType, setQuotationType] = useState<"Quotation" | "Quotation (No GST)">("Quotation");
   const [customerGst, setCustomerGst] = useState("");
 
   // Payment
@@ -149,7 +154,11 @@ export default function NewquotationPage({ editId }: quotationFormProps = {}) {
           setBillingAddress(data.billingAddress || "");
           setShippingSameAsBilling(data.shippingSameAsBilling ?? true);
           setShippingAddress(data.shippingAddress || "");
-          setGstApplicable(data.gstApplicable ?? false);
+          if (data.quotationType) {
+            setQuotationType(data.quotationType);
+          } else if (data.gstApplicable !== undefined) {
+            setQuotationType(data.gstApplicable ? "Quotation" : "Quotation (No GST)");
+          }
           setCustomerGst(data.customerGst || "");
           setPaymentMode(data.paymentMode || "Card");
           setDueDate(data.dueDate || "");
@@ -168,19 +177,20 @@ export default function NewquotationPage({ editId }: quotationFormProps = {}) {
 
   // Calculations
   const calculations = useMemo(() => {
+    const isGst = quotationType === "Quotation";
     const updatedItems = items.map((item) => ({
       ...item,
-      total: calculateItemTotal(item, gstApplicable),
+      total: calculateItemTotal(item, quotationType),
     }));
 
     const subtotal = updatedItems.reduce(
       (sum, item) => sum + item.rate * item.qty,
       0
     );
-    const totalGst = gstApplicable
+    const totalGst = isGst
       ? updatedItems.reduce(
           (sum, item) =>
-            sum + item.rate * item.qty * (item.gstPercent / 100),
+            sum + item.rate * item.qty * ((item.gstPercent || 0) / 100),
           0
         )
       : 0;
@@ -197,7 +207,7 @@ export default function NewquotationPage({ editId }: quotationFormProps = {}) {
       grandTotal,
       pendingAmount: Math.round(pendingAmount * 100) / 100,
     };
-  }, [items, amountPaid, gstApplicable]);
+  }, [items, amountPaid, quotationType]);
 
   const updateItem = (
     index: number,
@@ -207,7 +217,7 @@ export default function NewquotationPage({ editId }: quotationFormProps = {}) {
     setItems((prev) => {
       const updated = [...prev];
       updated[index] = { ...updated[index], [field]: value };
-      updated[index].total = calculateItemTotal(updated[index], gstApplicable);
+      updated[index].total = calculateItemTotal(updated[index], quotationType);
       return updated;
     });
   };
@@ -233,8 +243,10 @@ export default function NewquotationPage({ editId }: quotationFormProps = {}) {
   };
 
   const buildquotationData = () => {
+    const isGst = quotationType === "Quotation";
     return {
       quotationNumber: editId ? undefined : generatequotationNumber(),
+      quotationType,
       quotationDate,
       deliveryDate,
       companyName,
@@ -250,8 +262,8 @@ export default function NewquotationPage({ editId }: quotationFormProps = {}) {
       shippingAddress: shippingSameAsBilling
         ? billingAddress
         : shippingAddress,
-      gstApplicable,
-      customerGst: gstApplicable ? customerGst : "",
+      gstApplicable: isGst,
+      customerGst: isGst ? customerGst : "",
       paymentMode,
       dueDate,
       amountPaid,
@@ -358,11 +370,51 @@ export default function NewquotationPage({ editId }: quotationFormProps = {}) {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-3xl font-poppins font-bold text-primary mb-1">
-            {editId ? "Edit quotation" : "New Sales quotation"}
+            {editId ? `Edit ${quotationType}` : `New Sales ${quotationType}`}
           </h1>
           <p className="text-gray-500 text-sm">
-            Generate a professional tax quotation for kitchen appliance orders.
+            Generate a professional {quotationType === "Quotation" ? "tax quotation" : "quotation"} for kitchen appliance orders.
           </p>
+          <div className="flex gap-2 mt-4 bg-gray-100 p-1 rounded-lg w-max">
+            <button
+              type="button"
+              onClick={() => {
+                setQuotationType("Quotation");
+                setItems((prev) =>
+                  prev.map((item) => ({
+                    ...item,
+                    total: calculateItemTotal(item, "Quotation"),
+                  }))
+                );
+              }}
+              className={`px-4 py-2 rounded-md text-sm font-semibold transition-all ${
+                quotationType === "Quotation"
+                  ? "bg-white text-accent shadow-sm"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              Quotation
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setQuotationType("Quotation (No GST)");
+                setItems((prev) =>
+                  prev.map((item) => ({
+                    ...item,
+                    total: calculateItemTotal(item, "Quotation (No GST)"),
+                  }))
+                );
+              }}
+              className={`px-4 py-2 rounded-md text-sm font-semibold transition-all ${
+                quotationType === "Quotation (No GST)"
+                  ? "bg-white text-accent shadow-sm"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              Quotation (No GST)
+            </button>
+          </div>
         </div>
         <div className="flex items-center gap-3">
           <button
@@ -567,47 +619,21 @@ export default function NewquotationPage({ editId }: quotationFormProps = {}) {
               </div>
             </div>
 
-            {/* GST Toggle & Number */}
-            <div className="border-t border-gray-100 pt-4 mt-1">
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setGstApplicable(!gstApplicable)}
-                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 focus:outline-none ${
-                    gstApplicable ? "bg-accent" : "bg-gray-300"
-                  }`}
-                >
-                  <span
-                    className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transform transition-transform duration-200 ${
-                      gstApplicable ? "translate-x-[18px]" : "translate-x-[3px]"
-                    }`}
-                  />
-                </button>
-                <label className="text-xs font-bold text-gray-600 uppercase tracking-wide cursor-pointer" onClick={() => setGstApplicable(!gstApplicable)}>
-                  GST Applicable
-                </label>
+            {/* GST Number (when Quotation with GST) */}
+            {quotationType === "Quotation" && (
+              <div className="border-t border-gray-100 pt-4 mt-1">
+                <label className={labelClass}>GST Number (GSTIN)</label>
+                <input
+                  type="text"
+                  value={customerGst}
+                  onChange={(e) => setCustomerGst(e.target.value.toUpperCase())}
+                  placeholder="e.g. 24AABCU9603R1ZM"
+                  maxLength={15}
+                  className={inputClass}
+                />
+                <p className="text-[10px] text-gray-400 mt-1">15-character alphanumeric GST Identification Number</p>
               </div>
-
-              {gstApplicable && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="mt-3"
-                >
-                  <label className={labelClass}>GST Number (GSTIN)</label>
-                  <input
-                    type="text"
-                    value={customerGst}
-                    onChange={(e) => setCustomerGst(e.target.value.toUpperCase())}
-                    placeholder="e.g. 24AABCU9603R1ZM"
-                    maxLength={15}
-                    className={inputClass}
-                  />
-                  <p className="text-[10px] text-gray-400 mt-1">15-character alphanumeric GST Identification Number</p>
-                </motion.div>
-              )}
-            </div>
+            )}
           </div>
         </div>
       </div>
@@ -785,23 +811,29 @@ export default function NewquotationPage({ editId }: quotationFormProps = {}) {
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-gray-100">
-                <th className="pb-3 text-[10px] font-bold tracking-[0.15em] uppercase text-gray-400 w-[30%]">
+                <th className={`pb-3 text-[10px] font-bold tracking-[0.15em] uppercase text-gray-400 ${quotationType === "Quotation" ? "w-[24%]" : "w-[34%]"}`}>
                   Product Name & Category
                 </th>
+
+                {quotationType === "Quotation" && (
+                  <th className="pb-3 text-[10px] font-bold tracking-[0.15em] uppercase text-gray-400 text-center w-[12%]">
+                    HSN
+                  </th>
+                )}
 
                 <th className="pb-3 text-[10px] font-bold tracking-[0.15em] uppercase text-gray-400 text-center w-[10%]">
                   Qty
                 </th>
-                <th className="pb-3 text-[10px] font-bold tracking-[0.15em] uppercase text-gray-400 text-center w-[16%]">
+                <th className="pb-3 text-[10px] font-bold tracking-[0.15em] uppercase text-gray-400 text-center w-[14%]">
                   Rate (₹)
                 </th>
 
-                {gstApplicable && (
+                {quotationType === "Quotation" && (
                   <th className="pb-3 text-[10px] font-bold tracking-[0.15em] uppercase text-gray-400 text-center w-[12%]">
                     GST (%)
                   </th>
                 )}
-                <th className="pb-3 text-[10px] font-bold tracking-[0.15em] uppercase text-gray-400 text-right w-[18%]">
+                <th className="pb-3 text-[10px] font-bold tracking-[0.15em] uppercase text-gray-400 text-right w-[16%]">
                   Total (₹)
                 </th>
                 <th className="pb-3 w-[6%]"></th>
@@ -837,6 +869,20 @@ export default function NewquotationPage({ editId }: quotationFormProps = {}) {
                     />
                   </td>
 
+                  {quotationType === "Quotation" && (
+                    <td className="py-3 px-2">
+                      <input
+                        type="text"
+                        value={item.hsnCode || ""}
+                        onChange={(e) =>
+                          updateItem(index, "hsnCode", e.target.value)
+                        }
+                        placeholder="HSN"
+                        className="w-full text-center px-2 py-2 bg-gray-50 rounded-lg border border-gray-200 text-xs focus:outline-none focus:ring-1 focus:ring-accent"
+                      />
+                    </td>
+                  )}
+
                   <td className="py-3 px-2">
                     <input
                       type="number"
@@ -869,7 +915,7 @@ export default function NewquotationPage({ editId }: quotationFormProps = {}) {
                     />
                   </td>
 
-                  {gstApplicable && (
+                  {quotationType === "Quotation" && (
                     <td className="py-3 px-2">
                       <input
                         type="number"
@@ -889,7 +935,7 @@ export default function NewquotationPage({ editId }: quotationFormProps = {}) {
                   )}
                   <td className="py-3 px-2 text-right">
                     <span className="font-bold text-primary text-sm">
-                      {formatCurrency(calculateItemTotal(item, gstApplicable))}
+                      {formatCurrency(calculateItemTotal(item, quotationType))}
                     </span>
                   </td>
                   <td className="py-3 text-right">
@@ -972,7 +1018,7 @@ export default function NewquotationPage({ editId }: quotationFormProps = {}) {
                 {formatCurrency(calculations.subtotal)}
               </span>
             </div>
-            {gstApplicable && calculations.totalGst > 0 && (
+            {quotationType === "Quotation" && calculations.totalGst > 0 && (
               <div className="flex justify-between">
                 <span className="text-gray-600">GST</span>
                 <span className="font-semibold text-green-600">

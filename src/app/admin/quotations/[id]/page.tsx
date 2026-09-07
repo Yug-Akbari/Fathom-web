@@ -12,6 +12,7 @@ import jsPDF from "jspdf";
 
 interface quotationItem {
   productName: string;
+  hsnCode?: string;
   category: string;
   qty: number;
   rate: number;
@@ -22,6 +23,7 @@ interface quotationItem {
 interface quotation {
   id: string;
   quotationNumber: string;
+  quotationType?: "Quotation" | "Quotation (No GST)";
   quotationDate: string;
   deliveryDate: string;
   companyName: string;
@@ -33,7 +35,7 @@ interface quotation {
   customerPhone: string;
   customerEmail: string;
   customerGst: string;
-  gstApplicable: boolean;
+  gstApplicable?: boolean;
   billingAddress: string;
   shippingSameAsBilling: boolean;
   shippingAddress: string;
@@ -96,7 +98,7 @@ export default function quotationPreviewPage() {
           const sendEmailType = localStorage.getItem(`sendMailType_${quotationId}`);
           if (sendEmailTo) {
              setTimeout(() => {
-                generateAndSendPdf(sendEmailTo, sendEmailType || "Quotation", quotationData.customerName, quotationData);
+                generateAndSendPdf(sendEmailTo, sendEmailType || quotationData.quotationType || "Quotation", quotationData.customerName, quotationData);
                 localStorage.removeItem(`sendMail_${quotationId}`);
                 localStorage.removeItem(`sendMailType_${quotationId}`);
              }, 1500); // Wait for fonts and images to render
@@ -150,7 +152,7 @@ export default function quotationPreviewPage() {
       return;
     }
     if (window.confirm(`Send this quotation to ${quotation.customerEmail}?`)) {
-       generateAndSendPdf(quotation.customerEmail, "Quotation", quotation.customerName, quotation);
+       generateAndSendPdf(quotation.customerEmail, quotation.quotationType || "Quotation", quotation.customerName, quotation);
     }
   };
 
@@ -248,6 +250,8 @@ export default function quotationPreviewPage() {
     );
   }
 
+  const cgst = (quotation.totalGst || 0) / 2;
+  const sgst = (quotation.totalGst || 0) / 2;
 
   return (
     <>
@@ -353,7 +357,7 @@ export default function quotationPreviewPage() {
               </div>
               
               <div className="text-right">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4 font-serif">Quotation</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4 font-serif">{quotation.quotationType || "Quotation"}</h2>
                 <div className="text-xs text-gray-500 leading-relaxed uppercase tracking-wider">
                   <p>Date: <span className="text-gray-900 font-medium">{formatDate(quotation.quotationDate)}</span></p>
                   <p>Due Date: <span className="text-gray-900 font-medium">{quotation.dueDate ? formatDate(quotation.dueDate) : "On Receipt"}</span></p>
@@ -380,42 +384,51 @@ export default function quotationPreviewPage() {
                 <div className="mt-4 space-y-1">
                   {quotation.customerEmail && <p><span className="font-semibold text-gray-800">Email:</span> {quotation.customerEmail}</p>}
                   {quotation.customerPhone && <p><span className="font-semibold text-gray-800">Contact:</span> {quotation.customerPhone}</p>}
-                  {quotation.gstApplicable && quotation.customerGst && <p><span className="font-semibold text-gray-800">GSTIN:</span> {quotation.customerGst}</p>}
+                  {(quotation.quotationType ? quotation.quotationType === "Quotation" : quotation.gstApplicable) && quotation.customerGst && (
+                    <p><span className="font-semibold text-gray-800">GSTIN:</span> {quotation.customerGst}</p>
+                  )}
                 </div>
               </div>
             </div>
 
             {/* Products Table */}
-            <div className="mb-10 rounded-lg overflow-hidden flex flex-col pt-4 relative z-10">
-              <div className={`bg-[#f9fafb]/90 print:bg-transparent px-5 py-3 grid ${quotation.gstApplicable ? 'grid-cols-[3fr_0.5fr_1fr_0.7fr_1fr]' : 'grid-cols-[3fr_0.5fr_1fr_1fr]'} gap-2 items-center text-[9px] font-bold tracking-wider uppercase text-gray-500 rounded-t-lg`}>
-                <div>PRODUCT DESCRIPTION</div>
-                <div className="text-center">QTY</div>
-                <div className="text-right">RATE</div>
-                {quotation.gstApplicable && <div className="text-center">GST %</div>}
-                <div className="text-right">TOTAL (INR)</div>
-              </div>
-              
-              <div className="flex flex-col text-xs divide-y divide-gray-100 bg-white/60 print:bg-transparent">
-                {(!quotation.items || quotation.items.length === 0) ? (
-                   <div className="py-8 text-center text-gray-400 italic">No items</div>
-                ) : (
-                  quotation.items.map((item, i) => {
-                    return (
-                      <div key={i} className={`px-5 py-5 grid ${quotation.gstApplicable ? 'grid-cols-[3fr_0.5fr_1fr_0.7fr_1fr]' : 'grid-cols-[3fr_0.5fr_1fr_1fr]'} gap-2 items-center text-gray-600`}>
-                        <div>
-                          <p className="font-bold text-gray-900 mb-1">{item.productName || "—"}</p>
-                          {item.category && <p className="text-[10px] text-gray-500 leading-tight">{item.category}</p>}
-                        </div>
-                        <div className="text-center font-medium text-gray-800">{String(item.qty).padStart(2, "0")}</div>
-                        <div className="text-right">{formatCurrency(item.rate)}</div>
-                        {quotation.gstApplicable && <div className="text-center text-gray-600">{item.gstPercent || 0}%</div>}
-                        <div className="text-right font-bold text-gray-900">{formatCurrency(item.total)}</div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
+            {(() => {
+              const isGst = quotation.quotationType ? quotation.quotationType === "Quotation" : quotation.gstApplicable;
+              return (
+                <div className="mb-10 rounded-lg overflow-hidden flex flex-col pt-4 relative z-10">
+                  <div className={`bg-[#f9fafb]/90 print:bg-transparent px-5 py-3 grid ${isGst ? 'grid-cols-[2.8fr_0.8fr_0.5fr_1fr_0.7fr_1.2fr]' : 'grid-cols-[3fr_0.5fr_1fr_1fr]'} gap-2 items-center text-[9px] font-bold tracking-wider uppercase text-gray-500 rounded-t-lg`}>
+                    <div>PRODUCT DESCRIPTION</div>
+                    {isGst && <div className="text-center">HSN</div>}
+                    <div className="text-center">QTY</div>
+                    <div className="text-right">RATE</div>
+                    {isGst && <div className="text-center">GST %</div>}
+                    <div className="text-right">TOTAL (INR)</div>
+                  </div>
+                  
+                  <div className="flex flex-col text-xs divide-y divide-gray-100 bg-white/60 print:bg-transparent">
+                    {(!quotation.items || quotation.items.length === 0) ? (
+                       <div className="py-8 text-center text-gray-400 italic">No items</div>
+                    ) : (
+                      quotation.items.map((item, i) => {
+                        return (
+                          <div key={i} className={`px-5 py-5 grid ${isGst ? 'grid-cols-[2.8fr_0.8fr_0.5fr_1fr_0.7fr_1.2fr]' : 'grid-cols-[3fr_0.5fr_1fr_1fr]'} gap-2 items-center text-gray-600`}>
+                            <div>
+                              <p className="font-bold text-gray-900 mb-1">{item.productName || "—"}</p>
+                              {item.category && <p className="text-[10px] text-gray-500 leading-tight">{item.category}</p>}
+                            </div>
+                            {isGst && <div className="text-center font-medium text-gray-800">{item.hsnCode || "—"}</div>}
+                            <div className="text-center font-medium text-gray-800">{String(item.qty).padStart(2, "0")}</div>
+                            <div className="text-right">{formatCurrency(item.rate)}</div>
+                            {isGst && <div className="text-center text-gray-600">{item.gstPercent || 0}%</div>}
+                            <div className="text-right font-bold text-gray-900">{formatCurrency(item.total)}</div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Bottom Details Section */}
             <div className="grid grid-cols-[1fr_1.1fr] gap-8 mb-12">
@@ -472,11 +485,21 @@ export default function quotationPreviewPage() {
                     <span>Subtotal:</span>
                     <span className="font-semibold text-gray-900">{formatCurrency(quotation.subtotal)}</span>
                   </div>
-                  {quotation.gstApplicable && quotation.totalGst > 0 && (
-                  <div className="flex justify-between text-gray-500">
-                    <span>GST:</span>
-                    <span className="text-green-600 font-semibold">+{formatCurrency(quotation.totalGst)}</span>
-                  </div>
+                  {(quotation.quotationType ? quotation.quotationType === "Quotation" : quotation.gstApplicable) && quotation.totalGst > 0 && (
+                    <>
+                      <div className="flex justify-between text-gray-500">
+                        <span>CGST ({(quotation.items?.[0]?.gstPercent || 18) / 2}%):</span>
+                        <span>{formatCurrency(cgst)}</span>
+                      </div>
+                      <div className="flex justify-between text-gray-500">
+                        <span>SGST ({(quotation.items?.[0]?.gstPercent || 18) / 2}%):</span>
+                        <span>{formatCurrency(sgst)}</span>
+                      </div>
+                      <div className="flex justify-between text-gray-500">
+                        <span>IGST (0%):</span>
+                        <span>₹0.00</span>
+                      </div>
+                    </>
                   )}
                 </div>
 
@@ -488,6 +511,18 @@ export default function quotationPreviewPage() {
                   <p className="text-[8px] tracking-[0.05em] text-gray-400 text-center mt-3 uppercase font-medium">
                     {amountInWords(quotation.grandTotal)}
                   </p>
+                </div>
+
+                {/* Amount Paid / Pending section */}
+                <div className="mt-6 px-2 space-y-2 border-t border-gray-100 pt-4">
+                   <div className="flex justify-between text-green-700 font-medium">
+                     <span>Amount Paid:</span>
+                     <span>{formatCurrency(quotation.amountPaid || 0)}</span>
+                   </div>
+                   <div className="flex justify-between text-red-600 font-bold">
+                     <span>Balance Due:</span>
+                     <span>{formatCurrency(quotation.pendingAmount || 0)}</span>
+                   </div>
                 </div>
               </div>
             </div>

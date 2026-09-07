@@ -1,6 +1,7 @@
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import NotificationBell from "@/components/admin/NotificationBell";
 import AdminGuard from "@/components/admin/AdminGuard";
+import AdminHeaderUser from "@/components/admin/AdminHeaderUser";
 
 export const metadata = {
   title: "Admin Portal | FATHOM",
@@ -29,15 +30,7 @@ export default function AdminLayout({
             <div className="flex items-center gap-4">
               <NotificationBell />
               <div className="w-px h-8 bg-gray-200"></div>
-              <div className="flex items-center gap-3">
-                <div className="text-right">
-                  <div className="text-sm font-bold">Admin User</div>
-                  <div className="text-[10px] text-gray-400 uppercase tracking-widest">Super Admin</div>
-                </div>
-                <div className="w-10 h-10 rounded-full bg-gray-800 text-white flex items-center justify-center font-poppins font-bold text-sm">
-                  AU
-                </div>
-              </div>
+              <AdminHeaderUser />
             </div>
           </header>
 

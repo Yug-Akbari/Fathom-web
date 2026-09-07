@@ -98,12 +98,15 @@ export default function AdminSidebar({ className = "" }: { className?: string })
     <aside className={`bg-primary flex flex-col h-full border-r border-[#222222] ${className}`}>
       {/* Brand Header */}
       <div className="h-20 flex items-center px-8 border-b border-[#222222] shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-5 h-5 bg-accent rounded-sm transform rotate-45"></div>
-          <span className="font-poppins font-bold text-xl tracking-widest text-white uppercase">
-            Fathom
-          </span>
-        </div>
+        <Link href="/admin" className="flex items-center">
+          <Image 
+            src="/images/fathom-logo-transparent.png" 
+            alt="Fathom Logo" 
+            width={140} 
+            height={40} 
+            className="object-contain brightness-0 invert"
+          />
+        </Link>
       </div>
 
       {/* Navigation Links */}
