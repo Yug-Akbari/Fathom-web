@@ -5,16 +5,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, updateDoc, collection, onSnapshot } from "firebase/firestore";
-interface APlusNamedSlide {
-  title: string;
-  desktopImage: string;
-  mobileImage: string;
-}
-
-interface APlusCarouselSlide {
-  desktopImage: string;
-  mobileImage: string;
-}
+import { APlusBlock } from "@/lib/data";
 
 export default function ProductEditor({ params }: { params: { id: string } }) {
   const [isInitializing, setIsInitializing] = useState(true);
@@ -57,8 +48,7 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
   ]);
 
   // A+ Content State
-  const [namedSlides, setNamedSlides] = useState<APlusNamedSlide[]>([]);
-  const [carouselSlides, setCarouselSlides] = useState<APlusCarouselSlide[]>([]);
+  const [aPlusContent, setAPlusContent] = useState<APlusBlock[]>([]);
   const [isUploadingAPlus, setIsUploadingAPlus] = useState(false);
 
   const addSpec = () => {
@@ -130,6 +120,49 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
     });
   };
 
+  const uploadAPlusImage = async (file: File): Promise<string | null> => {
+    setIsUploadingAPlus(true);
+    try {
+      const compressedBase64 = await compressImage(file);
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageBase64: compressedBase64, filename: file.name })
+      });
+      if (!res.ok) throw new Error("Upload failed");
+      const data = await res.json();
+      return data.url;
+    } catch (err) {
+      console.error(err);
+      alert("Failed to upload A+ image.");
+      return null;
+    } finally {
+      setIsUploadingAPlus(false);
+    }
+  };
+
+  // APlus Image Handler
+  const handleAPlusImage = async (blockId: string, type: 'desktop' | 'mobile', e: React.ChangeEvent<HTMLInputElement>, slideIdx?: number) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = await uploadAPlusImage(file);
+    if (url) {
+      setAPlusContent(prev => prev.map(block => {
+        if (block.id !== blockId) return block;
+        if (block.type === 'standalone') {
+          return { ...block, [type === 'desktop' ? 'desktopImage' : 'mobileImage']: url };
+        } else if (block.type === 'named_slide_group' || block.type === 'carousel_group') {
+          const b = block as any;
+          if (slideIdx === undefined || !b.slides) return block;
+          const newSlides = [...b.slides];
+          newSlides[slideIdx] = { ...newSlides[slideIdx], [type === 'desktop' ? 'desktopImage' : 'mobileImage']: url };
+          return { ...block, slides: newSlides };
+        }
+        return block;
+      }) as APlusBlock[]);
+    }
+  };
+
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -163,8 +196,28 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
           }
 
           if (d.aPlusContent) {
-            if (d.aPlusContent.namedSlides) setNamedSlides(d.aPlusContent.namedSlides);
-            if (d.aPlusContent.carouselSlides) setCarouselSlides(d.aPlusContent.carouselSlides);
+            if (Array.isArray(d.aPlusContent)) {
+              setAPlusContent(d.aPlusContent);
+            } else {
+              // Backward compatibility migration from old object structure to new block array
+              const blocks: APlusBlock[] = [];
+              if (d.aPlusContent.standaloneImages) {
+                d.aPlusContent.standaloneImages.forEach((img: any, i: number) => {
+                  blocks.push({ id: `migrated_sa_${i}`, type: 'standalone', desktopImage: img.desktopImage, mobileImage: img.mobileImage });
+                });
+              }
+              if (d.aPlusContent.namedSlideGroups) {
+                d.aPlusContent.namedSlideGroups.forEach((g: any, i: number) => {
+                  blocks.push({ id: `migrated_nsg_${i}`, type: 'named_slide_group', slides: g.slides || [] });
+                });
+              }
+              if (d.aPlusContent.carouselGroups) {
+                d.aPlusContent.carouselGroups.forEach((g: any, i: number) => {
+                  blocks.push({ id: `migrated_cg_${i}`, type: 'carousel_group', slides: g.slides || [] });
+                });
+              }
+              setAPlusContent(blocks);
+            }
           }
         }
       } catch (e) {
@@ -278,10 +331,7 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
         desc: visibility.mainPanel ? desc : "",
         image: [...existingUrls, ...imageUrls].length > 0 ? [...existingUrls, ...imageUrls][0] : "", // Cover image
         images: [...existingUrls, ...imageUrls], // Array of all appended images
-        aPlusContent: {
-          namedSlides: namedSlides.filter(s => s.title && s.desktopImage),
-          carouselSlides: carouselSlides.filter(s => s.desktopImage)
-        },
+        aPlusContent,
       });
 
       if (failedUploads.length > 0) {
@@ -604,17 +654,62 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
 
           {/* Media Gallery */}
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-8">
-             <h3 className="text-[10px] font-bold tracking-[0.2em] uppercase text-primary mb-6">Media Gallery</h3>
+             <div className="flex justify-between items-center mb-6">
+                <h3 className="text-[10px] font-bold tracking-[0.2em] uppercase text-primary">Media Gallery</h3>
+             </div>
              
              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                {/* Previews */}
                {imagePreviews.map((preview, i) => (
-                 <div key={i} className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden border border-gray-200 group">
-                    {i === 0 && <div className="absolute top-2 left-2 z-10 bg-accent text-white px-2 py-0.5 rounded text-[8px] font-bold tracking-widest uppercase shadow-sm">Cover</div>}
-                    <Image src={preview} alt={`Preview ${i}`} fill className="object-cover" />
+                 <div 
+                   key={i} 
+                   draggable
+                   onDragStart={(e) => {
+                     e.dataTransfer.setData('text/plain', i.toString());
+                   }}
+                   onDragOver={(e) => {
+                     e.preventDefault();
+                   }}
+                   onDrop={(e) => {
+                     e.preventDefault();
+                     const draggedIdx = parseInt(e.dataTransfer.getData('text/plain'));
+                     if (draggedIdx === i || isNaN(draggedIdx)) return;
+                     
+                     // Reorder previews
+                     setImagePreviews(prev => {
+                       const newPreviews = [...prev];
+                       const [draggedItem] = newPreviews.splice(draggedIdx, 1);
+                       newPreviews.splice(i, 0, draggedItem);
+                       return newPreviews;
+                     });
+
+                     // Reorder files
+                     if (typeof setImageFiles !== 'undefined') {
+                       setImageFiles(prev => {
+                         const newFiles = [...prev];
+                         const [draggedFile] = newFiles.splice(draggedIdx, 1);
+                         newFiles.splice(i, 0, draggedFile);
+                         return newFiles;
+                       });
+                     }
+
+                     // Reorder base64 strings
+                     if (typeof setImagesBase64 !== 'undefined') {
+                       setImagesBase64(prev => {
+                         const newBase64 = [...prev];
+                         const [draggedBase64] = newBase64.splice(draggedIdx, 1);
+                         newBase64.splice(i, 0, draggedBase64);
+                         return newBase64;
+                       });
+                     }
+                   }}
+                   className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden border border-gray-200 group cursor-move"
+                 >
+                    {i === 0 && <div className="absolute top-2 left-2 z-10 bg-accent text-white px-2 py-0.5 rounded text-[8px] font-bold tracking-widest uppercase shadow-sm pointer-events-none">Cover</div>}
+                    <Image src={preview} alt={`Preview ${i}`} fill className="object-cover pointer-events-none" />
                     
                     {/* Delete overlay */}
-                    <div className="absolute inset-0 bg-red-500/80 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex items-center justify-center cursor-pointer" onClick={() => removeImage(i)}>
+                    <div className="absolute inset-0 bg-red-500/80 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex items-center justify-center cursor-pointer" onClick={(e) => { e.stopPropagation(); removeImage(i); }}>
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     </div>
                  </div>
@@ -639,110 +734,177 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
              </div>
 
              <p className="text-[10px] text-gray-400 mt-6 leading-relaxed">
-               Recommended: 2048x2048px JPG or PNG.
+               Recommended: 2048x2048px JPG or PNG. Drag and drop images to rearrange them.
              </p>
           </div>
 
-          {/* A+ Premium Content */}
+          {/* A+ Premium Content (Block Builder) */}
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-8">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-[10px] font-bold tracking-[0.2em] uppercase text-primary">A+ Premium Content</h3>
+              <h3 className="text-[10px] font-bold tracking-[0.2em] uppercase text-primary">A+ Premium Content Builder</h3>
               {isUploadingAPlus && <span className="text-xs text-accent animate-pulse font-bold">Uploading...</span>}
             </div>
+            <p className="text-[10px] text-gray-400 mb-8">Build your custom A+ content layout by adding blocks. Drag blocks to reorder them.</p>
 
-            {/* Named Slides Section */}
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="text-sm font-bold text-gray-800">Named Slides (Tabs)</h4>
-                <button onClick={() => setNamedSlides([...namedSlides, { title: "", desktopImage: "", mobileImage: "" }])} className="text-xs font-bold text-accent hover:text-primary transition-colors flex items-center gap-1">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg> Add Slide
-                </button>
-              </div>
-              <div className="space-y-4">
-                {namedSlides.map((slide, i) => (
-                  <div key={i} className="p-4 border border-gray-100 rounded-lg bg-gray-50/50 relative group">
-                    <button onClick={() => setNamedSlides(namedSlides.filter((_, idx) => idx !== i))} className="absolute top-2 right-2 text-gray-400 hover:text-red-500">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            {/* Blocks List */}
+            <div className="space-y-6 mb-8">
+              {aPlusContent.map((block, bi) => (
+                <div 
+                  key={block.id}
+                  draggable
+                  onDragStart={(e) => e.dataTransfer.setData('blockIdx', bi.toString())}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const draggedIdx = parseInt(e.dataTransfer.getData('blockIdx'));
+                    if (draggedIdx === bi || isNaN(draggedIdx)) return;
+                    setAPlusContent(prev => {
+                      const updated = [...prev];
+                      const [dragged] = updated.splice(draggedIdx, 1);
+                      updated.splice(bi, 0, dragged);
+                      return updated;
+                    });
+                  }}
+                  className="border-2 border-gray-100 rounded-xl p-5 bg-white relative group/block shadow-sm"
+                >
+                  {/* Block Header */}
+                  <div className="flex items-center justify-between mb-6 cursor-move pb-4 border-b border-gray-100">
+                    <div className="flex items-center gap-2">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-gray-300"><path d="M8 6h8M8 12h8M8 18h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      <span className="text-xs font-bold text-gray-800 uppercase tracking-widest">
+                        {block.type === 'standalone' ? 'Standalone Banner' : block.type === 'named_slide_group' ? 'Named Slides (Tabs)' : 'Arrow Carousel'}
+                      </span>
+                    </div>
+                    <button onClick={() => setAPlusContent(prev => prev.filter((_, idx) => idx !== bi))} className="text-gray-300 hover:text-red-500 transition-colors w-6 h-6 rounded-full hover:bg-red-50 flex items-center justify-center">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     </button>
-                    <input 
-                      type="text" 
-                      placeholder="Slide Title (e.g. Smart Specs)" 
-                      value={slide.title}
-                      onChange={(e) => {
-                        const updated = [...namedSlides];
-                        updated[i].title = e.target.value;
-                        setNamedSlides(updated);
-                      }}
-                      className="w-full bg-white border border-gray-200 rounded p-2 text-sm mb-3 outline-none focus:border-accent"
-                    />
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Desktop Image</label>
-                        {slide.desktopImage ? (
-                          <div className="relative h-20 w-full rounded overflow-hidden">
-                            <Image src={slide.desktopImage} alt="Desktop" fill className="object-cover" />
-                          </div>
+                  </div>
+
+                  {/* Block Content */}
+                  {block.type === 'standalone' && (
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {/* Standalone Image Grid UI */}
+                      <div className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden border border-gray-200 group">
+                        <div className="absolute top-2 left-2 z-10 bg-black/50 text-white px-2 py-0.5 rounded text-[8px] font-bold tracking-widest uppercase shadow-sm pointer-events-none">
+                          {block.desktopImage && block.mobileImage ? 'Ready' : 'Incomplete'}
+                        </div>
+                        {block.desktopImage ? (
+                          <Image src={block.desktopImage} alt="Desktop" fill className="object-cover pointer-events-none" />
                         ) : (
-                          <input type="file" accept="image/*" onChange={(e) => handleNamedSlideImage(i, 'desktop', e)} className="text-xs w-full" />
-                        )}
-                      </div>
-                      <div>
-                        <label className="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Mobile Image</label>
-                        {slide.mobileImage ? (
-                          <div className="relative h-20 w-full rounded overflow-hidden">
-                            <Image src={slide.mobileImage} alt="Mobile" fill className="object-cover" />
+                          <div className="flex flex-col items-center justify-center w-full h-full text-gray-400 bg-gray-50 border-2 border-dashed border-gray-200">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="mb-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-center px-2">Upload Image</span>
                           </div>
-                        ) : (
-                          <input type="file" accept="image/*" onChange={(e) => handleNamedSlideImage(i, 'mobile', e)} className="text-xs w-full" />
                         )}
+                        <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex flex-col items-center justify-center gap-3">
+                          <label className="text-[10px] font-bold text-white border border-white/30 bg-black/40 px-3 py-1.5 rounded cursor-pointer hover:bg-white hover:text-black transition-colors w-32 text-center mt-4">
+                            {block.desktopImage ? 'Update Desktop' : 'Add Desktop'}
+                            <input type="file" accept="image/*" onChange={(e) => handleAPlusImage(block.id, 'desktop', e)} className="hidden" />
+                          </label>
+                          <label className="text-[10px] font-bold text-white border border-white/30 bg-black/40 px-3 py-1.5 rounded cursor-pointer hover:bg-white hover:text-black transition-colors w-32 text-center">
+                            {block.mobileImage ? 'Update Mobile' : 'Add Mobile'}
+                            <input type="file" accept="image/*" onChange={(e) => handleAPlusImage(block.id, 'mobile', e)} className="hidden" />
+                          </label>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-                {namedSlides.length === 0 && <p className="text-xs text-gray-400 italic">No named slides added.</p>}
-              </div>
+                  )}
+
+                  {(block.type === 'named_slide_group' || block.type === 'carousel_group') && (
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {(block as any).slides?.map((slide: any, si: number) => (
+                        <div 
+                          key={si}
+                          draggable
+                          onDragStart={(e) => e.dataTransfer.setData('slideIdx', si.toString())}
+                          onDragOver={(e) => e.preventDefault()}
+                          onDrop={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const draggedIdx = parseInt(e.dataTransfer.getData('slideIdx'));
+                            if (draggedIdx === si || isNaN(draggedIdx)) return;
+                            setAPlusContent(prev => prev.map(b => {
+                              if (b.id !== block.id || !(b as any).slides) return b;
+                              const updatedSlides = [...(b as any).slides];
+                              const [dragged] = updatedSlides.splice(draggedIdx, 1);
+                              updatedSlides.splice(si, 0, dragged);
+                              return { ...b, slides: updatedSlides };
+                            }) as APlusBlock[]);
+                          }}
+                          className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden border border-gray-200 group cursor-move"
+                        >
+                          <div className="absolute top-2 left-2 z-10 bg-black/50 text-white px-2 py-0.5 rounded text-[8px] font-bold tracking-widest uppercase shadow-sm pointer-events-none">
+                            {slide.desktopImage && slide.mobileImage ? (block.type === 'named_slide_group' && !slide.title ? 'Missing Title' : 'Ready') : 'Incomplete'}
+                          </div>
+                          
+                          {block.type === 'named_slide_group' && (
+                            <div className="absolute top-8 left-2 right-2 z-10">
+                              <input 
+                                type="text" 
+                                placeholder="Tab Name..." 
+                                value={slide.title || ''}
+                                onChange={(e) => setAPlusContent(prev => prev.map(b => b.id === block.id && b.type === 'named_slide_group' ? { ...b, slides: (b as any).slides.map((s: any, idx: number) => idx === si ? { ...s, title: e.target.value } : s) } : b) as APlusBlock[])}
+                                onClick={(e) => e.stopPropagation()}
+                                className="w-full bg-black/50 border border-white/20 rounded px-2 py-1 text-[10px] text-white placeholder-white/50 outline-none focus:bg-black/80"
+                              />
+                            </div>
+                          )}
+
+                          {slide.desktopImage ? (
+                            <Image src={slide.desktopImage} alt="Desktop" fill className="object-cover pointer-events-none" />
+                          ) : (
+                            <div className="flex flex-col items-center justify-center w-full h-full text-gray-400 bg-gray-50 border-2 border-dashed border-gray-200">
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="mb-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            </div>
+                          )}
+
+                          <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex flex-col items-center justify-center gap-3">
+                            <button onClick={(e) => { e.stopPropagation(); setAPlusContent(prev => prev.map(b => b.id === block.id ? { ...b, slides: (b as any).slides?.filter((_: any, idx: number) => idx !== si) } : b) as APlusBlock[]); }} className="absolute top-2 right-2 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors shadow-md z-20">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            </button>
+                            <label className="text-[10px] font-bold text-white border border-white/30 bg-black/40 px-3 py-1.5 rounded cursor-pointer hover:bg-white hover:text-black transition-colors w-32 text-center mt-4">
+                              {slide.desktopImage ? 'Update Desktop' : 'Add Desktop'}
+                              <input type="file" accept="image/*" onChange={(e) => handleAPlusImage(block.id, 'desktop', e, si)} className="hidden" />
+                            </label>
+                            <label className="text-[10px] font-bold text-white border border-white/30 bg-black/40 px-3 py-1.5 rounded cursor-pointer hover:bg-white hover:text-black transition-colors w-32 text-center">
+                              {slide.mobileImage ? 'Update Mobile' : 'Add Mobile'}
+                              <input type="file" accept="image/*" onChange={(e) => handleAPlusImage(block.id, 'mobile', e, si)} className="hidden" />
+                            </label>
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Add Slide Button */}
+                      <div 
+                        onClick={() => setAPlusContent(prev => prev.map(b => b.id === block.id ? { ...b, slides: [...((b as any).slides || []), { title: "", desktopImage: "", mobileImage: "" }] } : b) as APlusBlock[])}
+                        className="relative aspect-square bg-[#FAF9F6] border-2 border-dashed border-gray-200 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:text-primary hover:border-gray-400 hover:bg-gray-50 transition-colors cursor-pointer group"
+                      >
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="mb-2 group-hover:-translate-y-1 transition-transform"><path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        <span className="text-[10px] font-bold tracking-widest uppercase text-center px-4">Add Empty<br/>Image Slot</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+              {aPlusContent.length === 0 && (
+                <div className="text-center py-10 bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl">
+                  <p className="text-sm font-bold text-gray-400">No A+ content blocks yet.</p>
+                  <p className="text-xs text-gray-400 mt-1">Click a button below to add your first block.</p>
+                </div>
+              )}
             </div>
 
-            {/* Carousel Slides Section */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="text-sm font-bold text-gray-800">Arrow Carousel</h4>
-                <button onClick={() => setCarouselSlides([...carouselSlides, { desktopImage: "", mobileImage: "" }])} className="text-xs font-bold text-accent hover:text-primary transition-colors flex items-center gap-1">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg> Add Slide
-                </button>
-              </div>
-              <div className="space-y-4">
-                {carouselSlides.map((slide, i) => (
-                  <div key={i} className="p-4 border border-gray-100 rounded-lg bg-gray-50/50 relative group">
-                    <button onClick={() => setCarouselSlides(carouselSlides.filter((_, idx) => idx !== i))} className="absolute top-2 right-2 text-gray-400 hover:text-red-500">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                    </button>
-                    <div className="grid grid-cols-2 gap-4 mt-4">
-                      <div>
-                        <label className="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Desktop Image</label>
-                        {slide.desktopImage ? (
-                          <div className="relative h-20 w-full rounded overflow-hidden">
-                            <Image src={slide.desktopImage} alt="Desktop" fill className="object-cover" />
-                          </div>
-                        ) : (
-                          <input type="file" accept="image/*" onChange={(e) => handleCarouselSlideImage(i, 'desktop', e)} className="text-xs w-full" />
-                        )}
-                      </div>
-                      <div>
-                        <label className="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Mobile Image</label>
-                        {slide.mobileImage ? (
-                          <div className="relative h-20 w-full rounded overflow-hidden">
-                            <Image src={slide.mobileImage} alt="Mobile" fill className="object-cover" />
-                          </div>
-                        ) : (
-                          <input type="file" accept="image/*" onChange={(e) => handleCarouselSlideImage(i, 'mobile', e)} className="text-xs w-full" />
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                {carouselSlides.length === 0 && <p className="text-xs text-gray-400 italic">No carousel slides added.</p>}
-              </div>
+            {/* Add Block Toolbar */}
+            <div className="flex flex-wrap gap-4 pt-6 border-t border-gray-100">
+              <button onClick={() => setAPlusContent(prev => [...prev, { id: Date.now().toString(), type: 'standalone', desktopImage: '', mobileImage: '' }])} className="px-4 py-3 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg text-[10px] font-bold tracking-widest uppercase text-gray-700 transition-colors flex items-center gap-2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg> Add Standalone Image
+              </button>
+              <button onClick={() => setAPlusContent(prev => [...prev, { id: Date.now().toString() + '1', type: 'named_slide_group', slides: [] }])} className="px-4 py-3 bg-accent/5 hover:bg-accent/10 border border-accent/20 rounded-lg text-[10px] font-bold tracking-widest uppercase text-accent transition-colors flex items-center gap-2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg> Add Named Slides
+              </button>
+              <button onClick={() => setAPlusContent(prev => [...prev, { id: Date.now().toString() + '2', type: 'carousel_group', slides: [] }])} className="px-4 py-3 bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg text-[10px] font-bold tracking-widest uppercase text-primary transition-colors flex items-center gap-2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg> Add Carousel
+              </button>
             </div>
           </div>
 

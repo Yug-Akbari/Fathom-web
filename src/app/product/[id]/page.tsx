@@ -94,7 +94,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
     "@type": "Product",
     name: product.name,
     description: product.desc || `${product.name} by FATHOM — premium Food Dehydrator, Dehydrator & Food Dryer.`,
-    image: product.images?.length > 0 ? product.images : [product.image],
+    image: (product.images?.length || 0) > 0 ? product.images : [product.image],
     brand: { "@type": "Brand", name: "FATHOM" },
     offers: {
       "@type": "Offer",
