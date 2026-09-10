@@ -14,6 +14,5 @@ export interface Product {
     isFeatured?: boolean;
     isBestSeller?: boolean;
     isMainPanel?: boolean;
+    aPlusContent?: any;
 }
-
-

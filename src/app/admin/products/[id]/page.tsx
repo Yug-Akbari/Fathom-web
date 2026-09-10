@@ -5,6 +5,16 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, updateDoc, collection, onSnapshot } from "firebase/firestore";
+interface APlusNamedSlide {
+  title: string;
+  desktopImage: string;
+  mobileImage: string;
+}
+
+interface APlusCarouselSlide {
+  desktopImage: string;
+  mobileImage: string;
+}
 
 export default function ProductEditor({ params }: { params: { id: string } }) {
   const [isInitializing, setIsInitializing] = useState(true);
@@ -45,6 +55,11 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
     { key: "CAPACITY", value: "" },
     { key: "FINISH", value: "" },
   ]);
+
+  // A+ Content State
+  const [namedSlides, setNamedSlides] = useState<APlusNamedSlide[]>([]);
+  const [carouselSlides, setCarouselSlides] = useState<APlusCarouselSlide[]>([]);
+  const [isUploadingAPlus, setIsUploadingAPlus] = useState(false);
 
   const addSpec = () => {
     setSpecs([...specs, { key: "", value: "" }]);
@@ -145,6 +160,11 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
              // but we will send these existing URLs back up during save
           } else if (d.image) {
              setImagePreviews([d.image]);
+          }
+
+          if (d.aPlusContent) {
+            if (d.aPlusContent.namedSlides) setNamedSlides(d.aPlusContent.namedSlides);
+            if (d.aPlusContent.carouselSlides) setCarouselSlides(d.aPlusContent.carouselSlides);
           }
         }
       } catch (e) {
@@ -258,6 +278,10 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
         desc: visibility.mainPanel ? desc : "",
         image: [...existingUrls, ...imageUrls].length > 0 ? [...existingUrls, ...imageUrls][0] : "", // Cover image
         images: [...existingUrls, ...imageUrls], // Array of all appended images
+        aPlusContent: {
+          namedSlides: namedSlides.filter(s => s.title && s.desktopImage),
+          carouselSlides: carouselSlides.filter(s => s.desktopImage)
+        },
       });
 
       if (failedUploads.length > 0) {
@@ -617,6 +641,109 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
              <p className="text-[10px] text-gray-400 mt-6 leading-relaxed">
                Recommended: 2048x2048px JPG or PNG.
              </p>
+          </div>
+
+          {/* A+ Premium Content */}
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-8">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-[10px] font-bold tracking-[0.2em] uppercase text-primary">A+ Premium Content</h3>
+              {isUploadingAPlus && <span className="text-xs text-accent animate-pulse font-bold">Uploading...</span>}
+            </div>
+
+            {/* Named Slides Section */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="text-sm font-bold text-gray-800">Named Slides (Tabs)</h4>
+                <button onClick={() => setNamedSlides([...namedSlides, { title: "", desktopImage: "", mobileImage: "" }])} className="text-xs font-bold text-accent hover:text-primary transition-colors flex items-center gap-1">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg> Add Slide
+                </button>
+              </div>
+              <div className="space-y-4">
+                {namedSlides.map((slide, i) => (
+                  <div key={i} className="p-4 border border-gray-100 rounded-lg bg-gray-50/50 relative group">
+                    <button onClick={() => setNamedSlides(namedSlides.filter((_, idx) => idx !== i))} className="absolute top-2 right-2 text-gray-400 hover:text-red-500">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    </button>
+                    <input 
+                      type="text" 
+                      placeholder="Slide Title (e.g. Smart Specs)" 
+                      value={slide.title}
+                      onChange={(e) => {
+                        const updated = [...namedSlides];
+                        updated[i].title = e.target.value;
+                        setNamedSlides(updated);
+                      }}
+                      className="w-full bg-white border border-gray-200 rounded p-2 text-sm mb-3 outline-none focus:border-accent"
+                    />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Desktop Image</label>
+                        {slide.desktopImage ? (
+                          <div className="relative h-20 w-full rounded overflow-hidden">
+                            <Image src={slide.desktopImage} alt="Desktop" fill className="object-cover" />
+                          </div>
+                        ) : (
+                          <input type="file" accept="image/*" onChange={(e) => handleNamedSlideImage(i, 'desktop', e)} className="text-xs w-full" />
+                        )}
+                      </div>
+                      <div>
+                        <label className="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Mobile Image</label>
+                        {slide.mobileImage ? (
+                          <div className="relative h-20 w-full rounded overflow-hidden">
+                            <Image src={slide.mobileImage} alt="Mobile" fill className="object-cover" />
+                          </div>
+                        ) : (
+                          <input type="file" accept="image/*" onChange={(e) => handleNamedSlideImage(i, 'mobile', e)} className="text-xs w-full" />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {namedSlides.length === 0 && <p className="text-xs text-gray-400 italic">No named slides added.</p>}
+              </div>
+            </div>
+
+            {/* Carousel Slides Section */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="text-sm font-bold text-gray-800">Arrow Carousel</h4>
+                <button onClick={() => setCarouselSlides([...carouselSlides, { desktopImage: "", mobileImage: "" }])} className="text-xs font-bold text-accent hover:text-primary transition-colors flex items-center gap-1">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg> Add Slide
+                </button>
+              </div>
+              <div className="space-y-4">
+                {carouselSlides.map((slide, i) => (
+                  <div key={i} className="p-4 border border-gray-100 rounded-lg bg-gray-50/50 relative group">
+                    <button onClick={() => setCarouselSlides(carouselSlides.filter((_, idx) => idx !== i))} className="absolute top-2 right-2 text-gray-400 hover:text-red-500">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    </button>
+                    <div className="grid grid-cols-2 gap-4 mt-4">
+                      <div>
+                        <label className="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Desktop Image</label>
+                        {slide.desktopImage ? (
+                          <div className="relative h-20 w-full rounded overflow-hidden">
+                            <Image src={slide.desktopImage} alt="Desktop" fill className="object-cover" />
+                          </div>
+                        ) : (
+                          <input type="file" accept="image/*" onChange={(e) => handleCarouselSlideImage(i, 'desktop', e)} className="text-xs w-full" />
+                        )}
+                      </div>
+                      <div>
+                        <label className="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Mobile Image</label>
+                        {slide.mobileImage ? (
+                          <div className="relative h-20 w-full rounded overflow-hidden">
+                            <Image src={slide.mobileImage} alt="Mobile" fill className="object-cover" />
+                          </div>
+                        ) : (
+                          <input type="file" accept="image/*" onChange={(e) => handleCarouselSlideImage(i, 'mobile', e)} className="text-xs w-full" />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {carouselSlides.length === 0 && <p className="text-xs text-gray-400 italic">No carousel slides added.</p>}
+              </div>
+            </div>
           </div>
 
         </div>

@@ -5,6 +5,16 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, onSnapshot } from "firebase/firestore";
+interface APlusNamedSlide {
+  title: string;
+  desktopImage: string;
+  mobileImage: string;
+}
+
+interface APlusCarouselSlide {
+  desktopImage: string;
+  mobileImage: string;
+}
 
 export default function ProductEditor() {
   const [isSaving, setIsSaving] = useState(false);
@@ -47,6 +57,11 @@ export default function ProductEditor() {
     { key: "CAPACITY", value: "" },
     { key: "FINISH", value: "" },
   ]);
+
+  // A+ Content State
+  const [namedSlides, setNamedSlides] = useState<APlusNamedSlide[]>([]);
+  const [carouselSlides, setCarouselSlides] = useState<APlusCarouselSlide[]>([]);
+  const [isUploadingAPlus, setIsUploadingAPlus] = useState(false);
 
   const addSpec = () => {
     setSpecs([...specs, { key: "", value: "" }]);
@@ -111,6 +126,51 @@ export default function ProductEditor() {
       img.onerror = () => reject(new Error('Failed to load image for compression'));
       img.src = URL.createObjectURL(file);
     });
+  };
+
+  const uploadAPlusImage = async (file: File): Promise<string | null> => {
+    setIsUploadingAPlus(true);
+    try {
+      const compressedBase64 = await compressImage(file);
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageBase64: compressedBase64, filename: file.name })
+      });
+      if (!res.ok) throw new Error("Upload failed");
+      const data = await res.json();
+      return data.url;
+    } catch (err) {
+      console.error(err);
+      alert("Failed to upload A+ image.");
+      return null;
+    } finally {
+      setIsUploadingAPlus(false);
+    }
+  };
+
+  const handleNamedSlideImage = async (index: number, type: 'desktop' | 'mobile', e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = await uploadAPlusImage(file);
+    if (url) {
+      const updated = [...namedSlides];
+      if (type === 'desktop') updated[index].desktopImage = url;
+      else updated[index].mobileImage = url;
+      setNamedSlides(updated);
+    }
+  };
+
+  const handleCarouselSlideImage = async (index: number, type: 'desktop' | 'mobile', e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = await uploadAPlusImage(file);
+    if (url) {
+      const updated = [...carouselSlides];
+      if (type === 'desktop') updated[index].desktopImage = url;
+      else updated[index].mobileImage = url;
+      setCarouselSlides(updated);
+    }
   };
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -211,6 +271,10 @@ export default function ProductEditor() {
         images: imageUrls, // Array of all uploaded images
         stockStatus: "In Stock",
         stockCount: 10,
+        aPlusContent: {
+          namedSlides: namedSlides.filter(s => s.title && s.desktopImage),
+          carouselSlides: carouselSlides.filter(s => s.desktopImage)
+        },
         createdAt: new Date().toISOString()
       });
 
@@ -230,6 +294,8 @@ export default function ProductEditor() {
       setImageFiles([]);
       setImagePreviews([]);
       setImagesBase64([]);
+      setNamedSlides([]);
+      setCarouselSlides([]);
       
     } catch (error) {
       console.error(error);
@@ -568,9 +634,112 @@ export default function ProductEditor() {
                </div>
              </div>
 
-             <p className="text-[10px] text-gray-400 mt-6 leading-relaxed">
+              <p className="text-[10px] text-gray-400 mt-6 leading-relaxed">
                Recommended: 2048x2048px JPG or PNG.
              </p>
+          </div>
+
+          {/* A+ Premium Content */}
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-8">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-[10px] font-bold tracking-[0.2em] uppercase text-primary">A+ Premium Content</h3>
+              {isUploadingAPlus && <span className="text-xs text-accent animate-pulse font-bold">Uploading...</span>}
+            </div>
+
+            {/* Named Slides Section */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="text-sm font-bold text-gray-800">Named Slides (Tabs)</h4>
+                <button onClick={() => setNamedSlides([...namedSlides, { title: "", desktopImage: "", mobileImage: "" }])} className="text-xs font-bold text-accent hover:text-primary transition-colors flex items-center gap-1">
+                  <Plus className="w-3 h-3" /> Add Slide
+                </button>
+              </div>
+              <div className="space-y-4">
+                {namedSlides.map((slide, i) => (
+                  <div key={i} className="p-4 border border-gray-100 rounded-lg bg-gray-50/50 relative group">
+                    <button onClick={() => setNamedSlides(namedSlides.filter((_, idx) => idx !== i))} className="absolute top-2 right-2 text-gray-400 hover:text-red-500">
+                      <X className="w-4 h-4" />
+                    </button>
+                    <input 
+                      type="text" 
+                      placeholder="Slide Title (e.g. Smart Specs)" 
+                      value={slide.title}
+                      onChange={(e) => {
+                        const updated = [...namedSlides];
+                        updated[i].title = e.target.value;
+                        setNamedSlides(updated);
+                      }}
+                      className="w-full bg-white border border-gray-200 rounded p-2 text-sm mb-3 outline-none focus:border-accent"
+                    />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Desktop Image</label>
+                        {slide.desktopImage ? (
+                          <div className="relative h-20 w-full rounded overflow-hidden">
+                            <Image src={slide.desktopImage} alt="Desktop" fill className="object-cover" />
+                          </div>
+                        ) : (
+                          <input type="file" accept="image/*" onChange={(e) => handleNamedSlideImage(i, 'desktop', e)} className="text-xs w-full" />
+                        )}
+                      </div>
+                      <div>
+                        <label className="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Mobile Image</label>
+                        {slide.mobileImage ? (
+                          <div className="relative h-20 w-full rounded overflow-hidden">
+                            <Image src={slide.mobileImage} alt="Mobile" fill className="object-cover" />
+                          </div>
+                        ) : (
+                          <input type="file" accept="image/*" onChange={(e) => handleNamedSlideImage(i, 'mobile', e)} className="text-xs w-full" />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {namedSlides.length === 0 && <p className="text-xs text-gray-400 italic">No named slides added.</p>}
+              </div>
+            </div>
+
+            {/* Carousel Slides Section */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="text-sm font-bold text-gray-800">Arrow Carousel</h4>
+                <button onClick={() => setCarouselSlides([...carouselSlides, { desktopImage: "", mobileImage: "" }])} className="text-xs font-bold text-accent hover:text-primary transition-colors flex items-center gap-1">
+                  <Plus className="w-3 h-3" /> Add Slide
+                </button>
+              </div>
+              <div className="space-y-4">
+                {carouselSlides.map((slide, i) => (
+                  <div key={i} className="p-4 border border-gray-100 rounded-lg bg-gray-50/50 relative group">
+                    <button onClick={() => setCarouselSlides(carouselSlides.filter((_, idx) => idx !== i))} className="absolute top-2 right-2 text-gray-400 hover:text-red-500">
+                      <X className="w-4 h-4" />
+                    </button>
+                    <div className="grid grid-cols-2 gap-4 mt-4">
+                      <div>
+                        <label className="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Desktop Image</label>
+                        {slide.desktopImage ? (
+                          <div className="relative h-20 w-full rounded overflow-hidden">
+                            <Image src={slide.desktopImage} alt="Desktop" fill className="object-cover" />
+                          </div>
+                        ) : (
+                          <input type="file" accept="image/*" onChange={(e) => handleCarouselSlideImage(i, 'desktop', e)} className="text-xs w-full" />
+                        )}
+                      </div>
+                      <div>
+                        <label className="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Mobile Image</label>
+                        {slide.mobileImage ? (
+                          <div className="relative h-20 w-full rounded overflow-hidden">
+                            <Image src={slide.mobileImage} alt="Mobile" fill className="object-cover" />
+                          </div>
+                        ) : (
+                          <input type="file" accept="image/*" onChange={(e) => handleCarouselSlideImage(i, 'mobile', e)} className="text-xs w-full" />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {carouselSlides.length === 0 && <p className="text-xs text-gray-400 italic">No carousel slides added.</p>}
+              </div>
+            </div>
           </div>
 
         </div>

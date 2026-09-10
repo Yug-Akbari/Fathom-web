@@ -6,6 +6,7 @@ import Script from "next/script";
 import ProductHero from "@/components/product/ProductHero";
 import CompleteSuite from "@/components/product/CompleteSuite";
 import ProductReviews from "@/components/product/ProductReviews";
+import ProductAPlusContent from "@/components/product/ProductAPlusContent";
 import { Product } from "@/lib/data";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/firebase";
@@ -30,6 +31,7 @@ async function fetchProductData(id: string): Promise<Product | undefined> {
         inStock: d.stockStatus !== "Out of Stock",
         desc: d.description || "",
         specs: d.specs || [],
+        aPlusContent: d.aPlusContent,
       };
     }
   } catch (error) {
@@ -132,6 +134,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
         </div>
       </div>
       <ProductHero product={product} />
+      <ProductAPlusContent content={product.aPlusContent} />
       <CompleteSuite />
       <ProductReviews productId={product.id} productName={product.name} />
     </div>
