@@ -8,7 +8,7 @@ export default function Footer() {
         <div className="flex items-center">
           <Image
             src="/images/fathom-logo-transparent.png"
-            alt="Fathom"
+            alt="FATHOM — Food Dehydrator, Dehydrator & Food Dryer Brand"
             width={140}
             height={40}
             className="h-8 w-auto"
@@ -20,6 +20,14 @@ export default function Footer() {
           <a href="/shop" className="text-xs font-semibold text-gray-500 hover:text-primary transition-colors tracking-widest uppercase">Shop</a>
           <a href="/about" className="text-xs font-semibold text-gray-500 hover:text-primary transition-colors tracking-widest uppercase">About Us</a>
           <a href="/contact" className="text-xs font-semibold text-gray-500 hover:text-primary transition-colors tracking-widest uppercase">Contact Us</a>
+          <a
+            href="https://www.instagram.com/fathom.india/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-semibold text-gray-500 hover:text-primary transition-colors tracking-widest uppercase"
+          >
+            Instagram
+          </a>
         </div>
 
         {/* Copyright */}

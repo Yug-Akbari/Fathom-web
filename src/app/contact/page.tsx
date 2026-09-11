@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import Script from "next/script";
 import InquiryHero from "@/components/contact/InquiryHero";
 import ContactForm from "@/components/contact/ContactForm";
 import SpecialistConnect from "@/components/contact/SpecialistConnect";
@@ -15,6 +16,9 @@ export const metadata: Metadata = {
     "dehydrator support",
     "FATHOM store contact",
   ],
+  alternates: {
+    canonical: "/contact",
+  },
   openGraph: {
     title: "Contact Us | FATHOM — Get in Touch",
     description:
@@ -25,9 +29,33 @@ export const metadata: Metadata = {
   },
 };
 
+const localBusinessJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  name: "FATHOM",
+  image: "https://www.fathomstore.in/images/fathom-logo-transparent.png",
+  url: "https://www.fathomstore.in/contact",
+  telephone: "+91-82385-43000",
+  email: "fathom.support@gmail.com",
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "126, Green Plaza Shopping, Mota Varachha",
+    addressLocality: "Surat",
+    addressRegion: "Gujarat",
+    postalCode: "394105",
+    addressCountry: "IN",
+  },
+  sameAs: ["https://www.instagram.com/fathom.india/"],
+};
+
 export default function ContactPage() {
   return (
     <div className="bg-surface min-h-screen">
+      <Script
+        id="localbusiness-jsonld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }}
+      />
       <InquiryHero />
       <div className="max-w-7xl mx-auto px-6 pb-24">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-8 overflow-hidden">

@@ -21,8 +21,8 @@ function CarouselSection({ slides }: { slides: { desktopImage: string; mobileIma
           transition={{ duration: 0.5 }}
           className="absolute inset-0"
         >
-          <Image src={slides[index].desktopImage} alt="Carousel" fill className="object-cover hidden md:block" priority />
-          {slides[index].mobileImage && <Image src={slides[index].mobileImage} alt="Carousel Mobile" fill className="object-cover block md:hidden" priority />}
+          <Image src={slides[index].desktopImage} alt="Carousel" fill className="object-contain hidden md:block" unoptimized priority />
+          {slides[index].mobileImage && <Image src={slides[index].mobileImage} alt="Carousel Mobile" fill className="object-contain block md:hidden" unoptimized priority />}
         </motion.div>
       </AnimatePresence>
 
@@ -83,8 +83,8 @@ function NamedSlideSection({ slides }: { slides: { title: string; desktopImage: 
             transition={{ duration: 0.4, ease: "easeOut" }}
             className="absolute inset-0"
           >
-            <Image src={slides[active].desktopImage} alt={slides[active].title} fill className="object-cover hidden md:block" priority />
-            {slides[active].mobileImage && <Image src={slides[active].mobileImage} alt={slides[active].title} fill className="object-cover block md:hidden" priority />}
+            <Image src={slides[active].desktopImage} alt={slides[active].title} fill className="object-contain hidden md:block" unoptimized priority />
+            {slides[active].mobileImage && <Image src={slides[active].mobileImage} alt={slides[active].title} fill className="object-contain block md:hidden" unoptimized priority />}
           </motion.div>
         </AnimatePresence>
       </div>
@@ -126,14 +126,10 @@ export default function ProductAPlusContent({ content }: { content?: any }) {
           return (
             <div key={block.id} className="w-full">
               {block.desktopImage && (
-                <div className="relative w-full aspect-[21/9] hidden md:block">
-                  <Image src={block.desktopImage} alt="Product detail" fill className="object-cover" priority />
-                </div>
+                <img src={block.desktopImage} alt="Product detail" className="w-full h-auto hidden md:block" />
               )}
               {block.mobileImage && (
-                <div className="relative w-full aspect-[3/4] block md:hidden">
-                  <Image src={block.mobileImage} alt="Product detail" fill className="object-cover" priority />
-                </div>
+                <img src={block.mobileImage} alt="Product detail" className="w-full h-auto block md:hidden" />
               )}
             </div>
           );

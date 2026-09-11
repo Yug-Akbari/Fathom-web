@@ -16,6 +16,9 @@ export const metadata: Metadata = {
     "food dryer brand",
     "premium appliances brand",
   ],
+  alternates: {
+    canonical: "/about",
+  },
   openGraph: {
     title: "About Us | FATHOM — Our Story & Mission",
     description:

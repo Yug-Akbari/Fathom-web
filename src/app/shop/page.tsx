@@ -17,6 +17,9 @@ export const metadata: Metadata = {
     "coffee grinder",
     "FATHOM shop",
   ],
+  alternates: {
+    canonical: "/shop",
+  },
   openGraph: {
     title: "Shop Food Dehydrators, Dehydrators & Food Dryers | FATHOM",
     description:

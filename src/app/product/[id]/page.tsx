@@ -117,12 +117,37 @@ export default async function ProductPage({ params }: { params: { id: string } }
     };
   }
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://www.fathomstore.in/" },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: product.category,
+        item: `https://www.fathomstore.in/shop?category=${encodeURIComponent(product.category)}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: product.name,
+        item: `https://www.fathomstore.in/product/${product.id}`,
+      },
+    ],
+  };
+
   return (
     <div className="w-full bg-background min-h-screen pt-4">
       <Script
         id="product-jsonld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <Script
+        id="breadcrumb-jsonld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
       <div className="max-w-[1400px] mx-auto px-6 pt-6">
         <div className="text-[9px] font-bold tracking-[0.2em] uppercase text-gray-400 flex items-center gap-2">
