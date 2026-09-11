@@ -1,0 +1,10 @@
+$lines = Get-Content -Path "src/app/admin/fbm-accounting/page.tsx"
+$lines[311] = "    const updates: Record<string, any> = {"
+$lines[312] = "      net_stock: netStock,"
+$lines[313] = "      low_stock: netStock <= 5,"
+$lines[314] = "      sku_id: skuVal,"
+$lines[315] = "      last_updated: serverTimestamp(),"
+$lines[316] = "    };"
+$lines[317] = "    if (productName) updates.product_name = productName;"
+$lines = $lines[0..317] + "    await setDoc(summaryRef, updates, { merge: true });" + $lines[318..($lines.Length-1)]
+$lines | Set-Content -Path "src/app/admin/fbm-accounting/page.tsx"

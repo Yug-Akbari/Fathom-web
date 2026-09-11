@@ -335,9 +335,9 @@ function AccountingContent() {
       net_stock: netStock,
       low_stock: netStock <= 5,
       sku_id: skuVal,
-      product_name: productName || `Offline — ${skuVal}`,
       last_updated: serverTimestamp(),
     };
+    if (productName) updates.product_name = productName;
 
     await setDoc(summaryRef, updates, { merge: true });
   };

@@ -309,13 +309,14 @@ function AccountingContent() {
     });
 
     const netStock = inboundAndReturnTotal - fbaSalesTotal;
-    await setDoc(summaryRef, {
+    const updates: Record<string, any> = {
       net_stock: netStock,
       low_stock: netStock <= 5,
       sku_id: skuVal,
-      product_name: productName || `FBM — ${skuVal}`,
       last_updated: serverTimestamp(),
-    }, { merge: true });
+    };
+    if (productName) updates.product_name = productName;
+    await setDoc(summaryRef, updates, { merge: true });
   };
 
   const clearSyncedDocs = async (docId: string) => {
