@@ -69,11 +69,11 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
   // Uses progressive quality reduction: starts at 70%, drops by 10% each pass
   const MAX_BASE64_SIZE = 3 * 1024 * 1024; // 3MB - safe margin under Vercel's 4.5MB limit
 
-  const compressImage = (file: File): Promise<string> => {
+  const compressImage = (file: File, customMaxDim?: number, customQuality?: number): Promise<string> => {
     return new Promise((resolve, reject) => {
       const img = new window.Image();
       img.onload = () => {
-        const maxDim = 1024; // Max dimension for product images
+        const maxDim = customMaxDim || 1024; // Max dimension for product images
         let { width, height } = img;
 
         // Scale down if needed, maintaining aspect ratio
@@ -92,7 +92,7 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
         ctx.drawImage(img, 0, 0, width, height);
 
         // Progressive compression: reduce quality until size is acceptable
-        let quality = 0.7;
+        let quality = customQuality || 0.7;
         let compressedBase64 = canvas.toDataURL('image/jpeg', quality);
 
         while (compressedBase64.length > MAX_BASE64_SIZE && quality > 0.1) {
@@ -123,7 +123,7 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
   const uploadAPlusImage = async (file: File): Promise<string | null> => {
     setIsUploadingAPlus(true);
     try {
-      const compressedBase64 = await compressImage(file);
+      const compressedBase64 = await compressImage(file, 2560, 0.95);
       const res = await fetch('/api/upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

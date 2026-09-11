@@ -21,8 +21,8 @@ function CarouselSection({ slides }: { slides: { desktopImage: string; mobileIma
           transition={{ duration: 0.5 }}
           className="absolute inset-0"
         >
-          <Image src={slides[index].desktopImage} alt="Carousel" fill className="object-contain hidden md:block" unoptimized priority />
-          {slides[index].mobileImage && <Image src={slides[index].mobileImage} alt="Carousel Mobile" fill className="object-contain block md:hidden" unoptimized priority />}
+          <img src={slides[index].desktopImage} alt="Carousel" className="absolute inset-0 w-full h-full object-contain hidden md:block" />
+          {slides[index].mobileImage && <img src={slides[index].mobileImage} alt="Carousel Mobile" className="absolute inset-0 w-full h-full object-contain block md:hidden" />}
         </motion.div>
       </AnimatePresence>
 
@@ -83,8 +83,8 @@ function NamedSlideSection({ slides }: { slides: { title: string; desktopImage: 
             transition={{ duration: 0.4, ease: "easeOut" }}
             className="absolute inset-0"
           >
-            <Image src={slides[active].desktopImage} alt={slides[active].title} fill className="object-contain hidden md:block" unoptimized priority />
-            {slides[active].mobileImage && <Image src={slides[active].mobileImage} alt={slides[active].title} fill className="object-contain block md:hidden" unoptimized priority />}
+            <img src={slides[active].desktopImage} alt={slides[active].title} className="absolute inset-0 w-full h-full object-contain hidden md:block" />
+            {slides[active].mobileImage && <img src={slides[active].mobileImage} alt={slides[active].title} className="absolute inset-0 w-full h-full object-contain block md:hidden" />}
           </motion.div>
         </AnimatePresence>
       </div>
