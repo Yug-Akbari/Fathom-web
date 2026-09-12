@@ -144,7 +144,7 @@ function AccountingContent() {
       snapshot.forEach((doc) => {
         const data = doc.data() as AccountingEntry;
         if (data.type === "Offline") {
-          fetchedEntries.push({ id: doc.id, ...data });
+          fetchedEntries.push({ ...data, id: doc.id });
         }
       });
       setEntries(fetchedEntries);
