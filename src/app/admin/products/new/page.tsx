@@ -712,28 +712,45 @@ export default function ProductEditor() {
 
                   {/* Block Content */}
                   {block.type === 'standalone' && (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {/* Standalone Image Grid UI */}
-                      <div className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden border border-gray-200 group">
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* Mobile Image Box */}
+                      <div className="relative aspect-square md:aspect-[4/3] bg-gray-100 rounded-lg overflow-hidden border border-gray-200 group">
                         <div className="absolute top-2 left-2 z-10 bg-black/50 text-white px-2 py-0.5 rounded text-[8px] font-bold tracking-widest uppercase shadow-sm pointer-events-none">
-                          {block.desktopImage && block.mobileImage ? 'Ready' : 'Incomplete'}
+                          Mobile
                         </div>
-                        {block.desktopImage ? (
-                          <Image src={block.desktopImage} alt="Desktop" fill className="object-cover pointer-events-none" />
+                        {block.mobileImage ? (
+                          <Image src={block.mobileImage} alt="Mobile" fill className="object-contain pointer-events-none" />
                         ) : (
                           <div className="flex flex-col items-center justify-center w-full h-full text-gray-400 bg-gray-50 border-2 border-dashed border-gray-200">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="mb-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-center px-2">Upload Image</span>
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-center px-2">Upload Mobile</span>
                           </div>
                         )}
                         <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex flex-col items-center justify-center gap-3">
-                          <label className="text-[10px] font-bold text-white border border-white/30 bg-black/40 px-3 py-1.5 rounded cursor-pointer hover:bg-white hover:text-black transition-colors w-32 text-center mt-4">
-                            {block.desktopImage ? 'Update Desktop' : 'Add Desktop'}
-                            <input type="file" accept="image/*" onChange={(e) => handleAPlusImage(block.id, 'desktop', e)} className="hidden" />
-                          </label>
                           <label className="text-[10px] font-bold text-white border border-white/30 bg-black/40 px-3 py-1.5 rounded cursor-pointer hover:bg-white hover:text-black transition-colors w-32 text-center">
                             {block.mobileImage ? 'Update Mobile' : 'Add Mobile'}
                             <input type="file" accept="image/*" onChange={(e) => handleAPlusImage(block.id, 'mobile', e)} className="hidden" />
+                          </label>
+                        </div>
+                      </div>
+
+                      {/* Desktop Image Box */}
+                      <div className="relative aspect-square md:aspect-[4/3] bg-gray-100 rounded-lg overflow-hidden border border-gray-200 group">
+                        <div className="absolute top-2 left-2 z-10 bg-black/50 text-white px-2 py-0.5 rounded text-[8px] font-bold tracking-widest uppercase shadow-sm pointer-events-none">
+                          Desktop
+                        </div>
+                        {block.desktopImage ? (
+                          <Image src={block.desktopImage} alt="Desktop" fill className="object-contain pointer-events-none" />
+                        ) : (
+                          <div className="flex flex-col items-center justify-center w-full h-full text-gray-400 bg-gray-50 border-2 border-dashed border-gray-200">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="mb-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-center px-2">Upload Desktop</span>
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex flex-col items-center justify-center gap-3">
+                          <label className="text-[10px] font-bold text-white border border-white/30 bg-black/40 px-3 py-1.5 rounded cursor-pointer hover:bg-white hover:text-black transition-colors w-32 text-center">
+                            {block.desktopImage ? 'Update Desktop' : 'Add Desktop'}
+                            <input type="file" accept="image/*" onChange={(e) => handleAPlusImage(block.id, 'desktop', e)} className="hidden" />
                           </label>
                         </div>
                       </div>
@@ -761,45 +778,66 @@ export default function ProductEditor() {
                               return { ...b, slides: updatedSlides };
                             }) as APlusBlock[]);
                           }}
-                          className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden border border-gray-200 group cursor-move"
+                          className="relative flex bg-gray-100 rounded-lg overflow-hidden border border-gray-200 cursor-move"
                         >
-                          <div className="absolute top-2 left-2 z-10 bg-black/50 text-white px-2 py-0.5 rounded text-[8px] font-bold tracking-widest uppercase shadow-sm pointer-events-none">
-                            {slide.desktopImage && slide.mobileImage ? (block.type === 'named_slide_group' && !slide.title ? 'Missing Title' : 'Ready') : 'Incomplete'}
-                          </div>
-                          
+                          {/* Slide Title Input (if named slide group) */}
                           {block.type === 'named_slide_group' && (
-                            <div className="absolute top-8 left-2 right-2 z-10">
+                            <div className="absolute top-2 left-2 right-8 z-20">
                               <input 
                                 type="text" 
                                 placeholder="Tab Name..." 
                                 value={slide.title || ''}
                                 onChange={(e) => setAPlusContent(prev => prev.map(b => b.id === block.id && b.type === 'named_slide_group' ? { ...b, slides: (b as any).slides.map((s: any, idx: number) => idx === si ? { ...s, title: e.target.value } : s) } : b) as APlusBlock[])}
                                 onClick={(e) => e.stopPropagation()}
-                                className="w-full bg-black/50 border border-white/20 rounded px-2 py-1 text-[10px] text-white placeholder-white/50 outline-none focus:bg-black/80"
+                                className="w-full bg-black/50 border border-white/20 rounded px-2 py-1 text-[10px] text-white placeholder-white/50 outline-none focus:bg-black/80 shadow-sm"
                               />
                             </div>
                           )}
 
-                          {slide.desktopImage ? (
-                            <Image src={slide.desktopImage} alt="Desktop" fill className="object-cover pointer-events-none" />
-                          ) : (
-                            <div className="flex flex-col items-center justify-center w-full h-full text-gray-400 bg-gray-50 border-2 border-dashed border-gray-200">
-                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="mb-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                            </div>
-                          )}
+                          <button onClick={(e) => { e.stopPropagation(); setAPlusContent(prev => prev.map(b => b.id === block.id ? { ...b, slides: (b as any).slides?.filter((_: any, idx: number) => idx !== si) } : b) as APlusBlock[]); }} className="absolute top-2 right-2 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors shadow-md z-20">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          </button>
 
-                          <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex flex-col items-center justify-center gap-3">
-                            <button onClick={(e) => { e.stopPropagation(); setAPlusContent(prev => prev.map(b => b.id === block.id ? { ...b, slides: (b as any).slides?.filter((_: any, idx: number) => idx !== si) } : b) as APlusBlock[]); }} className="absolute top-2 right-2 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors shadow-md z-20">
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                            </button>
-                            <label className="text-[10px] font-bold text-white border border-white/30 bg-black/40 px-3 py-1.5 rounded cursor-pointer hover:bg-white hover:text-black transition-colors w-32 text-center mt-4">
-                              {slide.desktopImage ? 'Update Desktop' : 'Add Desktop'}
-                              <input type="file" accept="image/*" onChange={(e) => handleAPlusImage(block.id, 'desktop', e, si)} className="hidden" />
-                            </label>
-                            <label className="text-[10px] font-bold text-white border border-white/30 bg-black/40 px-3 py-1.5 rounded cursor-pointer hover:bg-white hover:text-black transition-colors w-32 text-center">
-                              {slide.mobileImage ? 'Update Mobile' : 'Add Mobile'}
-                              <input type="file" accept="image/*" onChange={(e) => handleAPlusImage(block.id, 'mobile', e, si)} className="hidden" />
-                            </label>
+                          {/* Mobile Half */}
+                          <div className="flex-1 relative aspect-square border-r border-gray-200 group/mobile">
+                            <div className="absolute bottom-2 left-2 z-10 bg-black/50 text-white px-2 py-0.5 rounded text-[8px] font-bold tracking-widest uppercase pointer-events-none">
+                              Mobile
+                            </div>
+                            {slide.mobileImage ? (
+                              <Image src={slide.mobileImage} alt="Mobile" fill className="object-contain pointer-events-none" />
+                            ) : (
+                              <div className="flex flex-col items-center justify-center w-full h-full text-gray-400 bg-gray-50 border-2 border-dashed border-gray-200">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="mb-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                <span className="text-[8px] font-bold uppercase tracking-widest text-center px-1">Upload</span>
+                              </div>
+                            )}
+                            <div className="absolute inset-0 bg-black/70 opacity-0 group-hover/mobile:opacity-100 transition-opacity z-10 flex flex-col items-center justify-center">
+                              <label className="text-[8px] font-bold text-white border border-white/30 bg-black/40 px-2 py-1 rounded cursor-pointer hover:bg-white hover:text-black transition-colors w-24 text-center">
+                                {slide.mobileImage ? 'Update' : 'Add'}
+                                <input type="file" accept="image/*" onChange={(e) => handleAPlusImage(block.id, 'mobile', e, si)} className="hidden" />
+                              </label>
+                            </div>
+                          </div>
+
+                          {/* Desktop Half */}
+                          <div className="flex-1 relative aspect-square group/desktop">
+                            <div className="absolute bottom-2 left-2 z-10 bg-black/50 text-white px-2 py-0.5 rounded text-[8px] font-bold tracking-widest uppercase pointer-events-none">
+                              Desktop
+                            </div>
+                            {slide.desktopImage ? (
+                              <Image src={slide.desktopImage} alt="Desktop" fill className="object-contain pointer-events-none" />
+                            ) : (
+                              <div className="flex flex-col items-center justify-center w-full h-full text-gray-400 bg-gray-50 border-2 border-dashed border-gray-200">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="mb-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                <span className="text-[8px] font-bold uppercase tracking-widest text-center px-1">Upload</span>
+                              </div>
+                            )}
+                            <div className="absolute inset-0 bg-black/70 opacity-0 group-hover/desktop:opacity-100 transition-opacity z-10 flex flex-col items-center justify-center">
+                              <label className="text-[8px] font-bold text-white border border-white/30 bg-black/40 px-2 py-1 rounded cursor-pointer hover:bg-white hover:text-black transition-colors w-24 text-center">
+                                {slide.desktopImage ? 'Update' : 'Add'}
+                                <input type="file" accept="image/*" onChange={(e) => handleAPlusImage(block.id, 'desktop', e, si)} className="hidden" />
+                              </label>
+                            </div>
                           </div>
                         </div>
                       ))}
