@@ -1,97 +1,263 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { APlusBlock } from "@/lib/data";
 
+/* ─── Arrow Button ─── */
+function ArrowButton({ direction, onClick }: { direction: "left" | "right"; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`absolute top-1/2 -translate-y-1/2 w-10 h-10 md:w-14 md:h-14 rounded-full flex items-center justify-center text-white/80 hover:text-white bg-black/20 hover:bg-black/50 backdrop-blur-sm border border-white/10 hover:border-white/20 transition-all duration-300 z-20 group ${
+        direction === "left" ? "left-3 md:left-6" : "right-3 md:right-6"
+      }`}
+    >
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        className="md:w-6 md:h-6 transition-transform duration-200 group-hover:scale-110"
+      >
+        <polyline
+          points={direction === "left" ? "15 18 9 12 15 6" : "9 18 15 12 9 6"}
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </button>
+  );
+}
+
+/* ─── Dot Indicators ─── */
+function DotIndicators({ count, active, onSelect }: { count: number; active: number; onSelect: (i: number) => void }) {
+  if (count <= 1) return null;
+  return (
+    <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center gap-2 z-20">
+      {Array.from({ length: count }).map((_, i) => (
+        <button
+          key={i}
+          onClick={() => onSelect(i)}
+          className={`h-2 rounded-full transition-all duration-400 ${
+            active === i
+              ? "bg-accent w-8 shadow-[0_0_10px_rgba(255,165,0,0.5)]"
+              : "bg-white/40 hover:bg-white/60 w-2"
+          }`}
+        />
+      ))}
+    </div>
+  );
+}
+
+/* ─── Slide animation variants (horizontal sliding) ─── */
+const slideVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? "100%" : "-100%",
+    opacity: 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+  },
+  exit: (direction: number) => ({
+    x: direction < 0 ? "100%" : "-100%",
+    opacity: 0,
+  }),
+};
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CAROUSEL SECTION (Arrow Carousel) — Full-width with auto-play
+   ═══════════════════════════════════════════════════════════════════════════ */
 function CarouselSection({ slides }: { slides: { desktopImage: string; mobileImage: string }[] }) {
-  const [index, setIndex] = useState(0);
+  const [[index, direction], setSlide] = useState([0, 0]);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const paginate = useCallback(
+    (newDirection: number) => {
+      setSlide(([prev]) => {
+        let next = prev + newDirection;
+        if (next < 0) next = slides.length - 1;
+        if (next >= slides.length) next = 0;
+        return [next, newDirection];
+      });
+    },
+    [slides.length]
+  );
+
+  // Auto-play every 5 seconds
+  useEffect(() => {
+    if (slides.length <= 1) return;
+    timeoutRef.current = setInterval(() => paginate(1), 5000);
+    return () => {
+      if (timeoutRef.current) clearInterval(timeoutRef.current);
+    };
+  }, [paginate, slides.length]);
+
+  const handleNav = useCallback(
+    (dir: number) => {
+      if (timeoutRef.current) clearInterval(timeoutRef.current);
+      paginate(dir);
+      if (slides.length > 1) {
+        timeoutRef.current = setInterval(() => paginate(1), 5000);
+      }
+    },
+    [paginate, slides.length]
+  );
+
   if (slides.length === 0) return null;
 
   return (
-    <div className="relative w-full aspect-[3/4] md:aspect-[21/9] rounded-xl overflow-hidden bg-gray-100 shadow-xl">
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={index}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.5 }}
-          className="absolute inset-0"
-        >
-          <img src={slides[index].desktopImage} alt="Carousel" className="absolute inset-0 w-full h-full object-contain hidden md:block" />
-          {slides[index].mobileImage && <img src={slides[index].mobileImage} alt="Carousel Mobile" className="absolute inset-0 w-full h-full object-contain block md:hidden" />}
-        </motion.div>
-      </AnimatePresence>
+    <div className="relative w-full overflow-hidden bg-black">
+      <div className="relative w-full aspect-[3/4] md:aspect-[21/9]">
+        <AnimatePresence initial={false} custom={direction} mode="popLayout">
+          <motion.div
+            key={index}
+            custom={direction}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{
+              x: { type: "tween", duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+              opacity: { duration: 0.35 },
+            }}
+            className="absolute inset-0"
+          >
+            <img
+              src={slides[index].desktopImage}
+              alt="Carousel"
+              className="absolute inset-0 w-full h-full object-contain hidden md:block"
+            />
+            {slides[index].mobileImage && (
+              <img
+                src={slides[index].mobileImage}
+                alt="Carousel Mobile"
+                className="absolute inset-0 w-full h-full object-contain block md:hidden"
+              />
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
 
       {slides.length > 1 && (
         <>
-          <button
-            onClick={() => setIndex((p) => (p === 0 ? slides.length - 1 : p - 1))}
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-14 md:h-14 bg-black/20 hover:bg-black/60 backdrop-blur rounded-full flex items-center justify-center text-white transition-colors z-10"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><polyline points="15 18 9 12 15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          </button>
-          <button
-            onClick={() => setIndex((p) => (p === slides.length - 1 ? 0 : p + 1))}
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-14 md:h-14 bg-black/20 hover:bg-black/60 backdrop-blur rounded-full flex items-center justify-center text-white transition-colors z-10"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><polyline points="9 18 15 12 9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          </button>
-          <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10">
-            {slides.map((_, i) => (
-              <button key={i} onClick={() => setIndex(i)} className={`h-2 rounded-full transition-all duration-300 ${index === i ? "bg-accent w-8" : "bg-white/50 hover:bg-white/70 w-2"}`} />
-            ))}
-          </div>
+          <ArrowButton direction="left" onClick={() => handleNav(-1)} />
+          <ArrowButton direction="right" onClick={() => handleNav(1)} />
+          <DotIndicators
+            count={slides.length}
+            active={index}
+            onSelect={(i) => {
+              const dir = i > index ? 1 : -1;
+              if (timeoutRef.current) clearInterval(timeoutRef.current);
+              setSlide([i, dir]);
+              if (slides.length > 1) {
+                timeoutRef.current = setInterval(() => paginate(1), 5000);
+              }
+            }}
+          />
         </>
       )}
     </div>
   );
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   NAMED SLIDE SECTION (Tabs at top + Arrows on image + loop)
+   ═══════════════════════════════════════════════════════════════════════════ */
 function NamedSlideSection({ slides }: { slides: { title: string; desktopImage: string; mobileImage: string }[] }) {
-  const [active, setActive] = useState(0);
+  const [[active, direction], setSlide] = useState([0, 0]);
+
+  const paginate = useCallback(
+    (newDirection: number) => {
+      setSlide(([prev]) => {
+        let next = prev + newDirection;
+        if (next < 0) next = slides.length - 1;
+        if (next >= slides.length) next = 0;
+        return [next, newDirection];
+      });
+    },
+    [slides.length]
+  );
+
   if (slides.length === 0) return null;
 
   return (
-    <div>
-      <div className="flex flex-wrap items-center justify-center gap-6 md:gap-12 mb-12 border-b border-white/10 pb-4">
-        {slides.map((slide, i) => (
-          <button
-            key={i}
-            onClick={() => setActive(i)}
-            className={`text-xs md:text-sm font-bold tracking-[0.2em] uppercase transition-all duration-300 relative px-2 py-4 ${
-              active === i ? "text-accent" : "text-gray-500 hover:text-white"
-            }`}
-          >
-            {slide.title}
-            {active === i && (
-              <motion.div layoutId="namedSlideUnderline" className="absolute bottom-0 left-0 right-0 h-[2px] bg-accent" />
-            )}
-          </button>
-        ))}
+    <div className="w-full">
+      {/* Tab Names — constrained to max-width */}
+      <div className="max-w-[1400px] mx-auto px-6">
+        <div className="flex flex-wrap items-center justify-center gap-4 md:gap-10 pb-4 border-b border-white/10">
+          {slides.map((slide, i) => (
+            <button
+              key={i}
+              onClick={() => {
+                const dir = i > active ? 1 : -1;
+                setSlide([i, dir]);
+              }}
+              className={`text-xs md:text-sm font-bold tracking-[0.2em] uppercase transition-all duration-300 relative px-2 py-4 ${
+                active === i ? "text-accent" : "text-gray-500 hover:text-white"
+              }`}
+            >
+              {slide.title}
+              {active === i && (
+                <motion.div layoutId="namedSlideUnderline" className="absolute bottom-0 left-0 right-0 h-[2px] bg-accent" />
+              )}
+            </button>
+          ))}
+        </div>
       </div>
-      <div className="relative w-full aspect-[4/5] md:aspect-[21/9] rounded-xl overflow-hidden shadow-2xl bg-black">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={active}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-            className="absolute inset-0"
-          >
-            <img src={slides[active].desktopImage} alt={slides[active].title} className="absolute inset-0 w-full h-full object-contain hidden md:block" />
-            {slides[active].mobileImage && <img src={slides[active].mobileImage} alt={slides[active].title} className="absolute inset-0 w-full h-full object-contain block md:hidden" />}
-          </motion.div>
-        </AnimatePresence>
+
+      {/* Full-width Image with Arrows */}
+      <div className="relative w-full overflow-hidden bg-black mt-6 md:mt-10">
+        <div className="relative w-full aspect-[4/5] md:aspect-[21/9]">
+          <AnimatePresence initial={false} custom={direction} mode="popLayout">
+            <motion.div
+              key={active}
+              custom={direction}
+              variants={slideVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{
+                x: { type: "tween", duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+                opacity: { duration: 0.35 },
+              }}
+              className="absolute inset-0"
+            >
+              <img
+                src={slides[active].desktopImage}
+                alt={slides[active].title}
+                className="absolute inset-0 w-full h-full object-contain hidden md:block"
+              />
+              {slides[active].mobileImage && (
+                <img
+                  src={slides[active].mobileImage}
+                  alt={slides[active].title}
+                  className="absolute inset-0 w-full h-full object-contain block md:hidden"
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* Arrow Navigation */}
+        {slides.length > 1 && (
+          <>
+            <ArrowButton direction="left" onClick={() => paginate(-1)} />
+            <ArrowButton direction="right" onClick={() => paginate(1)} />
+          </>
+        )}
       </div>
     </div>
   );
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   MAIN COMPONENT
+   ═══════════════════════════════════════════════════════════════════════════ */
 export default function ProductAPlusContent({ content }: { content?: any }) {
   if (!content) return null;
 
@@ -136,19 +302,15 @@ export default function ProductAPlusContent({ content }: { content?: any }) {
         } else if (block.type === 'named_slide_group') {
           if (!block.slides || block.slides.length === 0) return null;
           return (
-            <div key={block.id} className="w-full bg-[#111111] py-16 md:py-24">
-              <div className="max-w-[1400px] mx-auto px-6">
-                <NamedSlideSection slides={block.slides} />
-              </div>
+            <div key={block.id} className="w-full bg-[#111111] pt-10 md:pt-16 pb-0">
+              <NamedSlideSection slides={block.slides} />
             </div>
           );
         } else if (block.type === 'carousel_group') {
           if (!block.slides || block.slides.length === 0) return null;
           return (
-            <div key={block.id} className="w-full bg-white py-16 md:py-24">
-              <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-                <CarouselSection slides={block.slides} />
-              </div>
+            <div key={block.id} className="w-full bg-black">
+              <CarouselSection slides={block.slides} />
             </div>
           );
         }
