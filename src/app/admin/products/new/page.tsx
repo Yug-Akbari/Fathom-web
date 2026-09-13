@@ -758,7 +758,7 @@ export default function ProductEditor() {
                   )}
 
                   {(block.type === 'named_slide_group' || block.type === 'carousel_group') && (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="flex flex-col gap-6">
                       {(block as any).slides?.map((slide: any, si: number) => (
                         <div 
                           key={si}
@@ -778,65 +778,72 @@ export default function ProductEditor() {
                               return { ...b, slides: updatedSlides };
                             }) as APlusBlock[]);
                           }}
-                          className="relative flex bg-gray-100 rounded-lg overflow-hidden border border-gray-200 cursor-move"
+                          className="relative border-2 border-gray-100 bg-gray-50/50 rounded-xl p-4 cursor-move group/slide"
                         >
-                          {/* Slide Title Input (if named slide group) */}
+                          <div className="flex justify-between items-center mb-4">
+                            <span className="text-[10px] font-bold tracking-widest uppercase text-gray-400 flex items-center gap-2">
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="text-gray-300"><path d="M8 6h8M8 12h8M8 18h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                              Slide {si + 1}
+                            </span>
+                            <button onClick={(e) => { e.stopPropagation(); setAPlusContent(prev => prev.map(b => b.id === block.id ? { ...b, slides: (b as any).slides?.filter((_: any, idx: number) => idx !== si) } : b) as APlusBlock[]); }} className="w-6 h-6 rounded-full hover:bg-red-50 text-gray-300 hover:text-red-500 transition-colors flex items-center justify-center">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            </button>
+                          </div>
+
                           {block.type === 'named_slide_group' && (
-                            <div className="absolute top-2 left-2 right-8 z-20">
+                            <div className="mb-4">
                               <input 
                                 type="text" 
                                 placeholder="Tab Name..." 
                                 value={slide.title || ''}
                                 onChange={(e) => setAPlusContent(prev => prev.map(b => b.id === block.id && b.type === 'named_slide_group' ? { ...b, slides: (b as any).slides.map((s: any, idx: number) => idx === si ? { ...s, title: e.target.value } : s) } : b) as APlusBlock[])}
                                 onClick={(e) => e.stopPropagation()}
-                                className="w-full bg-black/50 border border-white/20 rounded px-2 py-1 text-[10px] text-white placeholder-white/50 outline-none focus:bg-black/80 shadow-sm"
+                                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-800 placeholder-gray-400 outline-none focus:border-primary shadow-sm"
                               />
                             </div>
                           )}
 
-                          <button onClick={(e) => { e.stopPropagation(); setAPlusContent(prev => prev.map(b => b.id === block.id ? { ...b, slides: (b as any).slides?.filter((_: any, idx: number) => idx !== si) } : b) as APlusBlock[]); }} className="absolute top-2 right-2 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors shadow-md z-20">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                          </button>
-
-                          {/* Mobile Half */}
-                          <div className="flex-1 relative aspect-square border-r border-gray-200 group/mobile">
-                            <div className="absolute bottom-2 left-2 z-10 bg-black/50 text-white px-2 py-0.5 rounded text-[8px] font-bold tracking-widest uppercase pointer-events-none">
-                              Mobile
-                            </div>
-                            {slide.mobileImage ? (
-                              <Image src={slide.mobileImage} alt="Mobile" fill className="object-contain pointer-events-none" />
-                            ) : (
-                              <div className="flex flex-col items-center justify-center w-full h-full text-gray-400 bg-gray-50 border-2 border-dashed border-gray-200">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="mb-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                                <span className="text-[8px] font-bold uppercase tracking-widest text-center px-1">Upload</span>
+                          <div className="grid grid-cols-2 gap-4">
+                            {/* Mobile Image Box */}
+                            <div className="relative aspect-square md:aspect-[4/3] bg-gray-100 rounded-lg overflow-hidden border border-gray-200 group">
+                              <div className="absolute top-2 left-2 z-10 bg-black/50 text-white px-2 py-0.5 rounded text-[8px] font-bold tracking-widest uppercase shadow-sm pointer-events-none">
+                                Mobile
                               </div>
-                            )}
-                            <div className="absolute inset-0 bg-black/70 opacity-0 group-hover/mobile:opacity-100 transition-opacity z-10 flex flex-col items-center justify-center">
-                              <label className="text-[8px] font-bold text-white border border-white/30 bg-black/40 px-2 py-1 rounded cursor-pointer hover:bg-white hover:text-black transition-colors w-24 text-center">
-                                {slide.mobileImage ? 'Update' : 'Add'}
-                                <input type="file" accept="image/*" onChange={(e) => handleAPlusImage(block.id, 'mobile', e, si)} className="hidden" />
-                              </label>
-                            </div>
-                          </div>
-
-                          {/* Desktop Half */}
-                          <div className="flex-1 relative aspect-square group/desktop">
-                            <div className="absolute bottom-2 left-2 z-10 bg-black/50 text-white px-2 py-0.5 rounded text-[8px] font-bold tracking-widest uppercase pointer-events-none">
-                              Desktop
-                            </div>
-                            {slide.desktopImage ? (
-                              <Image src={slide.desktopImage} alt="Desktop" fill className="object-contain pointer-events-none" />
-                            ) : (
-                              <div className="flex flex-col items-center justify-center w-full h-full text-gray-400 bg-gray-50 border-2 border-dashed border-gray-200">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="mb-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                                <span className="text-[8px] font-bold uppercase tracking-widest text-center px-1">Upload</span>
+                              {slide.mobileImage ? (
+                                <Image src={slide.mobileImage} alt="Mobile" fill className="object-contain pointer-events-none" />
+                              ) : (
+                                <div className="flex flex-col items-center justify-center w-full h-full text-gray-400 bg-gray-50 border-2 border-dashed border-gray-200">
+                                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="mb-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                  <span className="text-[10px] font-bold uppercase tracking-widest text-center px-2">Upload Mobile</span>
+                                </div>
+                              )}
+                              <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex flex-col items-center justify-center gap-3">
+                                <label className="text-[10px] font-bold text-white border border-white/30 bg-black/40 px-3 py-1.5 rounded cursor-pointer hover:bg-white hover:text-black transition-colors w-32 text-center">
+                                  {slide.mobileImage ? 'Update Mobile' : 'Add Mobile'}
+                                  <input type="file" accept="image/*" onChange={(e) => handleAPlusImage(block.id, 'mobile', e, si)} className="hidden" />
+                                </label>
                               </div>
-                            )}
-                            <div className="absolute inset-0 bg-black/70 opacity-0 group-hover/desktop:opacity-100 transition-opacity z-10 flex flex-col items-center justify-center">
-                              <label className="text-[8px] font-bold text-white border border-white/30 bg-black/40 px-2 py-1 rounded cursor-pointer hover:bg-white hover:text-black transition-colors w-24 text-center">
-                                {slide.desktopImage ? 'Update' : 'Add'}
-                                <input type="file" accept="image/*" onChange={(e) => handleAPlusImage(block.id, 'desktop', e, si)} className="hidden" />
-                              </label>
+                            </div>
+
+                            {/* Desktop Image Box */}
+                            <div className="relative aspect-square md:aspect-[4/3] bg-gray-100 rounded-lg overflow-hidden border border-gray-200 group">
+                              <div className="absolute top-2 left-2 z-10 bg-black/50 text-white px-2 py-0.5 rounded text-[8px] font-bold tracking-widest uppercase shadow-sm pointer-events-none">
+                                Desktop
+                              </div>
+                              {slide.desktopImage ? (
+                                <Image src={slide.desktopImage} alt="Desktop" fill className="object-contain pointer-events-none" />
+                              ) : (
+                                <div className="flex flex-col items-center justify-center w-full h-full text-gray-400 bg-gray-50 border-2 border-dashed border-gray-200">
+                                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="mb-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                  <span className="text-[10px] font-bold uppercase tracking-widest text-center px-2">Upload Desktop</span>
+                                </div>
+                              )}
+                              <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex flex-col items-center justify-center gap-3">
+                                <label className="text-[10px] font-bold text-white border border-white/30 bg-black/40 px-3 py-1.5 rounded cursor-pointer hover:bg-white hover:text-black transition-colors w-32 text-center">
+                                  {slide.desktopImage ? 'Update Desktop' : 'Add Desktop'}
+                                  <input type="file" accept="image/*" onChange={(e) => handleAPlusImage(block.id, 'desktop', e, si)} className="hidden" />
+                                </label>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -845,10 +852,10 @@ export default function ProductEditor() {
                       {/* Add Slide Button */}
                       <div 
                         onClick={() => setAPlusContent(prev => prev.map(b => b.id === block.id ? { ...b, slides: [...((b as any).slides || []), { title: "", desktopImage: "", mobileImage: "" }] } : b) as APlusBlock[])}
-                        className="relative aspect-square bg-[#FAF9F6] border-2 border-dashed border-gray-200 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:text-primary hover:border-gray-400 hover:bg-gray-50 transition-colors cursor-pointer group"
+                        className="w-full py-4 bg-[#FAF9F6] border-2 border-dashed border-gray-200 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:text-primary hover:border-gray-400 hover:bg-gray-50 transition-colors cursor-pointer group"
                       >
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="mb-2 group-hover:-translate-y-1 transition-transform"><path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                        <span className="text-[10px] font-bold tracking-widest uppercase text-center px-4">Add Empty<br/>Image Slot</span>
+                        <span className="text-[10px] font-bold tracking-widest uppercase text-center">+ Add Image Slot</span>
                       </div>
                     </div>
                   )}
@@ -867,10 +874,10 @@ export default function ProductEditor() {
               <button onClick={() => setAPlusContent(prev => [...prev, { id: Date.now().toString(), type: 'standalone', desktopImage: '', mobileImage: '' }])} className="px-4 py-3 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg text-[10px] font-bold tracking-widest uppercase text-gray-700 transition-colors flex items-center gap-2">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg> Add Standalone Image
               </button>
-              <button onClick={() => setAPlusContent(prev => [...prev, { id: Date.now().toString() + '1', type: 'named_slide_group', slides: [] }])} className="px-4 py-3 bg-accent/5 hover:bg-accent/10 border border-accent/20 rounded-lg text-[10px] font-bold tracking-widest uppercase text-accent transition-colors flex items-center gap-2">
+              <button onClick={() => setAPlusContent(prev => [...prev, { id: Date.now().toString() + '1', type: 'named_slide_group', slides: [{ title: "", desktopImage: "", mobileImage: "" }] }])} className="px-4 py-3 bg-accent/5 hover:bg-accent/10 border border-accent/20 rounded-lg text-[10px] font-bold tracking-widest uppercase text-accent transition-colors flex items-center gap-2">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg> Add Named Slides
               </button>
-              <button onClick={() => setAPlusContent(prev => [...prev, { id: Date.now().toString() + '2', type: 'carousel_group', slides: [] }])} className="px-4 py-3 bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg text-[10px] font-bold tracking-widest uppercase text-primary transition-colors flex items-center gap-2">
+              <button onClick={() => setAPlusContent(prev => [...prev, { id: Date.now().toString() + '2', type: 'carousel_group', slides: [{ title: "", desktopImage: "", mobileImage: "" }] }])} className="px-4 py-3 bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg text-[10px] font-bold tracking-widest uppercase text-primary transition-colors flex items-center gap-2">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg> Add Carousel
               </button>
             </div>
