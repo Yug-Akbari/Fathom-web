@@ -367,10 +367,12 @@ export function invoiceEmailTemplate(data: {
   invoiceNumber: string;
   invoiceDate: string;
   grandTotal: string;
+  isTaxInvoice?: boolean;
   pdfSizeKB?: number;
 }): string {
+  const headerText = data.isTaxInvoice ? 'Official Tax Invoice' : 'Official Invoice';
   const content = `
-    ${headerSection('Official Tax Invoice')}
+    ${headerSection(headerText)}
     <!-- Greeting -->
     <tr>
       <td style="padding:30px 50px 0 50px;">

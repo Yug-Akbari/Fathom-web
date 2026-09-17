@@ -50,11 +50,13 @@ export async function POST(req: Request) {
       });
     } else {
       subject = `Your ${type || 'Invoice'} from FATHOM`;
+      const isTaxInvoice = type === "Tax Invoice";
       htmlContent = invoiceEmailTemplate({
         customerName: customerName || 'Customer',
         invoiceNumber: documentData?.invoiceNumber || '',
         invoiceDate: documentData?.invoiceDate || '',
         grandTotal: documentData?.grandTotal || '0',
+        isTaxInvoice: isTaxInvoice
       });
     }
 
