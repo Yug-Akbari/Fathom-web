@@ -101,18 +101,8 @@ function footerSection(refCode: string, bottomNote: string): string {
     <span style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:${TEXT_SECONDARY};">&copy; ${YEAR} FATHOM. All rights reserved.</span>
   </td>
 </tr>
-<tr>
-  <td align="center" style="padding:2px 40px;">
-    <span style="font-family:Arial,Helvetica,sans-serif;font-size:9px;letter-spacing:1px;color:${TEXT_MUTED};text-transform:uppercase;">Bespoke Architectural Kitchen Systems &amp; Haute Cuisine Technology</span>
-  </td>
-</tr>
-<tr>
-  <td align="center" style="padding:12px 40px 6px 40px;">
-    <div style="border-top:1px solid ${BORDER_COLOR};padding-top:10px;">
-      <span style="font-family:'Courier New',Courier,monospace;font-size:9px;letter-spacing:1px;color:${TEXT_MUTED};text-transform:uppercase;">${refCode}</span>
-    </div>
-  </td>
-</tr>
+
+
 <tr>
   <td align="center" style="padding:4px 40px 25px 40px;">
     <span style="font-family:Arial,Helvetica,sans-serif;font-size:9px;color:${TEXT_MUTED};">${bottomNote}</span>
@@ -280,157 +270,90 @@ export function welcomeEmailTemplate(data: {
   memberEmail: string;
   memberId: string;
 }): string {
-  const refCode = `AUTH_REF: FTM-${Math.floor(10000 + Math.random() * 90000)}-REG &bull; ENCRYPTED SESSION &bull; PARIS &bull; MILAN &bull; NEW YORK`;
-
   const content = `
-    ${headerSection('Membership Confirmed &bull; Welcome to Fathom')}
-    <!-- Title -->
+    <!-- Top dark bar with subtle glow/gradient -->
     <tr>
-      <td align="center" style="padding:30px 40px 5px 40px;">
-        <h2 style="margin:0;font-family: Arial, Helvetica, sans-serif;font-size:28px;font-weight:normal;color:${TEXT_PRIMARY};letter-spacing:1px;text-transform:uppercase;line-height:38px;">Welcome to the<br/>Inner Circle</h2>
+      <td style="background:linear-gradient(90deg, #111111, ${BRAND_COLOR}, #111111);height:4px;font-size:0;line-height:0;">&nbsp;</td>
+    </tr>
+    <!-- Logo -->
+    <tr>
+      <td align="center" style="padding:40px 40px 20px 40px;">
+        <img src="https://www.fathomstore.in/images/fathom-logo-transparent.png" alt="FATHOM" width="120" style="display:block; margin:0 auto; border:none;" />
       </td>
     </tr>
+    <!-- Welcome Header -->
     <tr>
-      <td align="center" style="padding:10px 0;">
-        <div style="width:40px;height:2px;background-color:${BRAND_COLOR};margin:0 auto;"></div>
+      <td align="center" style="padding:10px 40px 15px 40px;">
+        <h2 style="margin:0;font-family: Georgia, 'Times New Roman', Times, serif;font-size:24px;font-weight:normal;color:${TEXT_PRIMARY};letter-spacing:3px;text-transform:uppercase;">WELCOME TO FATHOM</h2>
       </td>
     </tr>
-    <!-- Body text -->
+    <!-- Body Text -->
     <tr>
-      <td align="center" style="padding:10px 50px 25px 50px;">
-        <p style="margin:0;font-family: Arial, Helvetica, sans-serif;font-size:14px;line-height:22px;color:${TEXT_SECONDARY};">
-          Your account registration has been successfully verified. We are honored to welcome you into the realm of bespoke architectural kitchen systems and haute cuisine technology.
+      <td align="center" style="padding:0 50px 30px 50px;">
+        <p style="margin:0;font-family: Arial, Helvetica, sans-serif;font-size:11px;line-height:18px;color:${TEXT_SECONDARY};">
+          Welcome to FATHOM. Your account has been successfully created and your email has been verified.
         </p>
       </td>
     </tr>
-    <!-- Membership credentials card -->
+    <!-- Button -->
     <tr>
-      <td style="padding:0 40px 20px 40px;">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid ${BORDER_COLOR};border-radius:8px;overflow:hidden;">
-          <!-- Card header -->
-          <tr>
-            <td style="padding:16px 20px;border-bottom:1px solid ${BORDER_COLOR};">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-                <tr>
-                  <td>
-                    <span style="font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:2px;color:${TEXT_PRIMARY};text-transform:uppercase;font-weight:600;">Client Membership Credentials</span>
-                  </td>
-                  <td align="right">
-                    <span style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:1px;color:#2e7d32;border:1px solid #c8e6c9;border-radius:12px;padding:4px 12px;text-transform:uppercase;font-weight:600;">&#10003; Verified Account</span>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-          <!-- Credentials body -->
-          <tr>
-            <td style="padding:18px 20px;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-                <tr>
-                  <td width="50%" style="vertical-align:top;padding-bottom:14px;">
-                    <span style="font-family:Arial,Helvetica,sans-serif;font-size:9px;letter-spacing:1px;color:${TEXT_MUTED};text-transform:uppercase;">Member Name</span><br/>
-                    <span style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:${TEXT_PRIMARY};font-weight:600;">${data.memberName}</span>
-                  </td>
-                  <td width="50%" style="vertical-align:top;padding-bottom:14px;">
-                    <span style="font-family:Arial,Helvetica,sans-serif;font-size:9px;letter-spacing:1px;color:${TEXT_MUTED};text-transform:uppercase;">Membership ID</span><br/>
-                    <span style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:${TEXT_PRIMARY};font-weight:600;">${data.memberId}</span>
-                  </td>
-                </tr>
-                <tr>
-                  <td width="50%" style="vertical-align:top;">
-                    <span style="font-family:Arial,Helvetica,sans-serif;font-size:9px;letter-spacing:1px;color:${TEXT_MUTED};text-transform:uppercase;">Registered Email</span><br/>
-                    <span style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${TEXT_PRIMARY};">${data.memberEmail}</span>
-                  </td>
-                  <td width="50%" style="vertical-align:top;">
-                    <span style="font-family:Arial,Helvetica,sans-serif;font-size:9px;letter-spacing:1px;color:${TEXT_MUTED};text-transform:uppercase;">Status &amp; Privilege</span><br/>
-                    <span style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${BRAND_COLOR};font-weight:600;">Active - Tier I Private Client</span>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-    <!-- CTA Button -->
-    <tr>
-      <td align="center" style="padding:10px 40px 5px 40px;">
+      <td align="center" style="padding:10px 40px 10px 40px;">
         <table role="presentation" cellpadding="0" cellspacing="0" border="0">
           <tr>
-            <td style="background-color:${TEXT_PRIMARY};border-radius:4px;">
-              <a href="https://www.fathomstore.in/" style="display:inline-block;padding:14px 40px;font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:3px;color:#ffffff;text-decoration:none;text-transform:uppercase;font-weight:600;">Access Client Portal</a>
+            <td style="background-color:#111111;border:1px solid ${BRAND_COLOR};border-radius:2px;">
+              <a href="https://www.fathomstore.in/" style="display:inline-block;padding:12px 30px;font-family: Arial, Helvetica, sans-serif;font-size:10px;letter-spacing:2px;color:#ffffff;text-decoration:none;text-transform:uppercase;font-weight:bold;">EXPLORE STORE</a>
             </td>
           </tr>
         </table>
       </td>
     </tr>
+    <!-- Small note below button -->
     <tr>
-      <td align="center" style="padding:8px 40px 25px 40px;">
-        <span style="font-family: Arial, Helvetica, sans-serif;font-size:12px;color:${TEXT_MUTED};font-style:italic;">Explore private catalog editions &amp; schedule showroom commissions</span>
+      <td align="center" style="padding:0 40px 35px 40px;">
+        <span style="font-family: Arial, Helvetica, sans-serif;font-size:10px;color:${TEXT_MUTED};">Discover the FATHOM collection.</span>
       </td>
     </tr>
-    <!-- Divider -->
+    <!-- Support Box -->
     <tr>
-      <td style="padding:0 40px;">
-        <div style="border-top:1px solid ${BORDER_COLOR};"></div>
-      </td>
-    </tr>
-    <!-- Exclusive privileges -->
-    <tr>
-      <td align="center" style="padding:25px 40px 15px 40px;">
-        <span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:3px;color:${TEXT_PRIMARY};text-transform:uppercase;font-weight:600;">Exclusive Member Privileges</span>
-      </td>
-    </tr>
-    <!-- Privilege 1 -->
-    <tr>
-      <td style="padding:8px 50px;">
-        <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+      <td style="padding:0 30px 30px 30px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid ${BORDER_COLOR};border-radius:6px;background-color:#fefefe;">
           <tr>
-            <td style="vertical-align:top;padding-right:14px;width:28px;">
-              <span style="font-size:18px;">&#9997;</span>
-            </td>
-            <td>
-              <p style="margin:0 0 3px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${TEXT_PRIMARY};font-weight:bold;">BESPOKE CONSULTATIONS</p>
-              <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:${TEXT_SECONDARY};">Direct access to our private kitchen architects and product specialists for custom culinary layouts.</p>
+            <td align="center" style="padding:16px 20px;">
+              <span style="font-family: Arial, Helvetica, sans-serif;font-size:11px;color:${TEXT_SECONDARY};">Need assistance? Contact Us at <a href="mailto:support@fathomstore.in" style="color:${BRAND_COLOR};text-decoration:none;">support@fathomstore.in</a></span>
             </td>
           </tr>
         </table>
       </td>
     </tr>
-    <!-- Privilege 2 -->
+    <!-- Footer line separator -->
     <tr>
-      <td style="padding:8px 50px;">
-        <table role="presentation" cellpadding="0" cellspacing="0" border="0">
-          <tr>
-            <td style="vertical-align:top;padding-right:14px;width:28px;">
-              <span style="font-size:18px;">&#128337;</span>
-            </td>
-            <td>
-              <p style="margin:0 0 3px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${TEXT_PRIMARY};font-weight:bold;">PRIORITY INQUIRIES &amp; RESERVE</p>
-              <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:${TEXT_SECONDARY};">Seamless WhatsApp concierge and priority build-allocation for ultra-limited series and appliances.</p>
-            </td>
-          </tr>
-        </table>
-      </td>
+      <td style="padding:0;border-top:1px solid ${BORDER_COLOR};"></td>
     </tr>
-    <!-- Privilege 3 -->
+    <!-- Minimal Footer -->
     <tr>
-      <td style="padding:8px 50px 25px 50px;">
-        <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+      <td style="padding:25px 30px;background-color:#fcfcfc;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
           <tr>
-            <td style="vertical-align:top;padding-right:14px;width:28px;">
-              <span style="font-size:18px;">&#128170;</span>
+            <td align="center" style="padding-bottom:12px;">
+              <span style="font-family: Arial, Helvetica, sans-serif;font-size:9px;letter-spacing:1px;color:${TEXT_MUTED};text-transform:uppercase;">
+                <a href="https://www.fathomstore.in/privacy-policy" style="color:${TEXT_MUTED};text-decoration:none;">Privacy Policy</a> &nbsp;&nbsp;&nbsp; <a href="https://www.fathomstore.in/terms" style="color:${TEXT_MUTED};text-decoration:none;">Terms of Service</a> &nbsp;&nbsp;&nbsp; <a href="https://www.fathomstore.in/contact" style="color:${TEXT_MUTED};text-decoration:none;">Contact Us</a>
+              </span>
             </td>
-            <td>
-              <p style="margin:0 0 3px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${TEXT_PRIMARY};font-weight:bold;">LIFETIME WARRANTY &amp; CARE</p>
-              <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:${TEXT_SECONDARY};">Comprehensive architectural concierge servicing, precision preventative checks, and authentic certificates.</p>
+          </tr>
+          <tr>
+            <td align="center" style="padding-bottom:6px;">
+              <span style="font-family: Arial, Helvetica, sans-serif;font-size:9px;color:${TEXT_MUTED};">&copy; 2026 FATHOM. All rights reserved.</span>
+            </td>
+          </tr>
+          <tr>
+            <td align="center">
+              <span style="font-family: Arial, Helvetica, sans-serif;font-size:8px;letter-spacing:2px;color:${TEXT_MUTED};text-transform:uppercase;">QUALITY &bull; DESIGN &bull; EXPERIENCE</span>
             </td>
           </tr>
         </table>
       </td>
     </tr>
-    ${footerSection(refCode, 'To ensure continued delivery of FATHOM member updates and private invitations, add fathom.support@gmail.com to your address book.')}
-  `;
+  \`;
 
   return emailWrapper(content);
 }
