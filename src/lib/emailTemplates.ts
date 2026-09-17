@@ -792,6 +792,201 @@ export function inquiryEmailTemplate(data: {
           We look forward to serving you.
         </p>
         <p style="margin:0;font-family: Arial, Helvetica, sans-serif;font-size:13px;color:${TEXT_SECONDARY};">
+        </table>
+      </td>
+    </tr>
+    <!-- Message -->
+    <tr>
+      <td style="padding:0 50px 20px 50px;">
+        <p style="margin:0 0 12px 0;font-family: Arial, Helvetica, sans-serif;font-size:14px;line-height:22px;color:${TEXT_SECONDARY};">
+          The attached quotation includes the product details, quantities, pricing, applicable taxes, and other relevant terms and conditions.
+        </p>
+        <p style="margin:0 0 12px 0;font-family: Arial, Helvetica, sans-serif;font-size:14px;line-height:22px;color:${TEXT_SECONDARY};">
+          Please review the quotation and feel free to contact us if you have any questions or require any changes.
+        </p>
+        <p style="margin:0 0 15px 0;font-family: Arial, Helvetica, sans-serif;font-size:14px;line-height:22px;color:${TEXT_SECONDARY};">
+          We look forward to serving you.
+        </p>
+        <p style="margin:0;font-family: Arial, Helvetica, sans-serif;font-size:14px;color:${TEXT_SECONDARY};">
+          Warm regards,<br/>
+          <strong style="color:${TEXT_PRIMARY};">Team FATHOM</strong>
+        </p>
+      </td>
+    </tr>
+
+    <!-- Customer care box -->
+    <tr>
+      <td style="padding:0 50px 25px 50px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid ${BORDER_COLOR};border-radius:6px;">
+          <tr>
+            <td style="padding:16px 20px;">
+              <p style="margin:0 0 10px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:2px;color:${TEXT_PRIMARY};text-transform:uppercase;font-weight:700;">Customer Care &amp; Verification</p>
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="padding:3px 0;">
+                    <span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${TEXT_MUTED};display:inline-block;width:60px;">Website:</span>
+                    <a href="https://www.fathomstore.in/" style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${BRAND_COLOR};text-decoration:none;">https://www.fathomstore.in/</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:3px 0;">
+                    <span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${TEXT_MUTED};display:inline-block;width:60px;">Email:</span>
+                    <a href="mailto:fathom.support@gmail.com" style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${BRAND_COLOR};text-decoration:none;">fathom.support@gmail.com</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:3px 0;">
+                    <span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${TEXT_MUTED};display:inline-block;width:60px;">Phone:</span>
+                    <span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${TEXT_PRIMARY};">+91 82385 43000</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    ${darkFooterSection('To ensure continued delivery of FATHOM updates and invoices, add fathom.support@gmail.com to your address book.')}
+  `;
+
+  return emailWrapper(content);
+}
+
+// ============================================================
+// 5. Inquiry Acknowledgement Email Template
+// ============================================================
+
+export function inquiryEmailTemplate(data: {
+  customerName: string;
+  inquiryDate: string;
+  category: string;
+  message: string;
+  tagReference: string;
+}): string {
+  const content = `
+    <!-- Top dark gold line -->
+    <tr>
+      <td style="background-color:${BRAND_COLOR};height:4px;font-size:0;line-height:0;">&nbsp;</td>
+    </tr>
+    <!-- Logo -->
+    <tr>
+      <td align="center" style="padding:40px 40px 10px 40px;">
+        <img src="https://www.fathomstore.in/images/fathom-logo-transparent.png" alt="FATHOM" width="160" style="display:block; margin:0 auto; border:none;" />
+      </td>
+    </tr>
+    <!-- Badge -->
+    <tr>
+      <td align="center" style="padding:15px 40px 25px 40px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td style="border:1px solid ${BRAND_COLOR};border-radius:20px;padding:8px 30px;background-color:#ffffff;">
+              <span style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:2px;color:${BRAND_COLOR};text-transform:uppercase;font-weight:bold;">Official Inquiry Acknowledgement</span>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <!-- Divider -->
+    <tr>
+      <td style="padding:0 40px;">
+        <div style="border-top:1px solid ${BORDER_COLOR};"></div>
+      </td>
+    </tr>
+    <!-- Greeting -->
+    <tr>
+      <td style="padding:30px 40px 15px 40px;">
+        <h2 style="margin:0;font-family: Arial, Helvetica, sans-serif;font-size:18px;font-weight:bold;color:${TEXT_PRIMARY};">Hi ${data.customerName},</h2>
+      </td>
+    </tr>
+    <!-- Intro text -->
+    <tr>
+      <td style="padding:0 40px 25px 40px;">
+        <p style="margin:0;font-family: Arial, Helvetica, sans-serif;font-size:13px;line-height:22px;color:${TEXT_SECONDARY};">
+          Thank you for reaching out to <strong style="color:${TEXT_PRIMARY};">FATHOM</strong>. We have received your inquiry, and our dedicated client concierge team is reviewing the details to assist you shortly.
+        </p>
+      </td>
+    </tr>
+    <!-- Inquiry Details Card -->
+    <tr>
+      <td style="padding:0 40px 25px 40px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid ${BORDER_COLOR};border-radius:10px;background-color:#fafaf8;overflow:hidden;">
+          <!-- Header -->
+          <tr>
+            <td style="padding:15px 20px;border-bottom:1px solid ${BORDER_COLOR};">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td>
+                    <span style="font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:1px;color:${BRAND_COLOR};text-transform:uppercase;font-weight:bold;">Your Inquiry Details</span>
+                  </td>
+                  <td align="right">
+                    <span style="font-family:Arial,Helvetica,sans-serif;font-size:9px;letter-spacing:1px;color:#2e7d32;border:1px solid #c8e6c9;border-radius:4px;padding:3px 8px;text-transform:uppercase;font-weight:bold;background-color:#e8f5e9;">Received</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <!-- Rows -->
+          <tr>
+            <td style="padding:15px 20px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <!-- Date Row -->
+                <tr>
+                  <td style="padding:10px 0;border-bottom:1px solid #f0f0f0;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td width="30%">
+                          <span style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:1px;color:${TEXT_MUTED};text-transform:uppercase;">Inquiry Date</span>
+                        </td>
+                        <td width="70%" align="right">
+                          <span style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${TEXT_PRIMARY};font-weight:bold;">${data.inquiryDate}</span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <!-- Category Row -->
+                <tr>
+                  <td style="padding:10px 0;border-bottom:1px solid #f0f0f0;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td width="30%">
+                          <span style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:1px;color:${TEXT_MUTED};text-transform:uppercase;">Category</span>
+                        </td>
+                        <td width="70%" align="right">
+                          <span style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:${TEXT_PRIMARY};background-color:#eef0f2;padding:4px 10px;border-radius:12px;font-weight:bold;">${data.category}</span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <!-- Message Row -->
+                <tr>
+                  <td style="padding:15px 0 5px 0;">
+                    <span style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:1px;color:${TEXT_MUTED};text-transform:uppercase;display:block;margin-bottom:10px;">Submitted Message</span>
+                    <div style="background-color:#ffffff;border:1px solid ${BORDER_COLOR};border-radius:6px;padding:15px;">
+                      <p style="margin:0 0 10px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:20px;color:${TEXT_SECONDARY};font-style:italic;">
+                        "${data.message}"
+                      </p>
+                      <span style="font-family:'Courier New',Courier,monospace;font-size:10px;color:${TEXT_MUTED};">Original tag reference: ${data.tagReference}</span>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <!-- Outro text -->
+    <tr>
+      <td style="padding:0 40px 20px 40px;">
+        <p style="margin:0 0 12px 0;font-family: Arial, Helvetica, sans-serif;font-size:13px;line-height:20px;color:${TEXT_SECONDARY};">
+          Our typical response turnaround is within <strong style="color:${TEXT_PRIMARY};">2 to 4 business hours</strong>. If your requirement is urgent or requires immediate customization, please feel free to connect directly via our customer support desk listed below.
+        </p>
+        <p style="margin:0 0 15px 0;font-family: Arial, Helvetica, sans-serif;font-size:13px;line-height:20px;color:${TEXT_SECONDARY};">
+          We look forward to serving you.
+        </p>
+        <p style="margin:0;font-family: Arial, Helvetica, sans-serif;font-size:13px;color:${TEXT_SECONDARY};">
           <span style="font-size:10px;letter-spacing:1px;text-transform:uppercase;">Warm Regards,</span><br/>
           <strong style="color:${TEXT_PRIMARY};font-size:14px;">Team FATHOM</strong>
         </p>
@@ -827,28 +1022,12 @@ export function inquiryEmailTemplate(data: {
                 </tr>
               </table>
             </td>
-                </tr>
-                <tr>
-                  <td style="padding:3px 0;">
-                    <span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${TEXT_MUTED};display:inline-block;width:60px;">Email:</span>
-                    <a href="mailto:fathom.support@gmail.com" style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${BRAND_COLOR};text-decoration:none;">fathom.support@gmail.com</a>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding:3px 0;">
-                    <span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${TEXT_MUTED};display:inline-block;width:60px;">Phone:</span>
-                    <span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${TEXT_PRIMARY};">+91 82385 43000</span>
-                  </td>
-                </tr>
-              </table>
-            </td>
           </tr>
         </table>
       </td>
     </tr>
-    ${darkFooterSection('To ensure continued delivery of FATHOM updates and invoices, add fathom.support@gmail.com to your address book.')}
+    ${darkFooterSection('To ensure continued delivery of FATHOM updates and inquiry confirmations, please add fathom.support@gmail.com to your address book.')}
   `;
 
   return emailWrapper(content);
 }
-
