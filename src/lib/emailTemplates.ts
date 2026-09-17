@@ -353,7 +353,7 @@ export function welcomeEmailTemplate(data: {
         </table>
       </td>
     </tr>
-  \`;
+  `;
 
   return emailWrapper(content);
 }
