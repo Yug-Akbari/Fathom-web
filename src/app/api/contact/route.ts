@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
+import { inquiryEmailTemplate } from "@/lib/emailTemplates";
 
 export async function POST(req: Request) {
   try {
@@ -60,22 +61,27 @@ export async function POST(req: Request) {
       `,
     };
 
+    // Format date like "19 Mar 2026, 04:30 PM"
+    const now = new Date();
+    const dateOpts: Intl.DateTimeFormatOptions = { day: '2-digit', month: 'short', year: 'numeric' };
+    const timeOpts: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit', hour12: true };
+    const inquiryDate = `${now.toLocaleDateString('en-GB', dateOpts)}, ${now.toLocaleTimeString('en-US', timeOpts)}`;
+    
+    // Generate short tag reference
+    const tagReference = Math.random().toString(36).substring(2, 6).toLowerCase();
+
     // 2. Email to the customer (auto-reply)
     const customerMailOptions = {
       from: noReplyUser,
       to: email,
-      subject: "Thank you for your inquiry - Fathom",
-      html: `
-        <h2>Hi ${name},</h2>
-        <p>Thank you for reaching out to Fathom. We have received your inquiry and our team will get back to you shortly.</p>
-        <br/>
-        <h3>Your Inquiry Details:</h3>
-        <p><strong>Category:</strong> ${category || 'N/A'}</p>
-        <p><strong>Message:</strong></p>
-        <p>${message.replace(/\n/g, '<br>')}</p>
-        <br/>
-        <p>Best regards,<br/>The Fathom Team</p>
-      `,
+      subject: "Thank you for your inquiry - FATHOM",
+      html: inquiryEmailTemplate({
+        customerName: name,
+        inquiryDate: inquiryDate,
+        category: category || 'General Inquiry',
+        message: message,
+        tagReference: tagReference
+      }),
     };
 
     // Send both emails
