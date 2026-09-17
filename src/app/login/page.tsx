@@ -16,6 +16,8 @@ export default function LoginPage() {
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [isOtpSent, setIsOtpSent] = useState(false);
 
   const { user, loginWithGoogle, loading } = useAuth();
   const router = useRouter();
@@ -46,9 +48,54 @@ export default function LoginPage() {
     setIsLoading(true);
     setError("");
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const response = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to send OTP");
+      }
+
+      setIsOtpSent(true);
     } catch (err: any) {
-      setError(err.message?.includes("already") ? "This email is already registered." : "Registration failed. Please try again.");
+      setError(err.message || "Registration failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!otp) return setError("Please enter the OTP.");
+    setIsLoading(true);
+    setError("");
+    try {
+      const response = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, otp }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Invalid OTP");
+      }
+
+      // OTP is valid, now create the user in Firebase
+      await createUserWithEmailAndPassword(auth, email, password);
+
+      // Send welcome email in the background (fire-and-forget)
+      fetch("/api/auth/send-welcome", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, name: name || email.split("@")[0] }),
+      }).catch((err) => console.error("Welcome email failed:", err));
+    } catch (err: any) {
+      setError(err.message?.includes("already") ? "This email is already registered." : err.message || "Registration failed.");
     } finally {
       setIsLoading(false);
     }
@@ -105,14 +152,14 @@ export default function LoginPage() {
           {/* Tabs */}
           <div className="flex border-b border-gray-200 mb-10">
             <button
-              onClick={() => { setActiveTab("signin"); setError(""); }}
+              onClick={() => { setActiveTab("signin"); setError(""); setIsOtpSent(false); }}
               className={`flex-1 pb-4 text-xs font-bold tracking-[0.2em] uppercase transition-colors relative ${activeTab === "signin" ? "text-primary" : "text-gray-400 hover:text-gray-600"}`}
             >
               Sign In
               {activeTab === "signin" && <motion.div layoutId="auth-tab" className="absolute bottom-0 left-0 w-full h-[2px] bg-primary" />}
             </button>
             <button
-              onClick={() => { setActiveTab("register"); setError(""); }}
+              onClick={() => { setActiveTab("register"); setError(""); setIsOtpSent(false); }}
               className={`flex-1 pb-4 text-xs font-bold tracking-[0.2em] uppercase transition-colors relative ${activeTab === "register" ? "text-primary" : "text-gray-400 hover:text-gray-600"}`}
             >
               Register
@@ -158,33 +205,59 @@ export default function LoginPage() {
           {/* Register Form */}
           {activeTab === "register" && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-6">
-              <div className="flex flex-col gap-2">
-                <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-500">Full Name</label>
-                <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Your full name" className="w-full border-b border-gray-200 py-3 text-base font-inter text-primary placeholder:text-gray-300 focus:outline-none focus:border-primary transition-colors bg-transparent" />
-              </div>
-              <div className="flex flex-col gap-2">
-                <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-500">Email Address</label>
-                <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="name@example.com" className="w-full border-b border-gray-200 py-3 text-base font-inter text-primary placeholder:text-gray-300 focus:outline-none focus:border-primary transition-colors bg-transparent" />
-              </div>
-              <div className="flex flex-col gap-2">
-                <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-500">Password</label>
-                <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Min 6 characters" className="w-full border-b border-gray-200 py-3 text-base font-inter text-primary placeholder:text-gray-300 focus:outline-none focus:border-primary transition-colors bg-transparent" />
-              </div>
-              <div className="flex flex-col gap-2">
-                <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-500">Confirm Password</label>
-                <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Re-enter password" className="w-full border-b border-gray-200 py-3 text-base font-inter text-primary placeholder:text-gray-300 focus:outline-none focus:border-primary transition-colors bg-transparent" />
-              </div>
+              {!isOtpSent ? (
+                <>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-500">Full Name</label>
+                    <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Your full name" className="w-full border-b border-gray-200 py-3 text-base font-inter text-primary placeholder:text-gray-300 focus:outline-none focus:border-primary transition-colors bg-transparent" />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-500">Email Address</label>
+                    <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="name@example.com" className="w-full border-b border-gray-200 py-3 text-base font-inter text-primary placeholder:text-gray-300 focus:outline-none focus:border-primary transition-colors bg-transparent" />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-500">Password</label>
+                    <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Min 6 characters" className="w-full border-b border-gray-200 py-3 text-base font-inter text-primary placeholder:text-gray-300 focus:outline-none focus:border-primary transition-colors bg-transparent" />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-500">Confirm Password</label>
+                    <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Re-enter password" className="w-full border-b border-gray-200 py-3 text-base font-inter text-primary placeholder:text-gray-300 focus:outline-none focus:border-primary transition-colors bg-transparent" />
+                  </div>
 
-              <button
-                onClick={handleRegister}
-                disabled={isLoading}
-                className="w-full bg-primary text-white py-5 flex items-center justify-between px-8 hover:bg-black transition-colors mt-2 group disabled:opacity-50"
-              >
-                <span className="text-xs font-bold tracking-[0.2em] uppercase">{isLoading ? "Creating Account..." : "Create Account"}</span>
-                {!isLoading && (
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="transform group-hover:translate-x-1 transition-transform"><path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                )}
-              </button>
+                  <button
+                    onClick={handleRegister}
+                    disabled={isLoading}
+                    className="w-full bg-primary text-white py-5 flex items-center justify-between px-8 hover:bg-black transition-colors mt-2 group disabled:opacity-50"
+                  >
+                    <span className="text-xs font-bold tracking-[0.2em] uppercase">{isLoading ? "Sending OTP..." : "Continue"}</span>
+                    {!isLoading && (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="transform group-hover:translate-x-1 transition-transform"><path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                    )}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-500">Enter OTP</label>
+                    <p className="text-xs text-gray-400 mb-2">We sent a verification code to {email}</p>
+                    <input type="text" value={otp} onChange={e => setOtp(e.target.value)} placeholder="6-digit code" className="w-full border-b border-gray-200 py-3 text-base font-inter text-primary placeholder:text-gray-300 focus:outline-none focus:border-primary transition-colors bg-transparent tracking-widest" maxLength={6} />
+                  </div>
+
+                  <button
+                    onClick={handleVerifyOtp}
+                    disabled={isLoading}
+                    className="w-full bg-primary text-white py-5 flex items-center justify-between px-8 hover:bg-black transition-colors mt-2 group disabled:opacity-50"
+                  >
+                    <span className="text-xs font-bold tracking-[0.2em] uppercase">{isLoading ? "Verifying..." : "Verify & Create Account"}</span>
+                    {!isLoading && (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="transform group-hover:translate-x-1 transition-transform"><path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                    )}
+                  </button>
+                  <button onClick={() => setIsOtpSent(false)} className="text-xs text-gray-400 hover:text-primary mt-2 text-center transition-colors">
+                    Back to registration
+                  </button>
+                </>
+              )}
             </motion.div>
           )}
 

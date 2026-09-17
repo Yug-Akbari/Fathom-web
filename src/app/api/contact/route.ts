@@ -14,19 +14,39 @@ export async function POST(req: Request) {
       );
     }
 
-    // Configure the email transporter using Gmail
-    const transporter = nodemailer.createTransport({
+    const inquiryUser = process.env.INQUIRY_EMAIL_USER || process.env.EMAIL_USER;
+    const inquiryPass = process.env.INQUIRY_EMAIL_PASS || process.env.EMAIL_PASS;
+    const noReplyUser = process.env.EMAIL_USER;
+    const noReplyPass = process.env.EMAIL_PASS;
+    
+    console.log("DEBUG EMAIL - Inquiry User:", inquiryUser ? "Loaded" : "Missing");
+    console.log("DEBUG EMAIL - NoReply User:", noReplyUser ? "Loaded" : "Missing");
+
+    // Configure the inquiry email transporter
+    const inquiryTransporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: process.env.EMAIL_USER, // e.g., fathom.support@gmail.com
-        pass: process.env.EMAIL_PASS, // App password
+        user: inquiryUser,
+        pass: inquiryPass,
       },
     });
 
+    // Configure the no-reply email transporter
+    const noReplyTransporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: noReplyUser,
+        pass: noReplyPass,
+      },
+    });
+
+    const receiverEmail = process.env.INQUIRY_RECEIVER_EMAIL || inquiryUser;
+
     // 1. Email to the support team
     const supportMailOptions = {
-      from: process.env.EMAIL_USER,
-      to: process.env.EMAIL_USER, // Send to the support email itself
+      from: inquiryUser,
+      to: receiverEmail, // Send to the configured receiver email
+      replyTo: email, // This allows the support team to click 'Reply' and reply directly to the customer
       subject: `New Inquiry from ${name} - ${category || 'General'}`,
       html: `
         <h2>New Inquiry Received</h2>
@@ -42,7 +62,7 @@ export async function POST(req: Request) {
 
     // 2. Email to the customer (auto-reply)
     const customerMailOptions = {
-      from: process.env.EMAIL_USER,
+      from: noReplyUser,
       to: email,
       subject: "Thank you for your inquiry - Fathom",
       html: `
@@ -59,8 +79,8 @@ export async function POST(req: Request) {
     };
 
     // Send both emails
-    await transporter.sendMail(supportMailOptions);
-    await transporter.sendMail(customerMailOptions);
+    await inquiryTransporter.sendMail(supportMailOptions);
+    await noReplyTransporter.sendMail(customerMailOptions);
 
     return NextResponse.json(
       { message: "Emails sent successfully" },

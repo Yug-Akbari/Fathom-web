@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
+import { invoiceEmailTemplate, quotationEmailTemplate } from "@/lib/emailTemplates";
 
 export async function POST(req: Request) {
   try {
@@ -28,52 +29,33 @@ export async function POST(req: Request) {
 
     if (type === "Quotation" || type === "Quotation (No GST)" || type.includes("Quotation")) {
       subject = "Your Quotation from FATHOM";
-      htmlContent = `
-        <p>Hello ${customerName || 'Customer'},</p>
-        <p>Thank you for your interest in FATHOM.</p>
-        <p>Please find the quotation for your requested products attached to this email.</p>
-        
-        <p><strong>Quotation Details:</strong><br/>
-        * Quotation Date: ${documentData?.quotationDate || ''}<br/>
-        * Valid Until: This quotation is valid for 10 days from the date of issuance. Prices and availability are subject to change after the validity period.<br/>
-        * Total Amount: ₹${documentData?.grandTotal || '0'}</p>
-        
-        <p>The attached quotation includes the product details, quantities, pricing, applicable taxes, and other relevant terms and conditions.</p>
-        
-        <p>Please review the quotation and feel free to contact us if you have any questions or require any changes.</p>
-        
-        <p>We look forward to serving you.</p>
-        
-        <p>Warm regards,<br/>
-        Team FATHOM</p>
-        
-        <p>Website: <a href="https://www.fathomstore.in/">https://www.fathomstore.in/</a><br/>
-        Email: fathom.support@gmail.com<br/>
-        Phone: +91 82385 43000</p>
-      `;
+
+      // Calculate valid-until date (10 days from quotation date)
+      let validUntil = '';
+      if (documentData?.quotationDate) {
+        try {
+          const qDate = new Date(documentData.quotationDate);
+          qDate.setDate(qDate.getDate() + 10);
+          validUntil = qDate.toISOString().split('T')[0];
+        } catch {
+          validUntil = '';
+        }
+      }
+
+      htmlContent = quotationEmailTemplate({
+        customerName: customerName || 'Customer',
+        quotationDate: documentData?.quotationDate || '',
+        validUntil: validUntil,
+        grandTotal: documentData?.grandTotal || '0',
+      });
     } else {
       subject = `Your ${type || 'Invoice'} from FATHOM`;
-      htmlContent = `
-        <p>Hello ${customerName || 'Customer'},</p>
-        <p>Thank you for choosing FATHOM.</p>
-        <p>Your invoice for Order is attached to this email.</p>
-        
-        <p><strong>Invoice Details:</strong><br/>
-        * Invoice Number: ${documentData?.invoiceNumber || ''}<br/>
-        * Order Date: ${documentData?.invoiceDate || ''}<br/>
-        * Invoice Amount: ₹${documentData?.grandTotal || '0'}</p>
-        
-        <p>Please keep this invoice for your records.</p>
-        
-        <p>We appreciate your trust in FATHOM and look forward to serving you again.</p>
-        
-        <p>Warm regards,<br/>
-        Team FATHOM</p>
-        
-        <p>Website: <a href="https://www.fathomstore.in/">https://www.fathomstore.in/</a><br/>
-        Email: fathom.support@gmail.com<br/>
-        Phone: +91 82385 43000</p>
-      `;
+      htmlContent = invoiceEmailTemplate({
+        customerName: customerName || 'Customer',
+        invoiceNumber: documentData?.invoiceNumber || '',
+        invoiceDate: documentData?.invoiceDate || '',
+        grandTotal: documentData?.grandTotal || '0',
+      });
     }
 
     // Send email with PDF attachment
