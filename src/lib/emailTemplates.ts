@@ -490,7 +490,7 @@ export function invoiceEmailTemplate(data: {
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                       <tr>
                         <td><span style="font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:1px;color:${TEXT_SECONDARY};text-transform:uppercase;">Invoice Number</span></td>
-                        <td align="right"><span style="font-family: Georgia, 'Times New Roman', Times, serif;font-size:14px;color:${TEXT_PRIMARY};font-weight:700;">${data.invoiceNumber}</span></td>
+                        <td align="right"><span style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:${TEXT_PRIMARY};font-weight:700;">${data.invoiceNumber}</span></td>
                       </tr>
                     </table>
                   </td>
@@ -500,7 +500,7 @@ export function invoiceEmailTemplate(data: {
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                       <tr>
                         <td><span style="font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:1px;color:${TEXT_SECONDARY};text-transform:uppercase;">Order Date</span></td>
-                        <td align="right"><span style="font-family: Georgia, 'Times New Roman', Times, serif;font-size:14px;color:${TEXT_PRIMARY};font-weight:700;">${data.invoiceDate}</span></td>
+                        <td align="right"><span style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:${TEXT_PRIMARY};font-weight:700;">${data.invoiceDate}</span></td>
                       </tr>
                     </table>
                   </td>
@@ -509,8 +509,8 @@ export function invoiceEmailTemplate(data: {
                   <td style="padding:14px 0 6px 0;">
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                       <tr>
-                        <td><span style="font-family: Georgia, 'Times New Roman', Times, serif;font-size:14px;color:${TEXT_PRIMARY};font-weight:bold;">Invoice Amount</span></td>
-                        <td align="right"><span style="font-family: Georgia, 'Times New Roman', Times, serif;font-size:24px;color:${TEXT_PRIMARY};font-weight:bold;">&#8377;${data.grandTotal}</span></td>
+                        <td><span style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:${TEXT_PRIMARY};font-weight:bold;">Invoice Amount</span></td>
+                        <td align="right"><span style="font-family:Arial,Helvetica,sans-serif;font-size:24px;color:${TEXT_PRIMARY};font-weight:bold;">&#8377;${data.grandTotal}</span></td>
                       </tr>
                     </table>
                   </td>
@@ -605,7 +605,7 @@ export function quotationEmailTemplate(data: {
           <strong>Hello ${data.customerName},</strong>
         </p>
         <p style="margin:0 0 8px 0;font-family: Georgia, 'Times New Roman', Times, serif;font-size:14px;line-height:22px;color:${TEXT_SECONDARY};">
-          Thank you for your interest in <strong style="color:${TEXT_PRIMARY};">FATHOM</strong>.
+          Thank you for your interest in <strong style="font-family:Arial,Helvetica,sans-serif;color:${TEXT_PRIMARY};">FATHOM</strong>.
         </p>
         <p style="margin:0;font-family: Georgia, 'Times New Roman', Times, serif;font-size:14px;line-height:22px;color:${TEXT_SECONDARY};">
           Please find the quotation for your requested products attached to this email.
@@ -640,7 +640,7 @@ export function quotationEmailTemplate(data: {
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                       <tr>
                         <td><span style="font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:1px;color:${TEXT_SECONDARY};text-transform:uppercase;">Quotation Date</span></td>
-                        <td align="right"><span style="font-family: Georgia, 'Times New Roman', Times, serif;font-size:14px;color:${TEXT_PRIMARY};font-weight:700;">${data.quotationDate}</span></td>
+                        <td align="right"><span style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:${TEXT_PRIMARY};font-weight:700;">${data.quotationDate}</span></td>
                       </tr>
                     </table>
                   </td>
@@ -651,7 +651,7 @@ export function quotationEmailTemplate(data: {
                       <tr>
                         <td><span style="font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:1px;color:${TEXT_SECONDARY};text-transform:uppercase;">Valid Until</span></td>
                         <td align="right">
-                          <span style="font-family: Georgia, 'Times New Roman', Times, serif;font-size:14px;color:${TEXT_PRIMARY};font-weight:700;">${validUntilDate}</span><br/>
+                          <span style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:${TEXT_PRIMARY};font-weight:700;">${validUntilDate}</span><br/>
                           <span style="font-family:Arial,Helvetica,sans-serif;font-size:10px;color:${TEXT_MUTED};">(Valid 10 days from issue)</span>
                         </td>
                       </tr>
@@ -663,8 +663,8 @@ export function quotationEmailTemplate(data: {
                     <p style="margin:0 0 8px 0;font-family: Georgia, 'Times New Roman', Times, serif;font-size:11px;color:${TEXT_MUTED};font-style:italic;">* Prices and availability are subject to change after the validity period.</p>
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                       <tr>
-                        <td><span style="font-family: Georgia, 'Times New Roman', Times, serif;font-size:14px;color:${TEXT_PRIMARY};font-weight:bold;">Total Amount</span></td>
-                        <td align="right"><span style="font-family: Georgia, 'Times New Roman', Times, serif;font-size:24px;color:${TEXT_PRIMARY};font-weight:bold;">&#8377;${data.grandTotal}</span></td>
+                        <td><span style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:${TEXT_PRIMARY};font-weight:bold;">Total Amount</span></td>
+                        <td align="right"><span style="font-family:Arial,Helvetica,sans-serif;font-size:24px;color:${TEXT_PRIMARY};font-weight:bold;">&#8377;${data.grandTotal}</span></td>
                       </tr>
                     </table>
                   </td>
