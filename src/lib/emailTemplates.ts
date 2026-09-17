@@ -26,7 +26,7 @@ function emailWrapper(content: string): string {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FATHOM</title>
 </head>
-<body style="margin:0;padding:0;background-color:${LIGHT_BG};font-family: Georgia, 'Times New Roman', Times, serif;">
+<body style="margin:0;padding:0;background-color:${LIGHT_BG};font-family: Arial, Helvetica, sans-serif;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:${LIGHT_BG};">
     <tr>
       <td align="center" style="padding:20px 10px;">
@@ -171,7 +171,7 @@ export function otpEmailTemplate(otp: string): string {
     border:1px solid ${BORDER_COLOR};
     border-radius:6px;
     text-align:center;vertical-align:middle;
-    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-family: Arial, Helvetica, sans-serif;
     font-size:28px;font-weight:bold;color:${TEXT_PRIMARY};
     background-color:#ffffff;
   `.replace(/\n/g, '');
@@ -186,7 +186,7 @@ export function otpEmailTemplate(otp: string): string {
     <!-- Title -->
     <tr>
       <td align="center" style="padding:35px 40px 5px 40px;">
-        <h2 style="margin:0;font-family: Georgia, 'Times New Roman', Times, serif;font-size:26px;font-weight:normal;color:${TEXT_PRIMARY};letter-spacing:2px;text-transform:uppercase;">Welcome to Fathom</h2>
+        <h2 style="margin:0;font-family: Arial, Helvetica, sans-serif;font-size:26px;font-weight:normal;color:${TEXT_PRIMARY};letter-spacing:2px;text-transform:uppercase;">Welcome to Fathom</h2>
       </td>
     </tr>
     <tr>
@@ -197,7 +197,7 @@ export function otpEmailTemplate(otp: string): string {
     <!-- Body text -->
     <tr>
       <td align="center" style="padding:10px 50px 25px 50px;">
-        <p style="margin:0;font-family: Georgia, 'Times New Roman', Times, serif;font-size:14px;line-height:22px;color:${TEXT_SECONDARY};">
+        <p style="margin:0;font-family: Arial, Helvetica, sans-serif;font-size:14px;line-height:22px;color:${TEXT_SECONDARY};">
           Thank you for initiating your registration with us. Please use the following One-Time Password (OTP) to authenticate your identity and complete your account setup.
         </p>
       </td>
@@ -287,7 +287,7 @@ export function welcomeEmailTemplate(data: {
     <!-- Title -->
     <tr>
       <td align="center" style="padding:30px 40px 5px 40px;">
-        <h2 style="margin:0;font-family: Georgia, 'Times New Roman', Times, serif;font-size:28px;font-weight:normal;color:${TEXT_PRIMARY};letter-spacing:1px;text-transform:uppercase;line-height:38px;">Welcome to the<br/>Inner Circle</h2>
+        <h2 style="margin:0;font-family: Arial, Helvetica, sans-serif;font-size:28px;font-weight:normal;color:${TEXT_PRIMARY};letter-spacing:1px;text-transform:uppercase;line-height:38px;">Welcome to the<br/>Inner Circle</h2>
       </td>
     </tr>
     <tr>
@@ -298,7 +298,7 @@ export function welcomeEmailTemplate(data: {
     <!-- Body text -->
     <tr>
       <td align="center" style="padding:10px 50px 25px 50px;">
-        <p style="margin:0;font-family: Georgia, 'Times New Roman', Times, serif;font-size:14px;line-height:22px;color:${TEXT_SECONDARY};">
+        <p style="margin:0;font-family: Arial, Helvetica, sans-serif;font-size:14px;line-height:22px;color:${TEXT_SECONDARY};">
           Your account registration has been successfully verified. We are honored to welcome you into the realm of bespoke architectural kitchen systems and haute cuisine technology.
         </p>
       </td>
@@ -366,7 +366,7 @@ export function welcomeEmailTemplate(data: {
     </tr>
     <tr>
       <td align="center" style="padding:8px 40px 25px 40px;">
-        <span style="font-family: Georgia, 'Times New Roman', Times, serif;font-size:12px;color:${TEXT_MUTED};font-style:italic;">Explore private catalog editions &amp; schedule showroom commissions</span>
+        <span style="font-family: Arial, Helvetica, sans-serif;font-size:12px;color:${TEXT_MUTED};font-style:italic;">Explore private catalog editions &amp; schedule showroom commissions</span>
       </td>
     </tr>
     <!-- Divider -->
@@ -451,13 +451,13 @@ export function invoiceEmailTemplate(data: {
     <!-- Greeting -->
     <tr>
       <td style="padding:30px 50px 0 50px;">
-        <p style="margin:0 0 12px 0;font-family: Georgia, 'Times New Roman', Times, serif;font-size:16px;color:${TEXT_PRIMARY};">
+        <p style="margin:0 0 12px 0;font-family: Arial, Helvetica, sans-serif;font-size:16px;color:${TEXT_PRIMARY};">
           <strong>Hello ${data.customerName},</strong>
         </p>
-        <p style="margin:0 0 8px 0;font-family: Georgia, 'Times New Roman', Times, serif;font-size:14px;line-height:22px;color:${TEXT_SECONDARY};">
+        <p style="margin:0 0 8px 0;font-family: Arial, Helvetica, sans-serif;font-size:14px;line-height:22px;color:${TEXT_SECONDARY};">
           Thank you for choosing <strong style="color:${TEXT_PRIMARY};">FATHOM</strong>.
         </p>
-        <p style="margin:0;font-family: Georgia, 'Times New Roman', Times, serif;font-size:14px;line-height:22px;color:${TEXT_SECONDARY};">
+        <p style="margin:0;font-family: Arial, Helvetica, sans-serif;font-size:14px;line-height:22px;color:${TEXT_SECONDARY};">
           Your invoice for Order is attached to this email.
         </p>
       </td>
@@ -524,11 +524,11 @@ export function invoiceEmailTemplate(data: {
     <!-- Message -->
     <tr>
       <td style="padding:0 50px 20px 50px;">
-        <p style="margin:0 0 10px 0;font-family: Georgia, 'Times New Roman', Times, serif;font-size:13px;color:${BRAND_COLOR};font-style:italic;">Please keep this invoice for your records.</p>
-        <p style="margin:0 0 15px 0;font-family: Georgia, 'Times New Roman', Times, serif;font-size:14px;line-height:22px;color:${TEXT_SECONDARY};">
+        <p style="margin:0 0 10px 0;font-family: Arial, Helvetica, sans-serif;font-size:13px;color:${BRAND_COLOR};font-style:italic;">Please keep this invoice for your records.</p>
+        <p style="margin:0 0 15px 0;font-family: Arial, Helvetica, sans-serif;font-size:14px;line-height:22px;color:${TEXT_SECONDARY};">
           We appreciate your trust in <strong style="color:${TEXT_PRIMARY};">FATHOM</strong> and look forward to serving you again.
         </p>
-        <p style="margin:0;font-family: Georgia, 'Times New Roman', Times, serif;font-size:14px;color:${TEXT_SECONDARY};">
+        <p style="margin:0;font-family: Arial, Helvetica, sans-serif;font-size:14px;color:${TEXT_SECONDARY};">
           Warm regards,<br/>
           <strong style="color:${TEXT_PRIMARY};">Team FATHOM</strong>
         </p>
@@ -601,13 +601,13 @@ export function quotationEmailTemplate(data: {
     <!-- Greeting -->
     <tr>
       <td style="padding:30px 50px 0 50px;">
-        <p style="margin:0 0 12px 0;font-family: Georgia, 'Times New Roman', Times, serif;font-size:16px;color:${TEXT_PRIMARY};">
+        <p style="margin:0 0 12px 0;font-family: Arial, Helvetica, sans-serif;font-size:16px;color:${TEXT_PRIMARY};">
           <strong>Hello ${data.customerName},</strong>
         </p>
-        <p style="margin:0 0 8px 0;font-family: Georgia, 'Times New Roman', Times, serif;font-size:14px;line-height:22px;color:${TEXT_SECONDARY};">
+        <p style="margin:0 0 8px 0;font-family: Arial, Helvetica, sans-serif;font-size:14px;line-height:22px;color:${TEXT_SECONDARY};">
           Thank you for your interest in <strong style="font-family:Arial,Helvetica,sans-serif;color:${TEXT_PRIMARY};">FATHOM</strong>.
         </p>
-        <p style="margin:0;font-family: Georgia, 'Times New Roman', Times, serif;font-size:14px;line-height:22px;color:${TEXT_SECONDARY};">
+        <p style="margin:0;font-family: Arial, Helvetica, sans-serif;font-size:14px;line-height:22px;color:${TEXT_SECONDARY};">
           Please find the quotation for your requested products attached to this email.
         </p>
       </td>
@@ -660,7 +660,7 @@ export function quotationEmailTemplate(data: {
                 </tr>
                 <tr>
                   <td style="padding:6px 0 2px 0;">
-                    <p style="margin:0 0 8px 0;font-family: Georgia, 'Times New Roman', Times, serif;font-size:11px;color:${TEXT_MUTED};font-style:italic;">* Prices and availability are subject to change after the validity period.</p>
+                    <p style="margin:0 0 8px 0;font-family: Arial, Helvetica, sans-serif;font-size:11px;color:${TEXT_MUTED};font-style:italic;">* Prices and availability are subject to change after the validity period.</p>
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                       <tr>
                         <td><span style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:${TEXT_PRIMARY};font-weight:bold;">Total Amount</span></td>
@@ -678,16 +678,16 @@ export function quotationEmailTemplate(data: {
     <!-- Message -->
     <tr>
       <td style="padding:0 50px 20px 50px;">
-        <p style="margin:0 0 12px 0;font-family: Georgia, 'Times New Roman', Times, serif;font-size:14px;line-height:22px;color:${TEXT_SECONDARY};">
+        <p style="margin:0 0 12px 0;font-family: Arial, Helvetica, sans-serif;font-size:14px;line-height:22px;color:${TEXT_SECONDARY};">
           The attached quotation includes the product details, quantities, pricing, applicable taxes, and other relevant terms and conditions.
         </p>
-        <p style="margin:0 0 12px 0;font-family: Georgia, 'Times New Roman', Times, serif;font-size:14px;line-height:22px;color:${TEXT_SECONDARY};">
+        <p style="margin:0 0 12px 0;font-family: Arial, Helvetica, sans-serif;font-size:14px;line-height:22px;color:${TEXT_SECONDARY};">
           Please review the quotation and feel free to contact us if you have any questions or require any changes.
         </p>
-        <p style="margin:0 0 15px 0;font-family: Georgia, 'Times New Roman', Times, serif;font-size:14px;line-height:22px;color:${TEXT_SECONDARY};">
+        <p style="margin:0 0 15px 0;font-family: Arial, Helvetica, sans-serif;font-size:14px;line-height:22px;color:${TEXT_SECONDARY};">
           We look forward to serving you.
         </p>
-        <p style="margin:0;font-family: Georgia, 'Times New Roman', Times, serif;font-size:14px;color:${TEXT_SECONDARY};">
+        <p style="margin:0;font-family: Arial, Helvetica, sans-serif;font-size:14px;color:${TEXT_SECONDARY};">
           Warm regards,<br/>
           <strong style="color:${TEXT_PRIMARY};">Team FATHOM</strong>
         </p>
