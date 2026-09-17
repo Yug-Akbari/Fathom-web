@@ -827,12 +827,28 @@ export function inquiryEmailTemplate(data: {
                 </tr>
               </table>
             </td>
+                </tr>
+                <tr>
+                  <td style="padding:3px 0;">
+                    <span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${TEXT_MUTED};display:inline-block;width:60px;">Email:</span>
+                    <a href="mailto:fathom.support@gmail.com" style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${BRAND_COLOR};text-decoration:none;">fathom.support@gmail.com</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:3px 0;">
+                    <span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${TEXT_MUTED};display:inline-block;width:60px;">Phone:</span>
+                    <span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${TEXT_PRIMARY};">+91 82385 43000</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
           </tr>
         </table>
       </td>
     </tr>
-    ${darkFooterSection('To ensure continued delivery of FATHOM updates and inquiry confirmations, please add fathom.support@gmail.com to your address book.')}
-  \`;
+    ${darkFooterSection('To ensure continued delivery of FATHOM updates and invoices, add fathom.support@gmail.com to your address book.')}
+  `;
 
   return emailWrapper(content);
 }
+
