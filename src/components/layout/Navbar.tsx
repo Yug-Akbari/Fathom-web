@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { Search, ShoppingBag, User, X, LogOut, Shield, Menu } from "lucide-react";
+import { Search, ShoppingBag, User, X, LogOut, Shield, Menu, ChevronRight, ChevronDown } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/lib/CartContext";
 import { useAuth } from "@/lib/AuthContext";
 import Image from "next/image";
+import { db } from "@/lib/firebase";
+import { collection, onSnapshot, query, orderBy, limit } from "firebase/firestore";
 
 const navLinks = [
   { text: "Home", href: "/" },
@@ -26,6 +28,32 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { items, removeItem, clearCart, isCartOpen, setIsCartOpen } = useCart();
   const { user, isAdmin, loginWithGoogle, logout } = useAuth();
+
+  // Shop dropdown state
+  const [isShopOpen, setIsShopOpen] = useState(false);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [isMobileShopExpanded, setIsMobileShopExpanded] = useState(false);
+  const shopTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Fetch categories for the dropdown
+  useEffect(() => {
+    const q = query(collection(db, "categories"), orderBy("displayOrder", "asc"), limit(8));
+    const unsub = onSnapshot(q, (snapshot) => {
+      setCategories(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+    return () => unsub();
+  }, []);
+
+  const handleShopEnter = () => {
+    if (shopTimeoutRef.current) clearTimeout(shopTimeoutRef.current);
+    setIsShopOpen(true);
+  };
+
+  const handleShopLeave = () => {
+    shopTimeoutRef.current = setTimeout(() => {
+      setIsShopOpen(false);
+    }, 200);
+  };
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && searchQuery.trim()) {
@@ -46,6 +74,7 @@ export default function Navbar() {
   // Close mobile menu on route change
   useEffect(() => {
     setIsMobileMenuOpen(false);
+    setIsShopOpen(false);
   }, [pathname]);
 
   // Prevent body scroll when mobile menu is open
@@ -96,6 +125,27 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
+              const isShop = link.text === "Shop";
+
+              if (isShop) {
+                return (
+                  <div
+                    key={link.href}
+                    className="relative"
+                    onMouseEnter={handleShopEnter}
+                    onMouseLeave={handleShopLeave}
+                  >
+                    <Link href={link.href} className="relative group text-sm font-semibold text-primary/80 hover:text-primary transition-colors tracking-[0.2em] uppercase flex items-center gap-1">
+                      {link.text}
+                      <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${isShopOpen ? 'rotate-180' : ''}`} />
+                      <span className={`absolute -bottom-1 left-0 h-[2px] bg-accent transition-all duration-300 ease-out origin-left ${isActive || isShopOpen ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
+                    </Link>
+
+
+                  </div>
+                );
+              }
+
               return (
                 <Link key={link.href} href={link.href} className="relative group text-sm font-semibold text-primary/80 hover:text-primary transition-colors tracking-[0.2em] uppercase">
                   {link.text}
@@ -151,6 +201,67 @@ export default function Navbar() {
         </div>
       </motion.nav>
 
+      {/* Shop Mega Menu Dropdown */}
+      <AnimatePresence>
+        {isShopOpen && categories.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="fixed top-20 left-0 right-0 z-40 hidden md:block"
+            onMouseEnter={handleShopEnter}
+            onMouseLeave={handleShopLeave}
+          >
+            {/* Subtle top border accent line */}
+            <div className="h-[2px] bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent" />
+
+            <div className="bg-white/95 backdrop-blur-xl border-b border-gray-200/80 shadow-[0_20px_60px_rgba(0,0,0,0.08)]">
+              <div className="max-w-5xl mx-auto px-6 py-5">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-1 h-5 bg-[#D4AF37] rounded-full" />
+                    <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400">Shop by Category</span>
+                  </div>
+                  <Link 
+                    href="/shop" 
+                    onClick={() => setIsShopOpen(false)}
+                    className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#D4AF37] hover:text-primary transition-colors flex items-center gap-1"
+                  >
+                    View All Products
+                    <ChevronRight className="w-3 h-3" />
+                  </Link>
+                </div>
+
+                {/* Minimal Category List */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-y-3 gap-x-8">
+                  {categories.map((cat, index) => (
+                    <motion.div
+                      key={cat.id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.03, duration: 0.3 }}
+                    >
+                      <Link
+                        href={`/shop?category=${encodeURIComponent(cat.name || cat.title || '')}`}
+                        onClick={() => setIsShopOpen(false)}
+                        className="group flex items-center justify-between border-b border-gray-100 pb-3 hover:border-[#D4AF37] transition-colors duration-300"
+                      >
+                        <span className="text-xs font-semibold tracking-[0.15em] uppercase text-primary/80 group-hover:text-[#D4AF37] transition-colors duration-300">
+                          {cat.name || cat.title || 'Category'}
+                        </span>
+                        <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-[#D4AF37] group-hover:translate-x-1 transition-all duration-300" />
+                      </Link>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Mobile Menu Drawer */}
       <AnimatePresence>
         {isMobileMenuOpen && (
@@ -202,6 +313,66 @@ export default function Navbar() {
               <div className="flex-1 overflow-y-auto py-4">
                 {navLinks.map((link, index) => {
                   const isActive = pathname === link.href;
+                  const isShop = link.text === "Shop";
+
+                  if (isShop) {
+                    return (
+                      <motion.div
+                        key={link.href}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                      >
+                        {/* Shop link with expand arrow */}
+                        <div className="flex items-center">
+                          <Link
+                            href={link.href}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className={`flex-1 flex items-center px-6 py-4 text-sm font-semibold tracking-[0.2em] uppercase transition-colors ${
+                              isActive
+                                ? "text-accent bg-accent/5 border-r-2 border-accent"
+                                : "text-primary/80 hover:text-primary hover:bg-gray-50"
+                            }`}
+                          >
+                            {link.text}
+                          </Link>
+                          <button
+                            onClick={() => setIsMobileShopExpanded(!isMobileShopExpanded)}
+                            className="px-4 py-4 text-gray-400 hover:text-accent transition-colors"
+                          >
+                            <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${isMobileShopExpanded ? 'rotate-180' : ''}`} />
+                          </button>
+                        </div>
+                        
+                        {/* Expandable categories */}
+                        <AnimatePresence>
+                          {isMobileShopExpanded && categories.length > 0 && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.3, ease: "easeInOut" }}
+                              className="overflow-hidden bg-gray-50/50"
+                            >
+                              {categories.map((cat) => (
+                                <Link
+                                  key={cat.id}
+                                  href={`/shop?category=${encodeURIComponent(cat.name || cat.title || '')}`}
+                                  onClick={() => setIsMobileMenuOpen(false)}
+                                  className="flex items-center gap-3 px-8 py-3 text-xs font-semibold tracking-[0.15em] uppercase text-gray-500 hover:text-accent hover:bg-white/80 transition-colors"
+                                >
+                                  {/* Minimal mobile text list */}
+                                  <span className="text-[13px]">{cat.name || cat.title || 'Category'}</span>
+                                  <ChevronRight className="w-3 h-3 ml-auto opacity-40" />
+                                </Link>
+                              ))}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </motion.div>
+                    );
+                  }
+
                   return (
                     <motion.div
                       key={link.href}
