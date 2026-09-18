@@ -16,6 +16,8 @@ export default function TrendingNow() {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
       
       const featured = data.filter(p => p.isFeatured === true || p.badge === 'Featured');
+      // Sort by trendingOrder ascending — products without order go to the end
+      featured.sort((a, b) => (a.trendingOrder ?? 999) - (b.trendingOrder ?? 999));
       setProducts(featured);
     });
     return () => unsub();

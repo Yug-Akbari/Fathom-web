@@ -47,6 +47,8 @@ export default function Hero() {
     const unsub = onSnapshot(collection(db, "products"), (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
       const mainPanelProducts = data.filter(p => p.isMainPanel === true);
+      // Sort by mainPanelOrder ascending — products without order go to the end
+      mainPanelProducts.sort((a, b) => (a.mainPanelOrder ?? 999) - (b.mainPanelOrder ?? 999));
       if (mainPanelProducts.length > 0) {
         const mappedSlides = mainPanelProducts.slice(0, 5).map((p, idx) => {
           const { title1, title2 } = parseProductName(p.name);

@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { db } from "@/lib/firebase";
-import { collection, onSnapshot, query, limit, where } from "firebase/firestore";
+import { collection, onSnapshot, query, limit, where, orderBy } from "firebase/firestore";
 
 
 
@@ -14,7 +14,7 @@ export default function CategoryGrid() {
   const [products, setProducts] = useState<any[]>([]);
 
   useEffect(() => {
-    const q = query(collection(db, "categories"), limit(6));
+    const q = query(collection(db, "categories"), orderBy("displayOrder", "asc"), limit(6));
     const unsub = onSnapshot(q, (snapshot) => {
       setDbCategories(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });

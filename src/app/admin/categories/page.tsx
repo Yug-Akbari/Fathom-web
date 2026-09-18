@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { db } from "@/lib/firebase";
-import { collection, onSnapshot, addDoc, doc, deleteDoc, updateDoc } from "firebase/firestore";
+import { collection, onSnapshot, addDoc, doc, deleteDoc, updateDoc, query, orderBy } from "firebase/firestore";
 
 export default function CategoryManagement() {
   const [categories, setCategories] = useState<any[]>([]);
@@ -39,7 +39,8 @@ export default function CategoryManagement() {
   };
 
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, "categories"), (snapshot) => {
+    const q = query(collection(db, "categories"), orderBy("displayOrder", "asc"));
+    const unsub = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setCategories(data);
     });
@@ -73,7 +74,7 @@ export default function CategoryManagement() {
           description,
           status,
           displayOrder: parseInt(displayOrder) || 0,
-          tags: tags.split(",").map(t => t.trim()),
+          tags: tags ? tags.split(",").map(t => t.trim()).filter(Boolean) : [],
           image: imageUrl || editingCategory.image || "",
         });
       } else {
@@ -83,7 +84,7 @@ export default function CategoryManagement() {
           description,
           status,
           displayOrder: parseInt(displayOrder) || 0,
-          tags: tags.split(",").map(t => t.trim()),
+          tags: tags ? tags.split(",").map(t => t.trim()).filter(Boolean) : [],
           productCount: 0,
           image: imageUrl,
           createdAt: new Date().toISOString()
@@ -101,7 +102,7 @@ export default function CategoryManagement() {
       setEditingCategory(null);
     } catch (e) {
       console.error(e);
-      alert("Error adding category.");
+      alert(`Error saving category: ${e instanceof Error ? e.message : 'Unknown error'}`);
     } finally {
       setIsSubmitting(false);
     }

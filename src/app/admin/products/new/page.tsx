@@ -37,6 +37,8 @@ export default function ProductEditor() {
   const [imagesBase64, setImagesBase64] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [trendingOrder, setTrendingOrder] = useState("");
+  const [mainPanelOrder, setMainPanelOrder] = useState("");
   const [visibility, setVisibility] = useState({
     mainPanel: false,
     bestSeller: false,
@@ -255,6 +257,8 @@ export default function ProductEditor() {
         isActive: visibility.active,
         isBestSeller: visibility.bestSeller,
         isMainPanel: visibility.mainPanel,
+        trendingOrder: trendingOrder !== "" ? parseInt(trendingOrder) : 999,
+        mainPanelOrder: mainPanelOrder !== "" ? parseInt(mainPanelOrder) : 999,
         desc: visibility.mainPanel ? desc : "",
         image: imageUrls.length > 0 ? imageUrls[0] : "", // Cover image
         images: imageUrls, // Array of all uploaded images
@@ -523,6 +527,21 @@ export default function ProductEditor() {
               </div>
             </div>
 
+            {/* Trending Order - only shows when Featured is on */}
+            {visibility.featured && (
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400">Trending Order</label>
+                <input 
+                  type="number" 
+                  value={trendingOrder}
+                  onChange={(e) => setTrendingOrder(e.target.value)}
+                  placeholder="e.g. 1, 2, 3 (lower = first)"
+                  className="w-full bg-transparent border border-gray-200 rounded-lg p-3 text-sm font-inter text-primary focus:border-accent outline-none transition-colors"
+                />
+                <span className="text-[10px] text-gray-400">Controls position in Trending Now section</span>
+              </div>
+            )}
+
             <div className="flex items-center justify-between">
               <div className="flex flex-col">
                 <span className="font-bold text-sm text-primary">Active Status</span>
@@ -569,15 +588,28 @@ export default function ProductEditor() {
               </div>
 
               {visibility.mainPanel && (
-                <div className="flex flex-col gap-2 relative group focus-within:text-primary">
-                  <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 group-focus-within:text-accent transition-colors">Hero Description</label>
-                  <textarea 
-                    rows={2}
-                    value={desc}
-                    onChange={(e) => setDesc(e.target.value)}
-                    placeholder="Brief description for the main slider..."
-                    className="w-full bg-[#FAF9F6] border border-gray-100 rounded-lg p-3 text-sm font-inter text-gray-600 focus:bg-white focus:border-primary outline-none transition-colors resize-none"
-                  />
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-2 relative group focus-within:text-primary">
+                    <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 group-focus-within:text-accent transition-colors">Hero Description</label>
+                    <textarea 
+                      rows={2}
+                      value={desc}
+                      onChange={(e) => setDesc(e.target.value)}
+                      placeholder="Brief description for the main slider..."
+                      className="w-full bg-[#FAF9F6] border border-gray-100 rounded-lg p-3 text-sm font-inter text-gray-600 focus:bg-white focus:border-primary outline-none transition-colors resize-none"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400">Slide Order</label>
+                    <input 
+                      type="number" 
+                      value={mainPanelOrder}
+                      onChange={(e) => setMainPanelOrder(e.target.value)}
+                      placeholder="e.g. 1, 2, 3 (lower = first)"
+                      className="w-full bg-transparent border border-gray-200 rounded-lg p-3 text-sm font-inter text-primary focus:border-accent outline-none transition-colors"
+                    />
+                    <span className="text-[10px] text-gray-400">Controls position in Hero slider</span>
+                  </div>
                 </div>
               )}
             </div>
