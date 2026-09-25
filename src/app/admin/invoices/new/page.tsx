@@ -112,6 +112,7 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
   const [transportCharges, setTransportCharges] = useState(0);
   const [unloadingCharges, setUnloadingCharges] = useState(0);
   const [specialNotes, setSpecialNotes] = useState("");
+  const [termsList, setTermsList] = useState<string[]>([""]);
 
   // Bank details toggle
   const [showBankDetails, setShowBankDetails] = useState(false);
@@ -162,6 +163,7 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
           setTransportCharges(data.transportCharges || 0);
           setUnloadingCharges(data.unloadingCharges || 0);
           setSpecialNotes(data.specialNotes || "");
+          setTermsList(data.termsAndConditions ? data.termsAndConditions.split('\n') : [""]);
           setShowBankDetails(data.showBankDetails ?? false);
           setShowSignature(data.showSignature ?? false);
         }
@@ -273,6 +275,7 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
       transportCharges,
       unloadingCharges,
       specialNotes,
+      termsAndConditions: termsList.filter(t => t.trim() !== "").join('\n'),
       showBankDetails,
       showSignature,
       subtotal: calculations.subtotal,
@@ -997,6 +1000,42 @@ export default function NewInvoicePage({ editId }: InvoiceFormProps = {}) {
                 placeholder="Mention any specific installation requirements or warranty terms discussed..."
                 className={`${inputClass} min-h-[100px] resize-y`}
               />
+            </div>
+            <div>
+              <label className={labelClass}>Terms & Conditions</label>
+              <div className="flex flex-col gap-2 mt-1">
+                {termsList.map((term, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={term}
+                      onChange={(e) => {
+                        const newTerms = [...termsList];
+                        newTerms[index] = e.target.value;
+                        setTermsList(newTerms);
+                      }}
+                      placeholder="e.g. Goods once sold will not be taken back."
+                      className={inputClass}
+                    />
+                    <button
+                      onClick={() => {
+                        const newTerms = termsList.filter((_, i) => i !== index);
+                        setTermsList(newTerms.length ? newTerms : [""]);
+                      }}
+                      className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+                <button
+                  onClick={() => setTermsList([...termsList, ""])}
+                  className="flex items-center gap-2 mt-1 text-sm font-bold text-accent hover:text-[#c5a130] transition-colors self-start"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add new line
+                </button>
+              </div>
             </div>
           </div>
         </div>

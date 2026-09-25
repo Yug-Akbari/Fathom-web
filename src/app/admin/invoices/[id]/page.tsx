@@ -45,6 +45,7 @@ interface Invoice {
   transportCharges: number;
   unloadingCharges: number;
   specialNotes: string;
+  termsAndConditions?: string;
   showBankDetails?: boolean;
   showSignature?: boolean;
   invoiceType?: "Tax Invoice" | "Invoice";
@@ -522,9 +523,22 @@ export default function InvoicePreviewPage() {
               </div>
             </div>
 
-            {/* Signature Container */}
-            <div className="flex items-end justify-end mt-16 pt-8">
-              <div className="w-56 text-center flex flex-col items-center">
+            {/* Terms & Signature Container */}
+            <div className="flex justify-between items-end mt-16 pt-8">
+              <div className="flex-1 pr-12">
+                {invoice.termsAndConditions && (
+                  <div className="text-[10px] text-gray-600">
+                    <p className="font-bold tracking-widest uppercase text-[#947A26] mb-3">TERMS & CONDITIONS</p>
+                    <ul className="text-[11px] text-gray-600 list-disc pl-4 space-y-1.5 marker:text-gray-400 mt-2">
+                      {invoice.termsAndConditions.split('\n').map((condition, idx) => {
+                        if (!condition.trim()) return null;
+                        return <li key={idx} className="pl-1 font-medium">{condition}</li>;
+                      })}
+                    </ul>
+                  </div>
+                )}
+              </div>
+              <div className="w-56 text-center flex flex-col items-center shrink-0">
                 {/* Signature Image */}
                 <div className="h-20 w-full mb-1 flex justify-center items-center relative z-10">
                   {(invoice.showSignature !== false) ? (
