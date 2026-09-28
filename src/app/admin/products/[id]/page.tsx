@@ -30,9 +30,8 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
     return () => unsub();
   }, []);
   // Image State (Multiple)
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
-  const [imagesBase64, setImagesBase64] = useState<string[]>([]);
+  type ProductImage = { preview: string; file: File | null; base64: string | null };
+  const [productImages, setProductImages] = useState<ProductImage[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [trendingOrder, setTrendingOrder] = useState("");
@@ -192,11 +191,11 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
           }
           
           if (d.images?.length > 0) {
-             setImagePreviews(d.images);
+             setProductImages(d.images.map((img: string) => ({ preview: img, file: null, base64: null })));
              // We don't hydrate File/Base64 states for existing URLs, 
              // but we will send these existing URLs back up during save
           } else if (d.image) {
-             setImagePreviews([d.image]);
+             setProductImages([{ preview: d.image, file: null, base64: null }]);
           }
 
           if (d.aPlusContent) {
@@ -237,23 +236,25 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
-    setImageFiles(prev => [...prev, ...files]);
+    const newItems = files.map(file => ({
+      preview: URL.createObjectURL(file),
+      file,
+      base64: null as string | null
+    }));
     
-    // Create previews
-    const newPreviews = files.map(file => URL.createObjectURL(file));
-    setImagePreviews(prev => [...prev, ...newPreviews]);
+    setProductImages(prev => [...prev, ...newItems]);
 
     // Compress and read Base64 for each file
     for (const file of files) {
       try {
         const compressedBase64 = await compressImage(file);
-        setImagesBase64(prev => [...prev, compressedBase64]);
+        setProductImages(prev => prev.map(item => item.file === file ? { ...item, base64: compressedBase64 } : item));
       } catch (err) {
         console.error('Failed to compress image:', file.name, err);
         // Fallback to uncompressed if compression fails
         const reader = new FileReader();
         reader.onloadend = () => {
-          setImagesBase64(prev => [...prev, reader.result as string]);
+          setProductImages(prev => prev.map(item => item.file === file ? { ...item, base64: reader.result as string } : item));
         };
         reader.readAsDataURL(file);
       }
@@ -261,9 +262,7 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
   };
 
   const removeImage = (index: number) => {
-    setImageFiles(prev => prev.filter((_, i) => i !== index));
-    setImagePreviews(prev => prev.filter((_, i) => i !== index));
-    setImagesBase64(prev => prev.filter((_, i) => i !== index));
+    setProductImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSave = async () => {
@@ -272,22 +271,31 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
     setUploadProgress("");
     
     try {
-      let imageUrls: string[] = [];
+      let finalImageUrls: string[] = [];
       const failedUploads: string[] = [];
 
       // 1. Upload Images to GitHub (sequentially to avoid SHA conflicts)
-      if (imagesBase64.length > 0 && imageFiles.length > 0) {
-        for (let idx = 0; idx < imagesBase64.length; idx++) {
-          const file = imageFiles[idx];
-          setUploadProgress(`Uploading image ${idx + 1} of ${imagesBase64.length}...`);
+      if (productImages.length > 0) {
+        for (let idx = 0; idx < productImages.length; idx++) {
+          const item = productImages[idx];
+          
+          if (!item.file || !item.base64) {
+             // Existing image or compression not finished (though if not finished, wait. but usually it's existing)
+             if (item.preview.startsWith('http')) {
+               finalImageUrls.push(item.preview);
+             }
+             continue;
+          }
+
+          setUploadProgress(`Uploading image ${idx + 1} of ${productImages.length}...`);
           
           try {
             const res = await fetch('/api/upload', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                imageBase64: imagesBase64[idx],
-                filename: file.name
+                imageBase64: item.base64,
+                filename: item.file.name
               })
             });
 
@@ -300,25 +308,22 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
               } catch {
                 errorMsg = errorText || `HTTP ${res.status}`;
               }
-              console.error(`Failed to upload ${file.name}:`, errorMsg);
-              failedUploads.push(file.name);
+              console.error(`Failed to upload ${item.file.name}:`, errorMsg);
+              failedUploads.push(item.file.name);
               continue; // Skip this image but continue with others
             }
 
             const data = await res.json();
-            imageUrls.push(data.url);
+            finalImageUrls.push(data.url);
           } catch (uploadErr) {
-            console.error(`Network error uploading ${file.name}:`, uploadErr);
-            failedUploads.push(file.name);
+            console.error(`Network error uploading ${item.file.name}:`, uploadErr);
+            failedUploads.push(item.file.name);
             continue;
           }
         }
       }
 
       setUploadProgress("Saving product...");
-
-      // Capture existing image URLs that haven't been deleted
-      const existingUrls = imagePreviews.filter(p => p.startsWith('http'));
 
       // 2. Update Product in Firebase
       await updateDoc(doc(db, "products", params.id), {
@@ -335,8 +340,8 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
         trendingOrder: trendingOrder !== "" ? parseInt(trendingOrder) : 999,
         mainPanelOrder: mainPanelOrder !== "" ? parseInt(mainPanelOrder) : 999,
         desc: visibility.mainPanel ? desc : "",
-        image: [...existingUrls, ...imageUrls].length > 0 ? [...existingUrls, ...imageUrls][0] : "", // Cover image
-        images: [...existingUrls, ...imageUrls], // Array of all appended images
+        image: finalImageUrls.length > 0 ? finalImageUrls[0] : "", // Cover image
+        images: finalImageUrls, // Array of all appended images
         aPlusContent,
       });
 
@@ -347,9 +352,8 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
       
-      // Don't reset form since we're still editing, just clear upload states
-      setImageFiles([]);
-      setImagesBase64([]);
+      // Reset product images to existing to show successful save state
+      setProductImages(finalImageUrls.map(url => ({ preview: url, file: null, base64: null })));
       
     } catch (error) {
       console.error(error);
@@ -694,7 +698,7 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
              
              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                {/* Previews */}
-               {imagePreviews.map((preview, i) => (
+               {productImages.map((imgObj, i) => (
                  <div 
                    key={i} 
                    draggable
@@ -710,37 +714,17 @@ export default function ProductEditor({ params }: { params: { id: string } }) {
                      if (draggedIdx === i || isNaN(draggedIdx)) return;
                      
                      // Reorder previews
-                     setImagePreviews(prev => {
-                       const newPreviews = [...prev];
-                       const [draggedItem] = newPreviews.splice(draggedIdx, 1);
-                       newPreviews.splice(i, 0, draggedItem);
-                       return newPreviews;
+                     setProductImages(prev => {
+                       const newImages = [...prev];
+                       const [draggedItem] = newImages.splice(draggedIdx, 1);
+                       newImages.splice(i, 0, draggedItem);
+                       return newImages;
                      });
-
-                     // Reorder files
-                     if (typeof setImageFiles !== 'undefined') {
-                       setImageFiles(prev => {
-                         const newFiles = [...prev];
-                         const [draggedFile] = newFiles.splice(draggedIdx, 1);
-                         newFiles.splice(i, 0, draggedFile);
-                         return newFiles;
-                       });
-                     }
-
-                     // Reorder base64 strings
-                     if (typeof setImagesBase64 !== 'undefined') {
-                       setImagesBase64(prev => {
-                         const newBase64 = [...prev];
-                         const [draggedBase64] = newBase64.splice(draggedIdx, 1);
-                         newBase64.splice(i, 0, draggedBase64);
-                         return newBase64;
-                       });
-                     }
                    }}
                    className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden border border-gray-200 group cursor-move"
                  >
                     {i === 0 && <div className="absolute top-2 left-2 z-10 bg-accent text-white px-2 py-0.5 rounded text-[8px] font-bold tracking-widest uppercase shadow-sm pointer-events-none">Cover</div>}
-                    <Image src={preview} alt={`Preview ${i}`} fill className="object-cover pointer-events-none" />
+                    <Image src={imgObj.preview} alt={`Preview ${i}`} fill className="object-cover pointer-events-none" />
                     
                     {/* Delete overlay */}
                     <div className="absolute inset-0 bg-red-500/80 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex items-center justify-center cursor-pointer" onClick={(e) => { e.stopPropagation(); removeImage(i); }}>
