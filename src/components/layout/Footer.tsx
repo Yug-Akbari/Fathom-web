@@ -21,7 +21,7 @@ export default function Footer() {
           <a href="/about" className="text-xs font-semibold text-gray-500 hover:text-primary transition-colors tracking-widest uppercase">About Us</a>
           <a href="/contact" className="text-xs font-semibold text-gray-500 hover:text-primary transition-colors tracking-widest uppercase">Contact Us</a>
           <a
-            href="https://www.instagram.com/fathom.india/"
+            href="https://www.instagram.com/fathomstore.in/"
             target="_blank"
             rel="noopener noreferrer"
             className="text-xs font-semibold text-gray-500 hover:text-primary transition-colors tracking-widest uppercase"
