@@ -127,7 +127,7 @@ export default function ShippingPolicyPage() {
       heroTitle="Shipping Policy"
       heroSubtitle="Reliable delivery across India"
       heroDescription="This policy explains our order processing, dispatch, delivery and shipment-related procedures."
-      introParagraph="FATHOM, operated by Shivam Enterprises, showcases kitchen appliances and related products through fathomstore.in. Purchases are not completed through direct website checkout. Customers must contact our team through WhatsApp or another official communication channel to discuss the product, confirm the order and finalise the shipping and payment arrangements."
+      introParagraph="FATHOM, operated by Shivam Enterprises, showcases appliances and related products through fathomstore.in. Purchases are not completed through direct website checkout. Customers must contact our team through WhatsApp or another official communication channel to discuss the product, confirm the order and finalise the shipping and payment arrangements."
       sections={sections}
       contactInfo={contactInfo}
       contactTitle="11. Contact Us"

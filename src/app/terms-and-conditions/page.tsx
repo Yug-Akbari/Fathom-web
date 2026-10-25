@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 const sections = [
   {
     title: "1. About FATHOM",
-    content: `FATHOM showcases kitchen appliances and related products.
+    content: `FATHOM showcases appliances and related products.
 
 <strong>Brand:</strong> FATHOM
 <strong>Legal Business Name:</strong> Shivam Enterprises
