@@ -19,7 +19,7 @@ export default function Footer() {
               />
             </Link>
             <p className="text-sm text-gray-500 font-inter leading-relaxed max-w-xs">
-              Premium kitchen appliances delivered across India. Food Dehydrators, Cold Press Juicers &amp; more.
+              Premium appliances delivered across India. Food Dehydrators, Cold Press Juicers &amp; more.
             </p>
             {/* Social */}
             <a
