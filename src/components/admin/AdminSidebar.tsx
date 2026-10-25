@@ -21,12 +21,14 @@ import {
   Star,
   BookUser,
   Warehouse,
-  FileSignature
+  FileSignature,
+  Rss
 } from "lucide-react";
 
 const mainNavItems = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Products", href: "/admin/inventory", icon: PackageSearch },
+  { name: "Google Feed", href: "/admin/feed", icon: Rss },
   { name: "Categories", href: "/admin/categories", icon: Grid },
   { name: "Directory", href: "/admin/directory", icon: BookUser },
   { name: "Leads", href: "/admin/leads", icon: Users },
