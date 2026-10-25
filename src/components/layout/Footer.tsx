@@ -18,9 +18,7 @@ export default function Footer() {
                 className="h-8 w-auto"
               />
             </Link>
-            <p className="text-sm text-gray-500 font-inter leading-relaxed max-w-xs">
-              Premium appliances delivered across India. Food Dehydrators, Cold Press Juicers &amp; more.
-            </p>
+
             {/* Social */}
             <a
               href="https://www.instagram.com/fathomstore.in/"
