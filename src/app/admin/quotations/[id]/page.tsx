@@ -372,7 +372,7 @@ export default function quotationPreviewPage() {
                 {quotation.companyName && <p className="font-bold text-gray-900 text-lg mb-2 uppercase">{quotation.companyName}</p>}
                 {quotation.companyAddress && <p className="whitespace-pre-line text-sm">{quotation.companyAddress}</p>}
                 <div className="mt-4 space-y-1">
-                  <p><span className="font-semibold text-gray-800">Email:</span> fathom.support@gmail.com</p>
+                  <p><span className="font-semibold text-gray-800">Email:</span> support@fathomstore.in</p>
                   {quotation.companyGstApplicable && quotation.companyGst && <p><span className="font-semibold text-gray-800">GSTIN:</span> {quotation.companyGst}</p>}
                 </div>
               </div>

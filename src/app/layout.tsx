@@ -97,7 +97,7 @@ const organizationJsonLd = {
     "@type": "ContactPoint",
     telephone: "+91-82385-43000",
     contactType: "customer service",
-    email: "fathom.support@gmail.com",
+    email: "support@fathomstore.in",
     areaServed: "IN",
     availableLanguage: ["English", "Hindi", "Gujarati"],
   },

@@ -27,7 +27,7 @@ const faqs = [
   },
   {
     q: "How do I contact FATHOM for product support?",
-    a: "You can reach FATHOM via WhatsApp or phone at +91 82385 43000, email fathom.support@gmail.com, through the Contact page on fathomstore.in, or on Instagram at instagram.com/fathom.india.",
+    a: "You can reach FATHOM via WhatsApp or phone at +91 82385 43000, email support@fathomstore.in, through the Contact page on fathomstore.in, or on Instagram at instagram.com/fathom.india.",
   },
 ];
 

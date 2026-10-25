@@ -375,7 +375,7 @@ export default function InvoicePreviewPage() {
                 {invoice.companyAddress && <p className="whitespace-pre-line text-sm">{invoice.companyAddress}</p>}
                 <div className="mt-4 space-y-1">
                   {invoice.companyGstApplicable && invoice.companyGst && <p><span className="font-semibold text-gray-800">GSTIN:</span> {invoice.companyGst}</p>}
-                  <p><span className="font-semibold text-gray-800">Email:</span> fathom.support@gmail.com</p>
+                  <p><span className="font-semibold text-gray-800">Email:</span> support@fathomstore.in</p>
                 </div>
               </div>
               

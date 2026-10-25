@@ -82,7 +82,7 @@ function footerSection(refCode: string, bottomNote: string): string {
       <tr>
         <td align="center" style="padding:16px 20px;">
           <span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${TEXT_SECONDARY};">Requires dedicated assistance? Contact <strong style="color:${TEXT_PRIMARY};">FATHOM Support</strong> at</span><br/>
-          <a href="mailto:fathom.support@gmail.com" style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${BRAND_COLOR};text-decoration:underline;">fathom.support@gmail.com</a>
+          <a href="mailto:support@fathomstore.in" style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${BRAND_COLOR};text-decoration:underline;">support@fathomstore.in</a>
         </td>
       </tr>
     </table>
@@ -255,7 +255,7 @@ export function otpEmailTemplate(otp: string): string {
         </table>
       </td>
     </tr>
-    ${footerSection(refCode, 'To ensure continued delivery of FATHOM security notices, add fathom.support@gmail.com to your address book.')}
+    ${footerSection(refCode, 'To ensure continued delivery of FATHOM security notices, add support@fathomstore.in to your address book.')}
   `;
 
   return emailWrapper(content);
@@ -477,7 +477,7 @@ export function invoiceEmailTemplate(data: {
                 <tr>
                   <td style="padding:3px 0;">
                     <span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${TEXT_MUTED};display:inline-block;width:60px;">Email:</span>
-                    <a href="mailto:fathom.support@gmail.com" style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${BRAND_COLOR};text-decoration:none;">fathom.support@gmail.com</a>
+                    <a href="mailto:support@fathomstore.in" style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${BRAND_COLOR};text-decoration:none;">support@fathomstore.in</a>
                   </td>
                 </tr>
                 <tr>
@@ -492,7 +492,7 @@ export function invoiceEmailTemplate(data: {
         </table>
       </td>
     </tr>
-    ${darkFooterSection('To ensure continued delivery of FATHOM updates and invoices, add fathom.support@gmail.com to your address book.')}
+    ${darkFooterSection('To ensure continued delivery of FATHOM updates and invoices, add support@fathomstore.in to your address book.')}
   `;
 
   return emailWrapper(content);
@@ -636,7 +636,7 @@ export function quotationEmailTemplate(data: {
                 <tr>
                   <td style="padding:3px 0;">
                     <span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${TEXT_MUTED};display:inline-block;width:60px;">Email:</span>
-                    <a href="mailto:fathom.support@gmail.com" style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${BRAND_COLOR};text-decoration:none;">fathom.support@gmail.com</a>
+                    <a href="mailto:support@fathomstore.in" style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${BRAND_COLOR};text-decoration:none;">support@fathomstore.in</a>
                   </td>
                 </tr>
                 <tr>
@@ -651,7 +651,7 @@ export function quotationEmailTemplate(data: {
         </table>
       </td>
     </tr>
-    ${darkFooterSection('To ensure continued delivery of FATHOM updates and invoices, add fathom.support@gmail.com to your address book.')}
+    ${darkFooterSection('To ensure continued delivery of FATHOM updates and invoices, add support@fathomstore.in to your address book.')}
   `;
 
   return emailWrapper(content);
@@ -831,7 +831,7 @@ export function inquiryEmailTemplate(data: {
                 <tr>
                   <td style="padding:3px 0;">
                     <span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${TEXT_MUTED};display:inline-block;width:60px;">Email:</span>
-                    <a href="mailto:fathom.support@gmail.com" style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${BRAND_COLOR};text-decoration:none;">fathom.support@gmail.com</a>
+                    <a href="mailto:support@fathomstore.in" style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${BRAND_COLOR};text-decoration:none;">support@fathomstore.in</a>
                   </td>
                 </tr>
                 <tr>
@@ -846,7 +846,7 @@ export function inquiryEmailTemplate(data: {
         </table>
       </td>
     </tr>
-    ${darkFooterSection('To ensure continued delivery of FATHOM updates and invoices, add fathom.support@gmail.com to your address book.')}
+    ${darkFooterSection('To ensure continued delivery of FATHOM updates and invoices, add support@fathomstore.in to your address book.')}
   `;
 
   return emailWrapper(content);

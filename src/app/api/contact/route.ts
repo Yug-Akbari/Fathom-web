@@ -25,7 +25,9 @@ export async function POST(req: Request) {
 
     // Configure the inquiry email transporter
     const inquiryTransporter = nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.zoho.in",
+      port: 465,
+      secure: true,
       auth: {
         user: inquiryUser,
         pass: inquiryPass,
@@ -34,7 +36,9 @@ export async function POST(req: Request) {
 
     // Configure the no-reply email transporter
     const noReplyTransporter = nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.zoho.in",
+      port: 465,
+      secure: true,
       auth: {
         user: noReplyUser,
         pass: noReplyPass,

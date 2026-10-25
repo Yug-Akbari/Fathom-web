@@ -38,6 +38,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.3,
     },
+    {
+      url: `${baseUrl}/privacy-policy`,
+      lastModified: today,
+      changeFrequency: 'monthly',
+      priority: 0.3,
+    },
+    {
+      url: `${baseUrl}/terms-and-conditions`,
+      lastModified: today,
+      changeFrequency: 'monthly',
+      priority: 0.3,
+    },
+    {
+      url: `${baseUrl}/shipping-policy`,
+      lastModified: today,
+      changeFrequency: 'monthly',
+      priority: 0.3,
+    },
+    {
+      url: `${baseUrl}/return-repair-replacement-policy`,
+      lastModified: today,
+      changeFrequency: 'monthly',
+      priority: 0.3,
+    },
   ]
 
   // ─── Dynamic Product Pages ───────────────────────────────────

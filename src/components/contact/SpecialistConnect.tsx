@@ -50,7 +50,7 @@ export default function SpecialistConnect() {
             Gujarat 394105
           </span>
           <span className="text-gray-500 font-inter text-sm mb-1">+91 82385 43000</span>
-          <span className="text-gray-500 font-inter text-sm">fathom.support@gmail.com</span>
+          <span className="text-gray-500 font-inter text-sm">support@fathomstore.in</span>
         </div>
       </div>
 
