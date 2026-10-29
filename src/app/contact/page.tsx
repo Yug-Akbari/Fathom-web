@@ -36,7 +36,7 @@ const localBusinessJsonLd = {
   image: "https://www.fathomstore.in/images/fathom-logo-transparent.png",
   url: "https://www.fathomstore.in/contact",
   telephone: "+91-82385-43000",
-  email: "support@fathomstore.in",
+  email: "fathom.support@gmail.com",
   address: {
     "@type": "PostalAddress",
     streetAddress: "126, Green Plaza Shopping, Mota Varachha",
