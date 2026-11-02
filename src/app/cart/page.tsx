@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/lib/CartContext";
-import { getOptimizedImageUrl } from "@/lib/imageUtils";
 import { Trash2, ShoppingBag, MessageCircle, ArrowLeft } from "lucide-react";
 
 const WHATSAPP_NUMBER = "918238543000";
@@ -71,7 +70,7 @@ export default function CartPage() {
                   >
                     {/* Product Image */}
                     <div className="w-32 h-32 md:w-40 md:h-40 bg-gray-50 rounded-xl overflow-hidden relative shrink-0">
-                      <Image src={getOptimizedImageUrl(item.image)} alt={item.name} fill className="object-contain p-3" />
+                      <Image src={item.image} alt={item.name} fill className="object-contain p-3" />
                     </div>
 
                     {/* Product Info */}
