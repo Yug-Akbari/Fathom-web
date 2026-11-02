@@ -1,0 +1,280 @@
+[
+  {
+    "id": "7KPgsdGnge51nHzSLAMW",
+    "trendingOrder": 999,
+    "createdAt": "2026-08-14T04:45:57.027Z",
+    "price": 2499,
+    "mainPanelOrder": 999,
+    "isActive": true,
+    "specs": [
+      {
+        "value": "27D x 10W x 8H Centimeters",
+        "key": "DIMENSIONS"
+      },
+      {
+        "value": "600",
+        "key": "CAPACITY"
+      },
+      {
+        "value": "BPA-Free Food Grade Tritan, Acrylonitrile Butadiene Styrene (ABS), Stainless Steel",
+        "key": "Material"
+      },
+      {
+        "key": "Wattage",
+        "value": "380 Watts"
+      },
+      {
+        "key": "Colour",
+        "value": "Midnight Black"
+      }
+    ],
+    "stockCount": 10,
+    "stockStatus": "In Stock",
+    "isMainPanel": false,
+    "isFeatured": false,
+    "isBestSeller": false,
+    "description": "POWERFUL 380W MOTOR & GRINDING PERFORMANCE – Blend smoothies, juices, protein shakes, and frozen drinks with a high-performance 380W motor, 6 stainless steel blades, and a powerful 6000mAh rechargeable battery. The IPX7 waterproof design makes cleaning quick and easy.\n2-IN-1 BLENDER & GRINDER WITH DUAL MODES – Enjoy the versatility of blending fresh juices or grinding nuts by changing the blade cover. Choose between Automatic Mode for everyday blending and Pulse Mode for tougher ingredients and improved ice crushing.\nPREMIUM BPA-FREE TRITAN CUP – The 600ml cup is made from food-grade Tritan material that is BPA-free, heat-resistant, durable, and impact-resistant, providing a safe and reliable blending experience for daily use.\nDUAL BLENDING MODES – Press A for Normal Mode to blend fruits, vegetables, smoothies, and other soft ingredients. Press B for Pulse Mode to crush ice and process nuts, coffee beans, spices, and other tougher ingredients for maximum versatility.\nSAFE, PORTABLE & USER-FRIENDLY DESIGN – Features a magnetic safety lock that only operates when the cup is securely attached, a protective blade cover for safer handling, a convenient carry handle, and a portable drinking lid so you can blend, carry, and enjoy your drink anywhere.\nUSB-C RECHARGEABLE & COMPLETE ACCESSORY SET – Recharge easily with the built-in USB Type-C port. Includes a 650ml blending cup, charging cable, cleaning brush, blade cover, bottom drinking lid, and user manual—ideal for home, office, gym, travel, and outdoor adventures.\nIPX7 WATERPROOF & EASY TO CLEAN – The IPX7 waterproof design allows for quick and convenient cleaning after every use. Simply add water, run a blending cycle for easy self-cleaning, then rinse thoroughly. For safe cleaning, always ensure the USB-C charging port cover is securely closed before washing.\nRELIABLE CUSTOMER SUPPORT: FATHOM is committed to your satisfaction with dedicated support for product setup, usage guidance, and troubleshooting assistance, helping you get the best performance from your product.",
+    "name": "Elite Portable Smoothie Blender & Grinder, 380W, 600ML Capacity",
+    "desc": "",
+    "aPlusContent": [
+      {
+        "id": "1789192866294",
+        "type": "standalone",
+        "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/bead6c3a-3edd-4ccc-a5d5-600d471d24a2_3__11_.png",
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/912d6d7a-d06a-4792-acfd-f0b5ed6bd31a_3__11_.png"
+      },
+      {
+        "id": "1789192870908",
+        "type": "standalone",
+        "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/1a759715-ccf0-4e4a-bfcf-b8bd5628f31c_4__11_.png",
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/306b0734-668c-4377-915d-1ed73fc7c7cd_4__11_.png"
+      },
+      {
+        "type": "standalone",
+        "id": "1789192842920",
+        "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/c4ef092f-e0de-4f7c-9a0a-2b9e778d4a0f_1__15_.png",
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/feeb1705-2a96-4348-b87a-695e8eb55265_1__15_.png"
+      },
+      {
+        "type": "standalone",
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/3b5ccc30-ce9d-49dc-8a3f-6a55af3ce640_2__12_.png",
+        "id": "1789192859196",
+        "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/23bffa9a-fad3-44d2-94b2-f07fc5d46436_2__12_.png"
+      },
+      {
+        "type": "standalone",
+        "id": "1789192880992",
+        "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/ef4adca3-798e-4973-a1d4-0bfa2fe4467f_5__12_.png",
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/027c2e28-ae3c-4750-86f7-0d51b3150421_5__12_.png"
+      },
+      {
+        "type": "standalone",
+        "id": "1789192886516",
+        "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/22c86060-4a76-4577-9a0b-26d56b097ca5_6__15_.png",
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/3259a941-929c-4585-95ff-c9c9e4dd0c2c_6__15_.png"
+      },
+      {
+        "type": "standalone",
+        "id": "1789192891676",
+        "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/131a12dd-4bc9-4fb9-969e-8caa6847301b_7__13_.png",
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/44fbaf47-d1da-4210-a7f3-46f9bde55995_7__13_.png"
+      },
+      {
+        "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/77dff244-2d62-40ce-8b47-be55824f3900_8__14_.png",
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/422f2e2a-38fe-4d4c-a3a8-1b69da0331c3_8__14_.png",
+        "type": "standalone",
+        "id": "1789192896037"
+      },
+      {
+        "id": "1789192917523",
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/1b964ce7-8797-4132-9cf4-cdbc63426df3_9__12_.png",
+        "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/aeb6996b-4570-4262-a027-f1cf33c904db_9__12_.png",
+        "type": "standalone"
+      },
+      {
+        "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/4c218a9f-469e-4b09-9959-49fb5ff4714c_11__6_.png",
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/e9b3ea80-c8ff-467a-8a1c-0f4e197a807c_11__6_.png",
+        "id": "1789192925932",
+        "type": "standalone"
+      },
+      {
+        "id": "1789192931250",
+        "type": "standalone",
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/912658e2-a1da-405b-b23e-885c67b973cd_12__6_.png",
+        "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/17b47d6d-7193-4add-ae5d-058751ed3c20_12__6_.png"
+      },
+      {
+        "id": "1789192921714",
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/eacdf488-639b-437a-a894-45ff2da27c23_10__6_.png",
+        "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/cde53272-1e55-44af-8b52-7f99d6aba02a_10__6_.png",
+        "type": "standalone"
+      }
+    ],
+    "category": "Portable Blender",
+    "images": [
+      "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/17613f1b-72e1-4823-8609-a2c6f3f8a08c_1__17_.png",
+      "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/5e47d710-c53d-4929-a527-0bcad796ac04_3__11_.png",
+      "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/1dea145e-dea3-4515-8319-477c5487fe29_4__11_.png",
+      "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/b55b2718-0c25-4adb-b43f-f8fc08c9eef9_5__12_.png",
+      "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/96c17579-4e11-406f-8c63-d254325d33a0_2__12_.png",
+      "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/ed37f0b5-4e64-45cf-a165-39cffa529ddb_6__15_.png",
+      "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/80e7347b-32fa-4e69-80b8-8a7aa02e7e0e_7__13_.png",
+      "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/29856331-2252-48b0-8fbe-b1eb7561f325_8__14_.png",
+      "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/44ed790d-1748-4706-a915-4db29310a4fc_9__12_.png"
+    ],
+    "sku": "FHD-12",
+    "image": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/17613f1b-72e1-4823-8609-a2c6f3f8a08c_1__17_.png"
+  },
+  {
+    "id": "Er7ae4fMUCfI014F3QXa",
+    "stockStatus": "In Stock",
+    "isMainPanel": true,
+    "sku": "S02",
+    "isFeatured": true,
+    "createdAt": "2026-03-03T11:08:53.034Z",
+    "specs": [
+      {
+        "value": "46D x 42W x 29H Centimeters",
+        "key": "DIMENSIONS"
+      },
+      {
+        "value": "1200 Watts",
+        "key": "Wattage"
+      },
+      {
+        "key": "Material",
+        "value": "304 Stainless Steel"
+      },
+      {
+        "key": "timer",
+        "value": "24H"
+      }
+    ],
+    "images": [
+      "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/e2de0e60-149a-4882-954d-802d6bc83764_1__10_.png",
+      "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/36d4328f-9934-4724-97fb-1aeb164ffe05_2__9_.png",
+      "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/d68a72d5-1b6c-4ae9-8ebb-fa80a353e286_3__9_.png",
+      "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/c51bcf16-e6d7-4d68-988d-397cb6041b63_4__9_.png",
+      "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/089b4e00-a491-4f89-8624-4da39a905456_5__9_.png",
+      "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/0f7bbc78-e7f1-4b01-8171-3971d2b19df4_6__13_.png",
+      "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/969a5d59-3f3f-4f62-9871-87ede70791e2_7__11_.png",
+      "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/3d924ef0-e784-47ae-9712-f8cb4590a01d_8__12_.png",
+      "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/8a7d7126-9cc6-4a83-b757-e900198d23c7_9__10_.png"
+    ],
+    "trendingOrder": 2,
+    "isActive": true,
+    "price": 15999,
+    "name": "Professional Food Dehydrator, 1200W, 8 Trays ",
+    "desc": "Powerful 8-Tray Food Dehydrator with 4–6 kg Capacity: Perfect for Drying Fruits, Vegetables, Herbs, Meat & More.",
+    "aPlusContent": [
+      {
+        "id": "1789134174467",
+        "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/9ea3d52b-2dda-4792-a9b2-736dceabff41_3__11_.png",
+        "type": "standalone",
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/7f7932e3-c94a-434a-8ba2-c4a52a3ef917_3__10_.png"
+      },
+      {
+        "id": "1789134183994",
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/90b0eb98-4e61-4cee-be67-ed30f8e14caa_4__10_.png",
+        "type": "standalone",
+        "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/2b277894-b388-4f0f-873b-38522e170d96_4__11_.png"
+      },
+      {
+        "slides": [
+          {
+            "title": "",
+            "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/f2d35b68-182b-4b68-9b8a-5684ec04a9c3_7__12_.png",
+            "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/3319eb5a-7b66-41f1-8f06-780d3a01094d_7__13_.png"
+          },
+          {
+            "title": "",
+            "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/20c780aa-b210-4ade-b3b6-1b954c07d753_6__15_.png",
+            "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/0ffd7fa0-0b7e-4c08-9e00-5479253b93ea_6__14_.png"
+          }
+        ],
+        "type": "carousel_group",
+        "id": "17892856393042"
+      },
+      {
+        "id": "1789285675429",
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/100b1e30-adf3-4409-9019-50d1f3f44e83_2__11_.png",
+        "type": "standalone",
+        "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/31eb2436-08fe-4f86-a4a6-52ca4d8d2277_2__12_.png"
+      },
+      {
+        "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/094b2176-2fb5-4fb1-80b1-a9830456df15_1__14_.png",
+        "id": "1789285697369",
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/e5767cdc-f623-4acf-82df-05833ebbde85_1__13_.png",
+        "type": "standalone"
+      },
+      {
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/d51ce7b1-d334-4aa0-b3af-14edda1423eb_5__11_.png",
+        "type": "standalone",
+        "id": "1789285751005",
+        "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/01219bb2-4a5d-4a23-b013-fe4331da6c12_5__12_.png"
+      },
+      {
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/f8998b90-0a66-4df9-b1a3-fee9858ee711_8__13_.png",
+        "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/fba98e42-7556-4252-a9b8-a521a4c0c33f_8__14_.png",
+        "type": "standalone",
+        "id": "1789285766613"
+      },
+      {
+        "id": "1789285774825",
+        "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/77c6ebba-7f32-4d7c-b2bc-c4f0835b83fe_9__12_.png",
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/9566e40f-a32a-478f-a47e-c190d9962ddf_9__11_.png",
+        "type": "standalone"
+      },
+      {
+        "id": "1789285779967",
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/4b024ce1-a61b-4869-b5c7-dc8754baa71f_10__5_.png",
+        "type": "standalone",
+        "mobileImage": ""
+      },
+      {
+        "type": "standalone",
+        "mobileImage": "",
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/990d29ea-c937-4d1a-8c1d-9f67f9c32165_11__5_.png",
+        "id": "1789285785483"
+      },
+      {
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/1233ffc4-fdfe-462c-9985-f12a4370618e_12__5_.png",
+        "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/3ac1b5c1-8fba-48ed-88f8-d4b06092b448_10__6_.png",
+        "id": "1789285824013",
+        "type": "standalone"
+      },
+      {
+        "id": "17892858819671",
+        "type": "named_slide_group",
+        "slides": [
+          {
+            "title": "For Family Snack",
+            "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/9042a854-2eec-4751-bc00-9b77f7d27a7e_11__6_.png",
+            "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/039c994e-9d7d-4cca-963b-4da1e3a89a7f_13__1_.png"
+          },
+          {
+            "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/a9617ef1-c4ff-4aba-9e8f-c3c1ea5b9659_14__1_.png",
+            "title": "For Dog Treat",
+            "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/2ef88ec7-26d3-4937-9774-93b5e2f22219_12__6_.png"
+          },
+          {
+            "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/74ba637e-9c0f-4e8a-ae1a-9a2d37e61d6a_13__2_.png",
+            "title": "For Low-calorie Diet",
+            "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/3c5a3f5b-18c7-47a1-8ce4-5ca648b09382_15.png"
+          },
+          {
+            "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/9ab0a714-1eeb-46c8-b79c-d5590252fb00_14__2_.png",
+            "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/02cc5d86-6f9e-425c-88f8-92b1e222d58c_16.png",
+            "title": "For Home Gardeners"
+          }
+        ]
+      }
+    ],
+    "mainPanelOrder": 2,
+    "isBestSeller": true,
+    "category": "Food Dehydrator",
+    "image": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/e2de0e60-149a-4882-954d-802d6bc83764_1__10_.png",
+    "description": "Large 8-Tray Capacity(30x28cm) – Dehydrate more in one batch with spacious 304 food-grade stainless steel trays, perfect for fruits, vegetables, jerky, herbs, and flower tea.\nPowerful 1200W Performance – More wattage means a more powerful machine, delivering faster heating, stronger airflow, and quicker, more efficient dehydration.\nIn-Built Power Saver Function – Consumes only 0.6-0.8 units per hour, helping you save electricity while ensuring efficient and consistent drying performance.\nAdjustable Temperature (30–90°C) – Multi-stage heat control lets you dry delicate herbs at low temps or create crispy jerky at higher settings.\nRetains 98% of Vitamins & Minerals – Preserves nutrients and natural flavors, giving you healthy, preservative-free snacks every time.\nAdvanced Air Circulation System – Three dimensional air vents and a 3D hot air duct prevent moisture buildup, ensuring faster, even drying and perfectly crisp snacks every time.\n24-Hour Digital Timer – Smart touch control panel lets you set precise dehydration times, so you can “set it and forget it.”\nQuiet & Durable Build – Premium stainless steel body with side air vents ensures long-lasting use, silent operation, and stylish kitchen appeal.",
+    "stockCount": 10
+  }
+]

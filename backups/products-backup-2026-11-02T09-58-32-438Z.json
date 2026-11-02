@@ -1,0 +1,128 @@
+[
+  {
+    "id": "7KPgsdGnge51nHzSLAMW",
+    "stockStatus": "In Stock",
+    "trendingOrder": 999,
+    "createdAt": "2026-08-14T04:45:57.027Z",
+    "isMainPanel": false,
+    "images": [
+      "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/17613f1b-72e1-4823-8609-a2c6f3f8a08c_1__17_.png",
+      "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/5e47d710-c53d-4929-a527-0bcad796ac04_3__11_.png",
+      "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/1dea145e-dea3-4515-8319-477c5487fe29_4__11_.png",
+      "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/b55b2718-0c25-4adb-b43f-f8fc08c9eef9_5__12_.png",
+      "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/96c17579-4e11-406f-8c63-d254325d33a0_2__12_.png",
+      "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/ed37f0b5-4e64-45cf-a165-39cffa529ddb_6__15_.png",
+      "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/80e7347b-32fa-4e69-80b8-8a7aa02e7e0e_7__13_.png",
+      "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/29856331-2252-48b0-8fbe-b1eb7561f325_8__14_.png",
+      "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/44ed790d-1748-4706-a915-4db29310a4fc_9__12_.png"
+    ],
+    "category": "Portable Blender",
+    "isFeatured": false,
+    "image": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/17613f1b-72e1-4823-8609-a2c6f3f8a08c_1__17_.png",
+    "stockCount": 10,
+    "name": "Elite Portable Smoothie Blender & Grinder, 380W, 600ML Capacity",
+    "isBestSeller": false,
+    "description": "POWERFUL 380W MOTOR & GRINDING PERFORMANCE – Blend smoothies, juices, protein shakes, and frozen drinks with a high-performance 380W motor, 6 stainless steel blades, and a powerful 6000mAh rechargeable battery. The IPX7 waterproof design makes cleaning quick and easy.\n2-IN-1 BLENDER & GRINDER WITH DUAL MODES – Enjoy the versatility of blending fresh juices or grinding nuts by changing the blade cover. Choose between Automatic Mode for everyday blending and Pulse Mode for tougher ingredients and improved ice crushing.\nPREMIUM BPA-FREE TRITAN CUP – The 600ml cup is made from food-grade Tritan material that is BPA-free, heat-resistant, durable, and impact-resistant, providing a safe and reliable blending experience for daily use.\nDUAL BLENDING MODES – Press A for Normal Mode to blend fruits, vegetables, smoothies, and other soft ingredients. Press B for Pulse Mode to crush ice and process nuts, coffee beans, spices, and other tougher ingredients for maximum versatility.\nSAFE, PORTABLE & USER-FRIENDLY DESIGN – Features a magnetic safety lock that only operates when the cup is securely attached, a protective blade cover for safer handling, a convenient carry handle, and a portable drinking lid so you can blend, carry, and enjoy your drink anywhere.\nUSB-C RECHARGEABLE & COMPLETE ACCESSORY SET – Recharge easily with the built-in USB Type-C port. Includes a 650ml blending cup, charging cable, cleaning brush, blade cover, bottom drinking lid, and user manual—ideal for home, office, gym, travel, and outdoor adventures.\nIPX7 WATERPROOF & EASY TO CLEAN – The IPX7 waterproof design allows for quick and convenient cleaning after every use. Simply add water, run a blending cycle for easy self-cleaning, then rinse thoroughly. For safe cleaning, always ensure the USB-C charging port cover is securely closed before washing.\nRELIABLE CUSTOMER SUPPORT: FATHOM is committed to your satisfaction with dedicated support for product setup, usage guidance, and troubleshooting assistance, helping you get the best performance from your product.",
+    "price": 2499,
+    "specs": [
+      {
+        "value": "27D x 10W x 8H Centimeters",
+        "key": "DIMENSIONS"
+      },
+      {
+        "value": "600",
+        "key": "CAPACITY"
+      },
+      {
+        "key": "Material",
+        "value": "BPA-Free Food Grade Tritan, Acrylonitrile Butadiene Styrene (ABS), Stainless Steel"
+      },
+      {
+        "value": "380 Watts",
+        "key": "Wattage"
+      },
+      {
+        "key": "Colour",
+        "value": "Midnight Black"
+      }
+    ],
+    "sku": "FHD-12",
+    "desc": "",
+    "mainPanelOrder": 999,
+    "aPlusContent": [
+      {
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/912d6d7a-d06a-4792-acfd-f0b5ed6bd31a_3__11_.png",
+        "type": "standalone",
+        "id": "1789192866294",
+        "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/bead6c3a-3edd-4ccc-a5d5-600d471d24a2_3__11_.png"
+      },
+      {
+        "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/1a759715-ccf0-4e4a-bfcf-b8bd5628f31c_4__11_.png",
+        "id": "1789192870908",
+        "type": "standalone",
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/306b0734-668c-4377-915d-1ed73fc7c7cd_4__11_.png"
+      },
+      {
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/feeb1705-2a96-4348-b87a-695e8eb55265_1__15_.png",
+        "type": "standalone",
+        "id": "1789192842920",
+        "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/c4ef092f-e0de-4f7c-9a0a-2b9e778d4a0f_1__15_.png"
+      },
+      {
+        "type": "standalone",
+        "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/23bffa9a-fad3-44d2-94b2-f07fc5d46436_2__12_.png",
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/3b5ccc30-ce9d-49dc-8a3f-6a55af3ce640_2__12_.png",
+        "id": "1789192859196"
+      },
+      {
+        "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/ef4adca3-798e-4973-a1d4-0bfa2fe4467f_5__12_.png",
+        "type": "standalone",
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/027c2e28-ae3c-4750-86f7-0d51b3150421_5__12_.png",
+        "id": "1789192880992"
+      },
+      {
+        "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/22c86060-4a76-4577-9a0b-26d56b097ca5_6__15_.png",
+        "type": "standalone",
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/3259a941-929c-4585-95ff-c9c9e4dd0c2c_6__15_.png",
+        "id": "1789192886516"
+      },
+      {
+        "id": "1789192891676",
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/44fbaf47-d1da-4210-a7f3-46f9bde55995_7__13_.png",
+        "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/131a12dd-4bc9-4fb9-969e-8caa6847301b_7__13_.png",
+        "type": "standalone"
+      },
+      {
+        "type": "standalone",
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/422f2e2a-38fe-4d4c-a3a8-1b69da0331c3_8__14_.png",
+        "id": "1789192896037",
+        "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/77dff244-2d62-40ce-8b47-be55824f3900_8__14_.png"
+      },
+      {
+        "id": "1789192917523",
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/1b964ce7-8797-4132-9cf4-cdbc63426df3_9__12_.png",
+        "type": "standalone",
+        "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/aeb6996b-4570-4262-a027-f1cf33c904db_9__12_.png"
+      },
+      {
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/e9b3ea80-c8ff-467a-8a1c-0f4e197a807c_11__6_.png",
+        "id": "1789192925932",
+        "type": "standalone",
+        "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/4c218a9f-469e-4b09-9959-49fb5ff4714c_11__6_.png"
+      },
+      {
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/912658e2-a1da-405b-b23e-885c67b973cd_12__6_.png",
+        "type": "standalone",
+        "id": "1789192931250",
+        "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/17b47d6d-7193-4add-ae5d-058751ed3c20_12__6_.png"
+      },
+      {
+        "id": "1789192921714",
+        "mobileImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/cde53272-1e55-44af-8b52-7f99d6aba02a_10__6_.png",
+        "type": "standalone",
+        "desktopImage": "https://raw.githubusercontent.com/Yug-Akbari/fathom-images/main/public/uploads/eacdf488-639b-437a-a894-45ff2da27c23_10__6_.png"
+      }
+    ],
+    "isActive": true
+  }
+]
