@@ -14,8 +14,7 @@ export interface FeedProduct {
   brand: string;
   condition: string;
   category: string;
-  sku: string;
-  identifierExists: "no" | "yes";
+  identifierExists: "no";
 }
 
 const BASE_URL = "https://www.fathomstore.in";
@@ -82,7 +81,6 @@ export async function fetchFeedProducts(): Promise<FeedProduct[]> {
       const isInStock = data.stockStatus !== "Out of Stock" && (data.stockCount === undefined || data.stockCount > 0);
 
       const title = (data.name || "FATHOM Product").trim();
-      const sku = (data.sku || doc.id).trim();
 
       products.push({
         id: doc.id,
@@ -97,8 +95,7 @@ export async function fetchFeedProducts(): Promise<FeedProduct[]> {
         brand: "FATHOM",
         condition: "new",
         category: data.category || "Food Dehydrators",
-        sku,
-        identifierExists: "no", // Custom brand without barcode/GTIN - prevents rejection
+        identifierExists: "no", // FATHOM products have no GTIN, UPC, EAN, or manufacturer-assigned MPN
       });
     });
 
@@ -127,7 +124,6 @@ ${additionalImgTags ? additionalImgTags + "\n" : ""}\
       <g:price>${p.price}</g:price>
       <g:brand>${cdata(p.brand)}</g:brand>
       <g:condition>${p.condition}</g:condition>
-      <g:mpn>${cdata(p.sku)}</g:mpn>
       <g:identifier_exists>${p.identifierExists}</g:identifier_exists>
       <g:product_type>${cdata(p.category)}</g:product_type>
       <g:shipping>
@@ -163,7 +159,6 @@ export function generateGoogleMerchantTsv(products: FeedProduct[]): string {
     "condition",
     "identifier_exists",
     "product_type",
-    "mpn",
   ];
 
   const rows = products.map((p) => {
@@ -182,7 +177,6 @@ export function generateGoogleMerchantTsv(products: FeedProduct[]): string {
       p.condition,
       p.identifierExists,
       clean(p.category),
-      clean(p.sku),
     ].join("\t");
   });
 

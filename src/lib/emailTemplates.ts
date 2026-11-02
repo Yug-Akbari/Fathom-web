@@ -791,22 +791,6 @@ export function inquiryEmailTemplate(data: {
         <p style="margin:0 0 15px 0;font-family: Arial, Helvetica, sans-serif;font-size:13px;line-height:20px;color:${TEXT_SECONDARY};">
           We look forward to serving you.
         </p>
-        <p style="margin:0;font-family: Arial, Helvetica, sans-serif;font-size:13px;color:${TEXT_SECONDARY};">
-        </table>
-      </td>
-    </tr>
-    <!-- Message -->
-    <tr>
-      <td style="padding:0 50px 20px 50px;">
-        <p style="margin:0 0 12px 0;font-family: Arial, Helvetica, sans-serif;font-size:14px;line-height:22px;color:${TEXT_SECONDARY};">
-          The attached quotation includes the product details, quantities, pricing, applicable taxes, and other relevant terms and conditions.
-        </p>
-        <p style="margin:0 0 12px 0;font-family: Arial, Helvetica, sans-serif;font-size:14px;line-height:22px;color:${TEXT_SECONDARY};">
-          Please review the quotation and feel free to contact us if you have any questions or require any changes.
-        </p>
-        <p style="margin:0 0 15px 0;font-family: Arial, Helvetica, sans-serif;font-size:14px;line-height:22px;color:${TEXT_SECONDARY};">
-          We look forward to serving you.
-        </p>
         <p style="margin:0;font-family: Arial, Helvetica, sans-serif;font-size:14px;color:${TEXT_SECONDARY};">
           Warm regards,<br/>
           <strong style="color:${TEXT_PRIMARY};">Team FATHOM</strong>

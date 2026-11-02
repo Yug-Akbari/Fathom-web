@@ -15,15 +15,11 @@ export async function POST(req: Request) {
       );
     }
 
-    const inquiryUser = process.env.INQUIRY_EMAIL_USER || process.env.EMAIL_USER;
+    const inquiryUser = process.env.INQUIRY_EMAIL_USER || "support@fathomstore.in";
     const inquiryPass = process.env.INQUIRY_EMAIL_PASS || process.env.EMAIL_PASS;
-    const noReplyUser = process.env.EMAIL_USER;
-    const noReplyPass = process.env.EMAIL_PASS;
-    
-    console.log("DEBUG EMAIL - Inquiry User:", inquiryUser ? "Loaded" : "Missing");
-    console.log("DEBUG EMAIL - NoReply User:", noReplyUser ? "Loaded" : "Missing");
+    const receiverEmail = process.env.INQUIRY_RECEIVER_EMAIL || "fathom.support@gmail.com";
 
-    // Configure the inquiry email transporter
+    // Configure the inquiry email transporter using support@fathomstore.in
     const inquiryTransporter = nodemailer.createTransport({
       host: "smtp.zoho.in",
       port: 465,
@@ -34,23 +30,10 @@ export async function POST(req: Request) {
       },
     });
 
-    // Configure the no-reply email transporter
-    const noReplyTransporter = nodemailer.createTransport({
-      host: "smtp.zoho.in",
-      port: 465,
-      secure: true,
-      auth: {
-        user: noReplyUser,
-        pass: noReplyPass,
-      },
-    });
-
-    const receiverEmail = process.env.INQUIRY_RECEIVER_EMAIL || inquiryUser;
-
-    // 1. Email to the support team
+    // 1. Email notification to the support team (received at fathom.support@gmail.com)
     const supportMailOptions = {
-      from: inquiryUser,
-      to: receiverEmail, // Send to the configured receiver email
+      from: `"FATHOM Inquiries" <${inquiryUser}>`,
+      to: receiverEmail, // Sends to fathom.support@gmail.com
       replyTo: email, // This allows the support team to click 'Reply' and reply directly to the customer
       subject: `New Inquiry from ${name} - ${category || 'General'}`,
       html: `
@@ -74,9 +57,9 @@ export async function POST(req: Request) {
     // Generate short tag reference
     const tagReference = Math.random().toString(36).substring(2, 6).toLowerCase();
 
-    // 2. Email to the customer (auto-reply)
+    // 2. Email to the customer acknowledging inquiry (sent from support@fathomstore.in)
     const customerMailOptions = {
-      from: noReplyUser,
+      from: `"FATHOM Support" <${inquiryUser}>`,
       to: email,
       subject: "Thank you for your inquiry - FATHOM",
       html: inquiryEmailTemplate({
@@ -88,9 +71,9 @@ export async function POST(req: Request) {
       }),
     };
 
-    // Send both emails
+    // Send both emails through the support@fathomstore.in transporter
     await inquiryTransporter.sendMail(supportMailOptions);
-    await noReplyTransporter.sendMail(customerMailOptions);
+    await inquiryTransporter.sendMail(customerMailOptions);
 
     return NextResponse.json(
       { message: "Emails sent successfully" },

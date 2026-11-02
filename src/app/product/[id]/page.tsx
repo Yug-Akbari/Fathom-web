@@ -1,8 +1,10 @@
-// Force dynamic rendering — disable caching so admin product updates always show live
-export const dynamic = 'force-dynamic';
+// Revalidate every 60 seconds (Incremental Static Regeneration)
+// Delivers instant CDN responses (<50ms) while keeping Vercel serverless usage minimal
+export const revalidate = 60;
 
 import Link from "next/link";
 import Script from "next/script";
+import { cache } from "react";
 import ProductHero from "@/components/product/ProductHero";
 import CompleteSuite from "@/components/product/CompleteSuite";
 import ProductReviews from "@/components/product/ProductReviews";
@@ -11,8 +13,11 @@ import { Product } from "@/lib/data";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
+import { getOptimizedImageUrl } from "@/lib/imageUtils";
 
-async function fetchProductData(id: string): Promise<Product | undefined> {
+// Deduplicated fetch using React cache — prevents duplicate Firestore requests
+// across generateMetadata and the main ProductPage component
+const fetchProductData = cache(async (id: string): Promise<Product | undefined> => {
   try {
     const docRef = doc(db, "products", id);
     const docSnap = await getDoc(docRef);
@@ -23,8 +28,8 @@ async function fetchProductData(id: string): Promise<Product | undefined> {
         name: d.name,
         subtitle: d.sku || "",
         price: d.price,
-        image: d.image || "/images/fridge-obsidian.png",
-        images: d.images || [],
+        image: getOptimizedImageUrl(d.image),
+        images: Array.isArray(d.images) ? d.images.map((img: string) => getOptimizedImageUrl(img)) : [],
         badge: d.isNew ? "New" : d.isBestSeller ? "Bestseller" : undefined,
         category: d.category?.toLowerCase() || "appliances",
         finish: d.specs?.find((s: any) => s.key === "FINISH")?.value || "Stainless Steel",
@@ -38,9 +43,9 @@ async function fetchProductData(id: string): Promise<Product | undefined> {
     console.error("Error fetching product from Firebase:", error);
   }
   return undefined;
-}
+});
 
-async function fetchApprovedReviews(productId: string) {
+const fetchApprovedReviews = cache(async (productId: string) => {
   try {
     const q = query(
       collection(db, "reviews"),
@@ -52,7 +57,7 @@ async function fetchApprovedReviews(productId: string) {
   } catch {
     return [];
   }
-}
+});
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
   const product = await fetchProductData(params.id);
@@ -64,8 +69,16 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
       ? `${product.desc.slice(0, 140)}. Free shipping across India. Shop now at FATHOM.`
       : `Buy the ${product.name} by FATHOM — premium Food Dehydrator, Dehydrator & Food Dryer. Free shipping across India.`,
     keywords: [
-      "fathom", product.name, `${product.name} India`, `buy ${product.name} online`,
-      "food dehydrator", "dehydrator", "food dryer", "coffee machine", "coffee grinder", "FATHOM",
+      "fathom",
+      product.name,
+      `${product.name} India`,
+      `buy ${product.name} online`,
+      "food dehydrator",
+      "dehydrator",
+      "food dryer",
+      "coffee machine",
+      "coffee grinder",
+      "FATHOM",
     ],
     openGraph: {
       title: `${product.name} | FATHOM`,
@@ -106,7 +119,6 @@ export default async function ProductPage({ params }: { params: { id: string } }
     },
   };
 
-  // Only add aggregateRating when there are real approved reviews
   if (avgRating && reviews.length > 0) {
     jsonLd.aggregateRating = {
       "@type": "AggregateRating",
@@ -151,9 +163,13 @@ export default async function ProductPage({ params }: { params: { id: string } }
       />
       <div className="max-w-[1400px] mx-auto px-6 pt-6">
         <div className="text-[9px] font-bold tracking-[0.2em] uppercase text-gray-400 flex items-center gap-2">
-          <Link href="/" className="hover:text-accent transition-colors">Home</Link>
+          <Link href="/" className="hover:text-accent transition-colors">
+            Home
+          </Link>
           <span className="text-gray-300">-</span>
-          <Link href="/shop" className="hover:text-accent transition-colors capitalize">{product.category}</Link>
+          <Link href="/shop" className="hover:text-accent transition-colors capitalize">
+            {product.category}
+          </Link>
           <span className="text-gray-300">-</span>
           <span className="text-primary">{product.name}</span>
         </div>

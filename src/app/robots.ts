@@ -6,11 +6,12 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: ['/', '/products-feed.xml', '/api/products-feed'],
-        disallow: ['/admin/', '/login', '/api/auth/'],
+        disallow: ['/admin/', '/login', '/api/auth/', '/_next/static/'],
       },
       {
         userAgent: ['Googlebot', 'Googlebot-Image', 'Google-Shopping'],
         allow: ['/', '/products-feed.xml', '/api/products-feed'],
+        disallow: ['/_next/static/'],
       },
     ],
     sitemap: 'https://www.fathomstore.in/sitemap.xml',
